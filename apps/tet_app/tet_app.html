@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>TETモード選択</title>
+  <meta name="robots" content="noindex, nofollow">
+  <style>
+    body { font-family: sans-serif; padding: 20px; }
+    label { display: block; margin: 8px 0; }
+    code { background: #f4f4f4; padding: 4px 6px; border-radius: 4px; }
+    .tet-list { margin-top: 20px; }
+    #start-button, #replay-button { margin: 12px 0; padding: 8px 16px; font-size: 16px; }
+    #result { margin-top: 20px; font-weight: bold; white-space: pre-wrap; }
+    .quiz-container { margin-top: 20px; }
+    #feedback { margin-top: 10px; font-size: 18px; font-weight: bold; color: darkgreen; }
+    #custom-tet-container { display: none; margin-top: 8px; }
+  </style>
+</head>
+<body>
+
+  <h2>🎮 モード選択：</h2>
+  <form id="tet-form">
+    <label>
+      <input type="radio" name="mode" value="easy" checked>
+      簡単モード（12, 24, 31, 53）
+    </label>
+    <label>
+      <input type="radio" name="mode" value="standard">
+      標準モード（奇数TETのみ）
+    </label>
+    <label>
+      <input type="radio" name="mode" value="advanced">
+      上級モード（全範囲）
+    </label>
+    <label>
+      <input type="radio" name="mode" value="custom">
+      カスタムモード（以下に入力）
+    </label>
+
+    <div id="custom-tet-container">
+      <input type="text" id="custom-tet" placeholder="例: 10, 19, 22">
+    </div>
+
+    <button type="button" id="start-button">選んだモードの音を鳴らす</button>
+
+    <code id="tet-output">[12, 24, 31, 53]</code>
+    <div class="tet-list" id="tet-list"></div>
+    <div id="result"></div>
+    <div class="quiz-container" id="quiz"></div>
+  </form>
+
+  <script>
+    const form = document.getElementById("tet-form");
+    const tetOutput = document.getElementById("tet-output");
+    const customTetInput = document.getElementById("custom-tet");
+    const customTetContainer = document.getElementById("custom-tet-container");
+    const tetList = document.getElementById("tet-list");
+    const startButton = document.getElementById("start-button");
+    const resultDiv = document.getElementById("result");
+    const quizDiv = document.getElementById("quiz");
+
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+    const modeTETs = {
+      easy: [12, 24, 31, 53],
+      standard: Array.from({length: 49}, (_, i) => 2*i+1).filter(n => n <= 99),
+      advanced: Array.from({length: 99}, (_, i) => i + 1),
+    };
+
+    function renderTETList(tets) {
+      tetList.textContent = `TET一覧: ${tets.join(", ")}`;
+    }
+
+    function updateDisplay() {
+      const mode = form.mode.value;
+      if (mode === "custom") {
+        customTetContainer.style.display = "block";
+        const customTets = customTetInput.value;
+        tetOutput.textContent = `[${customTets}]`;
+        tetList.textContent = "";
+      } else {
+        customTetContainer.style.display = "none";
+        const tets = modeTETs[mode];
+        tetOutput.textContent = JSON.stringify(tets);
+        renderTETList(tets);
+      }
+    }
+
+    form.addEventListener("change", updateDisplay);
+    customTetInput.addEventListener("input", updateDisplay);
+
+    function playTone(freq, duration = 1) {
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = "sine";
+      osc.frequency.value = freq;
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+      osc.start();
+      osc.stop(audioCtx.currentTime + duration);
+    }
+
+    function launchEarTraining(tets, totalRounds = 10) {
+      quizDiv.innerHTML = "";
+      let currentRound = 0;
+      let score = 0;
+      let lastFreq = null;
+
+      const question = document.createElement("p");
+      const select = document.createElement("select");
+      const feedback = document.createElement("div");
+      const checkButton = document.createElement("button");
+      const replayButton = document.createElement("button");
+      const scoreDisplay = document.createElement("p");
+      scoreDisplay.style.fontWeight = "bold";
+
+      replayButton.textContent = "🔁 もう一度再生";
+      replayButton.type = "button";
+
+      function nextRound() {
+        if (currentRound >= totalRounds) {
+          feedback.textContent = `🎉 全${totalRounds}問中 ${score}問正解しました！`;
+          feedback.style.color = "blue";
+          replayButton.disabled = true;
+          return;
+        }
+
+        select.innerHTML = "";
+        const selectedTET = tets[Math.floor(Math.random() * tets.length)];
+        const degree = Math.floor(selectedTET / 12);
+        const correctFreq = 440 * Math.pow(2, degree / selectedTET);
+        lastFreq = correctFreq;
+
+        const correctTETs = tets.filter(t => {
+          const approx = 440 * Math.pow(2, degree / t);
+          return Math.abs(approx - correctFreq) < 1;
+        });
+
+        playTone(correctFreq);
+
+        question.textContent = `🎧 問題 ${currentRound + 1}: 再生された音はどのTET？（ヒント: ${tets.join(", ")}）`;
+
+        tets.forEach(t => {
+          const option = document.createElement("option");
+          option.value = t;
+          option.textContent = `${t} TET`;
+          select.appendChild(option);
+        });
+
+        checkButton.textContent = "答え合わせ";
+        checkButton.type = "button";
+        checkButton.onclick = () => {
+          const answer = parseInt(select.value);
+          if (correctTETs.includes(answer)) {
+            feedback.textContent = "✅ 正解！";
+            feedback.style.color = "green";
+            playTone(880, 0.3);
+            score++;
+          } else {
+            feedback.textContent = `❌ 不正解！正解は ${correctTETs.join(", ")} TET でした。`;
+            feedback.style.color = "red";
+            playTone(220, 0.3);
+          }
+          currentRound++;
+          scoreDisplay.textContent = `現在のスコア: ${score}/${currentRound}`;
+          setTimeout(nextRound, 1500);
+        };
+
+        replayButton.onclick = () => {
+          if (lastFreq) playTone(lastFreq);
+        };
+      }
+
+      quizDiv.appendChild(question);
+      quizDiv.appendChild(select);
+      quizDiv.appendChild(checkButton);
+      quizDiv.appendChild(replayButton);
+      quizDiv.appendChild(feedback);
+      quizDiv.appendChild(scoreDisplay);
+
+      nextRound();
+    }
+
+    startButton.addEventListener("click", () => {
+      const selectedMode = form.mode.value;
+      const selectedTETs = selectedMode === "custom"
+        ? customTetInput.value.split(',').map(n => parseInt(n.trim())).filter(n => !isNaN(n))
+        : modeTETs[selectedMode];
+
+      if (!selectedTETs.length) {
+        resultDiv.textContent = "⚠️ TETが選択されていません。";
+        quizDiv.innerHTML = "";
+        return;
+      }
+
+      resultDiv.innerHTML = `✅ 選択されたTET: [${selectedTETs.join(", ")}]
+🎧 耳トレモードを開始します！`;
+      launchEarTraining(selectedTETs);
+    });
+
+    window.addEventListener("DOMContentLoaded", updateDisplay);
+  </script>
+
+</body>
+</html>
