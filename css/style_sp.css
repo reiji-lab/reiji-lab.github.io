@@ -713,6 +713,14 @@ footer{
   margin-bottom:0px;
 }
 
+.disclaimer{
+  font-size:16px;
+  color:#333333;
+  margin-top:30px;
+  background: #F2F2F2;
+  padding:20px 20px;
+}
+
 .u-indent_1{
   padding-left:14px;
   text-indent:-14px;
