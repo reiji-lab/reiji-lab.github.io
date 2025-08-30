@@ -97,7 +97,7 @@ code {
 }
 
 .p-cont_listDate{
-  font-size:26px;
+  font-size:16px;
   display:inline-block;
   margin-bottom:5px;
   color:#7D847B
@@ -311,6 +311,13 @@ main{
   display:inline-block;
   padding-right:40px;
   position:relative;
+}
+
+.p-cont_listDate{
+  font-size:26px;
+  display:inline-block;
+  margin-bottom:5px;
+  color:#7D847B
 }
 
 .p-wide_ttl span::after{
