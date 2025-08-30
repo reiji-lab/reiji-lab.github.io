@@ -616,7 +616,7 @@ footer{
 }
 
 .p-img_cp_ttl{
-  margin-top:28px;
+  margin-top:34px;
   margin-bottom:0px;
   font-family: Verdana, sans-serif;
   font-size:16px;
@@ -827,8 +827,13 @@ footer{
 }
 
 .p-ai_def{
-  font-size:18px;
+  font-size:28px;
   margin-bottom:0px;
+}
+
+.p-ai_txt li {
+    margin-bottom: 10px;
+    font-size: 28px;
 }
 
 .disclaimer{
