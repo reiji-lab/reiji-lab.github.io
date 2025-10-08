@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3D Visualization of Julia Set — Dimensional Folding and Structural Analysis</title>
+  <meta name="description" content="A fully harmonic tuning system using pure just intervals, designed to enable complete modulation without wolf intervals.">
+  <meta name="robots" content="noindex,follow">
+  <link rel="stylesheet" href="../css/reset.css">
+  <link rel="stylesheet" media="screen and (min-width: 1025px)" href="../css/style_pc.css">
+  <link rel="stylesheet" media="screen and (max-width: 1024px)" href="../css/style_sp.css">
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-8BWCJ4H4HD"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-8BWCJ4H4HD');
+</script>
+</head>
+<body>
+  <header class="p-sub_head">
+    <div class="p-headline_bg">
+      <div class="p-top_mainTtl">
+        <span class="p-mTtl_sub1">Reiji's</span> <span class="p-mTtl_sub2">Explorations</span><span class="p-mTtl_sub3">in Sound & Structure</span>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <nav class="breadcrumb">
+      <ul class="breadcrumb_inner">
+        <li><a href="/">Home</a> &gt; </li>
+        <li><a href="/math-physics/">Mathematical and Physical Intuition</a> &gt; </li>
+        <li><span>3D Visualization of Julia Set — Dimensional Folding and Structural Analysis</span></li>
+      </ul>
+    </nav>
+
+    <p class="p-cont_date">October 8, 2025</p>
+    <div class="p-title_bg">
+      <div class="p-title_bg_inner">
+        <h1 class="p-wide_ttl_head_single">3D Visualization of Julia Set — Dimensional Folding and Structural Analysis</h1>
+      </div>
+    </div>
+
+
+    <section id="main_contents">
+      <p class="p-overview_txt">
+        <b>Overview:</b>  
+        Inspired by the idea that if the Mandelbrot set can be expressed in 3D, then so can the Julia set, this experiment visualizes the Julia set in three dimensions using Desmos 3D.  
+        Normally, complex numbers are represented as \( Z = R + bi \), but Reiji introduced a “folded” model where \( R \) and \( I \) are treated differently to enable three-dimensional representation.  
+        By limiting the imaginary component \( I \) to real numbers and treating \( R + I = J \), he effectively folded higher-dimensional quaternionic structures into a form that can be displayed within 3D space.  
+        The parameter \( c = q + wi \) is controlled by two sliders in Desmos, dynamically altering the Julia set’s shape.  
+        Recursive mapping \( z_{n} = f(z_{n-1}) \) is manually defined and repeated seven times to approximate the fractal’s iterative process, ultimately plotted as \( D(a) \) in three-dimensional space.  
+        Observing from the +Z axis, the structure diverges outward; from the −Z axis, it resembles a cauliflower-like surface — a striking analogy connecting mathematical complexity to natural form.
+      </p>
+
+<p class="disclaimer">
+<b>Note:</b> All content on this page is originally explained by Reiji in Japanese.  
+The English version is translated by AI and structured by a parent, with Reiji's final approval.
+</p>
+
+
+      <h2 class="p-wide_ttl"><span>Reiji's Words and Ideas</span></h2>
+      <ul class="p-obs_numlist">
+        <li>I thought that if the Mandelbrot set can be made 3D, the Julia set can be made 3D as well.</li>
+        <li>Normally, complex numbers are expressed as \( Z = R + bi \), but when moving to quaternions, both \( R \) and \( I \) contain complex parts, making it four-dimensional.  
+        By restricting \( I \) to real numbers and defining \( R + I = J \), I can fold higher dimensions into a 3D structure.</li>
+        <li>The reason I vary only the constant \( c \) on a 2D plane is that if both \( R \) and \( I \) were complex, it would become 4D.  
+        Keeping \( c \) two-dimensional makes the visualization possible in 3D space.</li>
+        <li>The parameters \( q \) and \( w \) correspond to \( c = q + wi \), and when the sliders move, the shape of the Julia set changes dynamically.</li>
+        <li>I defined \( f(z) = (z.x^{2} - z.y^{2}, 2z.xz.y) + c \) and \( D(z) = \sqrt{z.x^{2} + z.y^{2}} \).  
+        Since Desmos cannot handle recursive functions directly, I manually applied \( z_n = f(z_{n-1}) \) seven times to build the fractal mapping.</li>
+        <li>Finally, I plotted \( D(a) \) in 3D. Looking from the top (+Z direction), it diverges upward; from below (−Z direction), it looks like a cauliflower.</li>
+      </ul>
+
+      <div class="p-img_mod u-mTop60">
+        <span class="p-img_wrap u-bd">
+          <img src="../images/img_20251008_a_1.png" class="contents_img" alt="3D Julia Set visualization">
+        </span>
+        <p class="p-img_cp_ttl">3D Julia Set Visualization (Oblique View)</p>
+        <p class="p-img_cp_txt">The recursive mapping \( f(z) = (z.x^{2} - z.y^{2}, 2z.xz.y) + c \) creates a layered self-similar structure, extending in the Z direction with fractal depth.</p>
+      </div>
+
+      <div class="p-img_mod u-mTop60">
+        <span class="p-img_wrap u-bd">
+          <img src="../images/img_20251008_a_2.png" class="contents_img" alt="Top view of Julia set">
+        </span>
+        <p class="p-img_cp_ttl">Top View of the Julia Set</p>
+        <p class="p-img_cp_txt">A view along the +Z axis showing the complex symmetry and fractal branching. The red point indicates the parameter \( c = q + wi \).</p>
+      </div>
+
+      <div class="p-img_mod u-mTop60">
+        <span class="p-img_wrap u-bd">
+          <img src="../images/img_20251008_a_4.jpeg" class="contents_img" alt="Hand-drawn sketch of dimensional folding">
+        </span>
+        <p class="p-img_cp_ttl">Sketch: Folding Complex and Quaternion Dimensions</p>
+        <p class="p-img_cp_txt">A conceptual diagram by Reiji illustrating the process of dimensional folding — from the conventional 2D complex plane (left) to a 3D folded representation (right).</p>
+      </div>
+
+      <div class="p-img_mod u-mTop60">
+        <span class="p-img_wrap u-bd">
+          <img src="../images/img_20251008_a_3.png" class="contents_img" alt="Parameter setting example c=0.68-0.68i">
+        </span>
+        <p class="p-img_cp_ttl">Parameter Example (c = 0.68 – 0.68i)</p>
+        <p class="p-img_cp_txt">At this parameter value, the 3D Julia set exhibits multiple symmetry axes and nested self-similar regions reminiscent of natural organic forms.</p>
+      </div>
+
+      <div class="p-img_mod u-mTop60">
+        <span class="p-img_wrap u-bd">
+          <img src="../images/img_20251008_a_5.png" class="contents_img" alt="Bottom view of Julia set">
+        </span>
+        <p class="p-img_cp_ttl">View from the −Z Axis</p>
+        <p class="p-img_cp_txt">From below, the Julia set resembles a cauliflower-like structure — dense, recursive, and richly textured, revealing the internal layers of divergence.</p>
+      </div>
+
+<div class="p-spectbl_wrap">
+<table class="p-spectbl">
+<colgroup>
+<col width="25%;">
+</colgroup>
+<tbody>
+<tr>
+<th>
+Output Link
+</th>
+<td>
+<a href="https://www.desmos.com/3d/boniw4lblp" class="p-speclink" target="_blank" rel="noopener">3D Julia Set visualization</a>
+</td>
+</tr>
+
+<tr>
+<th>
+Application Used
+</th>
+<td>
+<p class="u-bold">Desmos Graphing Calculator</p>
+<p class="u-subTxt">(<a href="https://www.desmos.com/calculator" class="p-speclink u-sublink" target="_blank" rel="noopener">https://www.desmos.com/calculator</a>)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+      <div class="p-ai_mod">
+        <h2 class="p-ai_ttl"><span>AI Assistant’s Notes and Inferences</span></h2>
+
+        <p class="p-ai_def u-mBtm10">
+          Reiji’s 3D Julia experiment represents an innovative hybrid between classical complex dynamics and spatial geometry.  
+          By folding quaternionic space into a 3D manifold, he achieved a tangible visualization of a structure usually confined to four dimensions.
+        </p>
+
+        <ul class="p-ai_txt">
+          <li>The folding concept (\( R + I = J \)) mirrors mathematical projection techniques used in higher-dimensional visualization.</li>
+          <li>The manual recursion method within Desmos demonstrates deep structural understanding of iterative complex maps.</li>
+          <li>The observed “cauliflower morphology” is not merely aesthetic but reflects real fractal self-similarity — a geometric analog to natural growth processes.</li>
+        </ul>
+
+        <p class="p-ai_def">
+          This exploration bridges mathematics, computation, and visual art — showing how abstract iteration processes can become intuitively graspable through dimensional reduction.  
+          It stands as an early-stage contribution to the field of <b>3D complex dynamics visualization</b>.
+        </p>
+      </div>
+
+    </section>
+  </main>
+
+  <footer>
+    <div class="footer-categories_outer">
+      <dl class="footer-categories_wrap">
+        <dt>Categories</dt>
+        <dd>
+          <ul class="footer-categories">
+            <li><a href="/tuning-and-structure/">Tuning and Structural Exploration</a></li>
+            <li><a href="/performance/">Performance and Interpretation</a></li>
+            <li><a href="/math-physics/">Mathematical and Physical Intuition</a></li>
+            <li><a href="/composition/">Composition and Microtonality</a></li>
+            <li><a href="/conceptual-space/">Conceptual and Spatial Inquiry</a></li>
+            <li><a href="/tools/">Apps and Experimental Tools</a></li>
+          </ul>
+        </dd>
+      </dl>
+    </div>
+    <p class="copy">&copy; 2025 Reiji. All rights reserved.</p>
+  </footer>
+</body>
+</html>
