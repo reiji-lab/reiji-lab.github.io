@@ -725,6 +725,16 @@ footer{
   margin-bottom:0px;
 }
 
+.p-overviewLink{
+  font-size: 18px;
+  color:#1d9bb1;
+}
+
+.p-mainTxtLink{
+  font-size: 22px;
+  color:#1d9bb1;
+}
+
 .disclaimer{
   font-size:16px;
   color:#333333;
