@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mandelbrot and Julia Set Parameter Explorer — Dynamic Fractal Simulation and Fibonacci Structures</title>
+  <meta name="description" content="A Desmos-based exploration by Reiji (age 9) that turns Mandelbrot and Julia set parameters into movable points, revealing convergence, divergence, Julia connectivity, and Fibonacci-related bulb structures.">
+  <meta name="robots" content="noindex,follow">
+  <link rel="stylesheet" href="../css/reset.css">
+  <link rel="stylesheet" media="screen and (min-width: 1025px)" href="../css/style_pc.css">
+  <link rel="stylesheet" media="screen and (max-width: 1024px)" href="../css/style_sp.css">
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-8BWCJ4H4HD"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-8BWCJ4H4HD');
+</script>
+</head>
+<body>
+  <header class="p-sub_head">
+    <div class="p-headline_bg">
+      <div class="p-top_mainTtl">
+        <span class="p-mTtl_sub1">Reiji's</span> <span class="p-mTtl_sub2">Explorations</span><span class="p-mTtl_sub3">in Sound & Structure</span>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <nav class="breadcrumb">
+      <ul class="breadcrumb_inner">
+        <li><a href="/">Home</a> &gt; </li>
+        <li><a href="/math-physics/">Mathematical and Physical Intuition</a> &gt; </li>
+        <li><span>Mandelbrot and Julia Set Parameter Explorer — Dynamic Fractal Simulation and Fibonacci Structures</span></li>
+      </ul>
+    </nav>
+
+    <p class="p-cont_date">November 17, 2025</p>
+
+    <div class="p-title_bg">
+      <div class="p-title_bg_inner">
+        <h1 class="p-wide_ttl_head_single">Mandelbrot and Julia Set Parameter Explorer — Dynamic Fractal Simulation and Fibonacci Structures</h1>
+      </div>
+    </div>
+
+
+    <section id="main_contents">
+      <p class="p-overview_txt">
+        <b>Overview:</b><br>
+        This Desmos-based project turns the parameters of the <b>Mandelbrot</b> and <b>Julia</b> sets into interactive points.
+        By moving these points and sliders, Reiji explores how orbits converge, diverge, or oscillate, and how the shape of the sets changes in real time.
+        The model treats the exponent, initial value, orbit point, Julia parameter, maximum iteration count, and escape radius as components of a high-dimensional parameter space.
+        Through this, Reiji discovers links between boundary bulbs, polygonal orbits, the <b>Fibonacci sequence</b>, and convergence toward the <b>golden ratio</b>.
+      </p>
+
+<p class="disclaimer">
+<b>Note:</b> All content on this page is originally explained by Reiji in Japanese.  
+The English version is translated by AI and structured by a parent, with Reiji's final approval.
+</p>
+
+
+      <h2 class="p-wide_ttl"><span>Reiji's Words and Ideas</span></h2>
+      <ul class="p-obs_numlist">
+        <li>
+          This model is a dynamic simulation that changes fractal shapes by treating the values in the Mandelbrot and Julia set formulas as variables.
+          Points inside the graph and several sliders can be moved directly to observe many different fractal patterns.
+        </li>
+        <li>
+          If each variable is one real dimension (two dimensions when including the imaginary part), then the system behaves like a
+          <b>10-dimensional coordinate space</b> for the Mandelbrot set.
+          When interpreted in 4 dimensions, it corresponds to the Julia set.
+        </li>
+        <li>
+          The basic iteration for the Mandelbrot set is
+          \[
+          f(z,n)=f(z,n-1)^a+z,\quad f(z,0)=z \text{ or } E,\quad |f(x+yi,d)|\le F.
+          \]
+          Here, \(a\) is the exponent, \(b\) is the point whose orbit is plotted, \(c\) is the Julia parameter, \(d\) is the maximum number of iterations,
+          \(E\) is the starting value of \(z\), and \(F\) (between 0 and 2) controls how much of the set appears filled in.
+        </li>
+        <li>
+          Moving the point \(a\) changes the exponent and therefore the global shape of the Mandelbrot set.
+          Moving \(b\) shows the actual orbit \(f(b[0...d])\) as it converges, diverges, or oscillates.
+          Adjusting \(d\) increases or decreases the detail of the fractal, while changing \(E\) (the initial value) can drastically alter the resulting shape.
+        </li>
+        <li>
+          For the Julia set, I change the recurrence to
+          \[
+          f(z,n)=f(z,n-1)^a+c,\quad f(z,0)=z,
+          \]
+          and then move the point \(c\) on the screen.
+          When \(c\) is inside the Mandelbrot set, the corresponding Julia set is connected;
+          when \(c\) is outside, the Julia set breaks into dust-like pieces.
+          A special example is \(c=-1.766513-0.04175i\), where a Julia set appears inside another Julia set.
+          The same coordinate, when viewed on the Mandelbrot side, corresponds to a point where a small Mandelbrot set appears inside a larger one.
+        </li>
+        <li>
+          If the screen becomes completely white, it usually means the maximum number of iterations is not suitable and the structure has become too fine to draw.
+          By zooming in and increasing \(d\) step by step, the details of the set can be observed again.
+        </li>
+        <li>
+          When I set \(a=-2\) and \(d=50\), a sideways rounded triangle appears in black, with a white region floating inside.
+          Placing \(b\) at 0 shows an orbit that moves back and forth between 0 and infinity:
+          even values of \(d\) send the orbit to 0, while odd values make it diverge.
+        </li>
+        <li>
+          After turning \(f(z,0)=z\) into \(f(z,0)=E\), I move \(b\) along the edge of the Mandelbrot set.
+          Around approximately \(0.1+0.7i\), bulbs on the left side produce polygonal patterns whose numerators increase as odd numbers
+          (for example, near \(-0.51+0.558i\) I see a <b>5/2-gon</b>).
+          On the right side, near the large main bulb, the patterns become ordinary integer-gons.
+        </li>
+        <li>
+          Along the main antenna between 0 and 1 on the real axis (especially from the special point \(0.25+0i\) with the condition \(x&gt;0.25, \lim_{x\to0.25}\) up to 1),
+          moving \(b\) to successive large bulbs gives a sequence of polygon types: 2-gon, 3/2-gon, 5/3-gon, 8/5-gon, 13/8-gon, 21/13-gon, and so on.
+          These ratios follow the <b>Fibonacci sequence</b>, which means the bulbs converge to \(\varphi-1\), where \(\varphi\) is the golden ratio.
+          From this, I formed the hypothesis that uncountably many numbers between 0 and 1 are being visualized through these shapes.
+        </li>
+      </ul>
+
+      <!-- Image 6: Whiteboard note -->
+      <div class="p-img_mod u-mTop60">
+        <span class="p-img_wrap u-bd">
+          <img src="../images/img_20251117_a_6.jpeg" class="contents_img" alt="Whiteboard notes connecting Mandelbrot formulas, intervals between 0 and 2, and Fibonacci ratios">
+        </span>
+        <p class="p-img_cp_ttl">Whiteboard Notes: From Formula to Fibonacci</p>
+        <p class="p-img_cp_txt">
+          During the interview, Reiji summarized his thinking on a whiteboard:
+          the iteration formula \(f(z,n)\), the condition \(|f(x+yi,d)|\le F\), the interval \(0\le z\le2\),
+          schematic bulbs on the Mandelbrot boundary, and the sequence of ratios leading to Fibonacci numbers.
+          It shows how formulas, shapes, and number sequences are used together to explain a single phenomenon.
+        </p>
+      </div>
+
+      <!-- Image 1 -->
+      <div class="p-img_mod u-mTop60">
+        <span class="p-img_wrap u-bd">
+          <img src="../images/img_20251117_a_1.png" class="contents_img" alt="Mandelbrot set with the orbit of point b drawn as line segments">
+        </span>
+        <p class="p-img_cp_ttl">Mandelbrot Set and the Orbit of b</p>
+        <p class="p-img_cp_txt">
+          The classic Mandelbrot set with the orbit of point \(b\) plotted as a polyline.
+          Here the parameters \(a=2\), \(E=0\), and \(F=2\) show how the trajectory visits several locations before stabilizing or diverging.
+        </p>
+      </div>
+
+      <!-- Image 2 -->
+      <div class="p-img_mod u-mTop60">
+        <span class="p-img_wrap u-bd">
+          <img src="../images/img_20251117_a_2.png" class="contents_img" alt="Julia set mode with c as parameter and orbit of b">
+        </span>
+        <p class="p-img_cp_ttl">Julia Set Mode: f(z,n)=f(z,n-1)<sup>a</sup>+c</p>
+        <p class="p-img_cp_txt">
+          In Julia mode, the recurrence becomes \(f(z,n)=f(z,n-1)^a+c\).
+          The point \(c\) moves through the smaller bulbs surrounding the Mandelbrot set, while the orbit of \(b\) draws a dense polygon inside the corresponding Julia set.
+        </p>
+      </div>
+
+      <!-- Image 3 -->
+      <div class="p-img_mod u-mTop60">
+        <span class="p-img_wrap u-bd">
+          <img src="../images/img_20251117_a_3.png" class="contents_img" alt="Effect of changing the initial value E on the Mandelbrot-like fractal">
+        </span>
+        <p class="p-img_cp_ttl">Changing the Initial Value E</p>
+        <p class="p-img_cp_txt">
+          With the initial condition modified to \(f(z,0)=E\), moving \(E\) to the left side of the set produces a different Mandelbrot-like figure.
+          The orbit of \(b\) forms a spiral pattern, illustrating how sensitive the system is to the starting point.
+        </p>
+      </div>
+
+      <!-- Image 4 -->
+      <div class="p-img_mod u-mTop60">
+        <span class="p-img_wrap u-bd">
+          <img src="../images/img_20251117_a_4.png" class="contents_img" alt="Internal structure of the Mandelbrot set with F reduced below 0.5">
+        </span>
+        <p class="p-img_cp_ttl">Exploring the Escape Radius F</p>
+        <p class="p-img_cp_txt">
+          By setting the escape radius to \(F=0.48\), only the most strongly bound region remains filled in black.
+          The jagged boundary becomes more pronounced, highlighting the internal connectivity of the main body.
+        </p>
+      </div>
+
+      <!-- Image 5 -->
+      <div class="p-img_mod u-mTop60">
+        <span class="p-img_wrap u-bd">
+          <img src="../images/img_20251117_a_5.png" class="contents_img" alt="Desmos parameter list showing a, b, c, d, E, F">
+        </span>
+        <p class="p-img_cp_ttl">Parameter Layout in Desmos</p>
+        <p class="p-img_cp_txt">
+          The Desmos setup for the six key parameters: exponent \(a\), orbit point \(b\), Julia parameter \(c\),
+          maximum iterations \(d\), starting value \(E\), and escape radius \(F\).
+          Each is treated as a movable point or slider, turning the fractal into a multi-dimensional control panel.
+        </p>
+      </div>
+
+
+<div class="p-spectbl_wrap">
+<table class="p-spectbl">
+<colgroup>
+<col width="25%;">
+</colgroup>
+<tbody>
+
+            <tr>
+              <th>Output Link</th>
+              <td>
+                <a href="https://www.desmos.com/calculator/p7euoabro4" class="p-speclink" target="_blank" rel="noopener">Mandelbrot and Julia Set Parameter Explorer — Dynamic Fractal Simulation and Fibonacci Structures</a>
+              </td>
+            </tr>
+
+            <tr>
+              <th>Application Used</th>
+              <td>
+                <p class="u-bold">Desmos Graphing Calculator</p>
+                <p class="u-subTxt">
+                  (<a href="https://www.desmos.com/calculator" class="p-speclink u-sublink" target="_blank" rel="noopener">https://www.desmos.com/calculator</a>)
+                </p>
+              </td>
+            </tr>
+</tbody>
+</table>
+</div>
+
+      <div class="p-ai_mod">
+        <h2 class="p-ai_ttl"><span>AI Assistant’s Notes and Inferences</span></h2>
+
+        <p class="p-ai_def u-mBtm10">
+          This work turns the Mandelbrot and Julia sets into an <b>interactive laboratory</b>.
+          Rather than drawing a single beautiful fractal, Reiji designs a parameter space where the exponent,
+          orbit point, Julia parameter, initial value, iteration depth, and escape radius can all be moved
+          and combined in real time.
+        </p>
+        <ul class="p-ai_txt">
+          <li>
+            Treating these parameters as coordinates in a high-dimensional space allows Reiji to reason about
+            convergence, divergence, and oscillation not only numerically but also geometrically.
+          </li>
+          <li>
+            The systematic exploration of bulbs and their corresponding polygon orbits reveals a rich structure:
+            along certain paths, the observed ratios follow the Fibonacci sequence and converge to \(\varphi-1\),
+            connecting fractal geometry with classical number theory.
+          </li>
+          <li>
+            The special Julia parameter \(c=-1.766513-0.04175i\), where a Julia set appears inside another Julia set
+            and matches a point where the Mandelbrot set contains a smaller copy of itself, shows an intuitive grasp
+            of self-similarity and parameter–space correspondence.
+          </li>
+          <li>
+            The whiteboard notes demonstrate that Reiji naturally weaves together formulas, limits, intervals,
+            and diagrams to support a single hypothesis: that uncountably many numbers between 0 and 1 are
+            encoded in the visual organization of the Mandelbrot boundary.
+          </li>
+        </ul>
+        <p class="p-ai_def">
+          In summary, this project functions simultaneously as a visualization, a computational tool,
+          and a research notebook. It showcases how a child can use interactive media to bridge
+          fractal geometry, complex dynamics, and number sequences into one coherent line of inquiry.
+        </p>
+      </div>
+
+    </section>
+  </main>
+
+  <footer>
+    <div class="footer-categories_outer">
+      <dl class="footer-categories_wrap">
+        <dt>Categories</dt>
+        <dd>
+          <ul class="footer-categories">
+            <li><a href="/tuning-and-structure/">Tuning and Structural Exploration</a></li>
+            <li><a href="/performance/">Performance and Interpretation</a></li>
+            <li><a href="/math-physics/">Mathematical and Physical Intuition</a></li>
+            <li><a href="/composition/">Composition and Microtonality</a></li>
+            <li><a href="/conceptual-space/">Conceptual and Spatial Inquiry</a></li>
+            <li><a href="/tools/">Apps and Experimental Tools</a></li>
+          </ul>
+        </dd>
+      </dl>
+    </div>
+    <p class="copy">&copy; 2025 Reiji. All rights reserved.</p>
+  </footer>
+</body>
+</html>
