@@ -743,6 +743,12 @@ footer{
   padding:20px 30px;
 }
 
+.p-math_box{
+  display:block;
+  text-align:center;
+  margin:20px 0;
+}
+
 .u-indent_1{
   padding-left:14px;
   text-indent:-14px;
