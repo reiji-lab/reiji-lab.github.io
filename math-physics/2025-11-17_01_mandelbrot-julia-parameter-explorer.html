@@ -73,12 +73,16 @@ The English version is translated by AI and structured by a parent, with Reiji's
           If each variable is one real dimension (two dimensions when including the imaginary part), then the system behaves like a
           <b>10-dimensional coordinate space</b> for the Mandelbrot set.
           When interpreted in 4 dimensions, it corresponds to the Julia set.
-        </li>
+    .    </li>
         <li>
-          The basic iteration for the Mandelbrot set is
-          \[
-          f(z,n)=f(z,n-1)^a+z,\quad f(z,0)=z \text{ or } E,\quad |f(x+yi,d)|\le F.
-          \]
+          The basic iteration for the Mandelbrot set is<br>
+
+<div class="p-math_box">
+  <span class="formula-line">\( f(z,n)=f(z,n-1)^a+z, \)</span>
+  <span class="formula-line">\( f(z,0)=z \text{ or } E, \)</span>
+  <span class="formula-line">\( |f(x+yi,d)|\le F. \)</span>
+</div>
+
           Here, \(a\) is the exponent, \(b\) is the point whose orbit is plotted, \(c\) is the Julia parameter, \(d\) is the maximum number of iterations,
           \(E\) is the starting value of \(z\), and \(F\) (between 0 and 2) controls how much of the set appears filled in.
         </li>
@@ -89,9 +93,12 @@ The English version is translated by AI and structured by a parent, with Reiji's
         </li>
         <li>
           For the Julia set, I change the recurrence to
-          \[
-          f(z,n)=f(z,n-1)^a+c,\quad f(z,0)=z,
-          \]
+
+<div class="p-math_box">
+  <span class="formula-line">\( f(z,n)=f(z,n-1)^a+c, \)</span>
+  <span class="formula-line">\( f(z,0)=z, \)</span>
+</div>
+
           and then move the point \(c\) on the screen.
           When \(c\) is inside the Mandelbrot set, the corresponding Julia set is connected;
           when \(c\) is outside, the Julia set breaks into dust-like pieces.
