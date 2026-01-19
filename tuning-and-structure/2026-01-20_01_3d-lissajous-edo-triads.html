@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Variable-EDO Triads in 3D — Lissajous Curves + Overtone Playback in Desmos</title>
+  <meta name="description" content="A Desmos 3D experiment by a 9-year-old (Reiji): triads built in any EDO (1–1200) are visualized as 3D Lissajous curves and played with overtones (1–128). Closeness to simple just ratios is observed through curve regularity/closure and audible beating between partials.">
+  <meta name="robots" content="noindex,follow">
+  <link rel="stylesheet" href="../css/reset.css">
+  <link rel="stylesheet" media="screen and (min-width: 1025px)" href="../css/style_pc.css">
+  <link rel="stylesheet" media="screen and (max-width: 1024px)" href="../css/style_sp.css">
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-8BWCJ4H4HD"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-8BWCJ4H4HD');
+</script>
+</head>
+<body>
+  <header class="p-sub_head">
+    <div class="p-headline_bg">
+      <div class="p-top_mainTtl">
+        <span class="p-mTtl_sub1">Reiji's</span> <span class="p-mTtl_sub2">Explorations</span><span class="p-mTtl_sub3">in Sound & Structure</span>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <nav class="breadcrumb">
+    <ul class="breadcrumb_inner">
+      <li><a href="/">Home</a> &gt; </li>
+      <li><a href="/tuning-and-structure/">Tuning and Structural Exploration</a> &gt; </li>
+      <li><span>Variable-EDO Triads in 3D (Desmos)</span></li>
+    </ul>
+    </nav>
+
+  <p class="p-cont_date">January 20, 2026</p>
+
+    <div class="p-title_bg">
+      <div class="p-title_bg_inner">
+        <h1 class="p-wide_ttl_head_single">
+          Variable-EDO Triads in 3D — Lissajous Curves + Overtone Playback in Desmos
+        </h1>
+      </div>
+    </div>
+
+
+    <section id="main_contents">
+      <p class="p-overview_txt">
+        <b>Overview:</b><br>
+        This project is a Desmos (3D) implementation by <strong>Reiji (age 9)</strong>.
+        A triad built in an arbitrary equal division of the octave (<strong>EDO 1–1200</strong>) is visualized as a
+        <strong>3D Lissajous curve</strong>, while the corresponding three tones are played simultaneously using Desmos
+        <strong>tone()</strong> with an adjustable overtone range (<strong>1–128</strong>).<br><br>
+
+        The goal is to observe how close an EDO triad is to simple just ratios (e.g. \(5/4\), \(3/2\)),
+        using two linked perspectives:
+        <strong>(1) visual cues</strong> such as how “regular” or “closed” the curve appears, and
+        <strong>(2) auditory cues</strong> such as beating (wobbling) that can arise from mismatches between certain partials
+        when overtones are enabled.<br><br>
+
+        <b>Notes on interpretation:</b><br>
+        “Closer” and “farther” are not defined here as a strict numeric error metric.
+        Instead, they are treated as <em>observational signs</em>, mainly:
+        (i) the curve looks more regular / closes more cleanly,
+        and (ii) beating becomes less prominent.
+        Also, 2D projections (XY / XZ / YZ) can look different even for the same frequency ratios,
+        because the appearance depends on the chosen coordinate representation (including the role/order of
+        \(\sin\) and \(\cos\)).
+      </p>
+
+<p class="disclaimer">
+<b>Note:</b> All content on this page is originally explained by Reiji in Japanese.  
+The English version is translated by AI and structured by a parent, with Reiji's final approval.
+</p>
+
+
+      <h2 class="p-wide_ttl"><span>Reiji's Words and Ideas</span></h2>
+      <ul class="p-obs_numlist">
+
+        <li>
+          <b>What this is</b><br>
+          I built a system that draws a triad in any EDO (from 1 to 1200) as a 3D animated Lissajous curve,
+          and plays the corresponding three tones at the same time.
+          In 3D, relationships that can be hard to see as a “triad” in 2D projections can become clearer as a spatial structure.
+          The sound is linked to the visualization, so I can listen to the triad while watching the curve.
+        </li>
+
+        <li>
+          <b>Formulas (Lissajous part)</b><br>
+          \[
+            \left(\sin At,\ \cos Bt,\ \sin Ct\right)
+          \]
+          This is a parametric representation used to draw the 3D Lissajous curve.<br><br>
+
+          \(A\): the first tone. Since this is the root, it is fixed to 1.<br>
+          \(B\): the second tone:
+          \[
+            B=\sqrt[e_{do}]{2}^{s_{tep}}
+          \]
+          \(C\): the third tone:
+          \[
+            C=\sqrt[e_{do}]{2}^{s_{tep2}}
+          \]
+          (I keep the expressions for \(B\) and \(C\) in the same form as in Desmos.)
+        </li>
+
+        <li>
+          <b>Formulas (tone playback)</b><br>
+          Root tone:
+          \[
+            \operatorname{tone}\left(h_{z}\cdot\left[1...o_{vertone}\right]\right)
+          \]
+          Second tone:
+          \[
+            \operatorname{tone}\left(\left(h_{z}\cdot2^{\frac{s_{tep}}{e_{do}}}\right)\cdot\left[1...o_{vertone}\right]\right)
+          \]
+          Third tone:
+          \[
+            \operatorname{tone}\left(\left(h_{z}\cdot2^{\frac{s_{tep2}}{e_{do}}}\right)\cdot\left[1...o_{vertone}\right]\right)
+          \]
+          Overtones can make small mismatches easier to hear as beating between specific partials.
+        </li>
+
+        <li>
+          <b>Variables</b><br>
+          <ul>
+            <li><strong>overtone</strong> (\(o_{vertone}\)): sets how many overtones are played (1–128). If it is 1, it is a single sine partial.</li>
+            <li><strong>u</strong>: how far forward in time to draw (0 to \(60\pi\)). This helps find points where the curve almost fully closes.</li>
+            <li><strong>edo</strong> (\(e_{do}\)): sets the equal division of the octave (1–1200).</li>
+            <li><strong>step</strong> (\(s_{tep}\)): which step above the root is used for the second tone.</li>
+            <li><strong>step2</strong> (\(s_{tep2}\)): which step above the root is used for the third tone.</li>
+            <li><strong>h</strong> (\(h_{z}\)): the root frequency in Hz.</li>
+          </ul>
+          If the system becomes heavy on a device, lowering <strong>overtone</strong> can help.
+        </li>
+
+        <li>
+          <b>Why the projections can look different</b><br>
+          For example, in 12-EDO with a C–E–G triad:
+          XY shows the C–E relationship, XZ shows the C–G relationship, and YZ also relates to C–E.
+          However, YZ does not necessarily look identical to XY.<br><br>
+
+          This is because in the XY plane, it is represented by the pair
+          <strong>\(x=\sin (y)\), \(y=\cos (x)\)</strong>,
+          while in the YZ plane the roles of the axes are swapped, and the \(\sin/\cos\) assignments or ordering changes.
+          So even when the interval content is the same, the visible features can differ depending on the chosen coordinates.
+          I found it interesting that “the same thing” can look different depending on how it is observed.
+        </li>
+
+      </ul>
+
+      <!-- Images -->
+      <div class="p-img_mod u-mTop60">
+        <span class="p-img_wrap u-bd">
+          <img src="../images/lissage3d_1.png" class="contents_img" alt="Desmos 3D view of a triad as a 3D Lissajous curve with parameters">
+        </span>
+        <p class="p-img_cp_ttl">Main View: 3D Lissajous Triad with Variable EDO</p>
+        <p class="p-img_cp_txt">
+          A triad drawn as \((\sin At,\cos Bt,\sin Ct)\) while playing the corresponding tones using tone().<br>
+          The curve’s closure and regularity are used as visual cues when comparing EDO triads to simple just ratios.
+        </p>
+      </div>
+
+      <div class="p-img_mod u-mTop60">
+        <span class="p-img_wrap u-bd">
+          <img src="../images/lissage3d_2.png" class="contents_img" alt="XY projection of the 3D Lissajous triad">
+        </span>
+        <p class="p-img_cp_ttl">XY Projection: Root–Second Tone (A–B)</p>
+        <p class="p-img_cp_txt">
+          Projection onto the XY plane. When a two-tone ratio is close to a simple rational relationship,
+          the curve often appears more regular.<br>
+          With more overtones, small mismatches may become audible as beating between certain partials.
+        </p>
+      </div>
+
+      <div class="p-img_mod u-mTop60">
+        <span class="p-img_wrap u-bd">
+          <img src="../images/lissage3d_3.png" class="contents_img" alt="XZ projection of the 3D Lissajous triad">
+        </span>
+        <p class="p-img_cp_ttl">XZ Projection: Root–Third Tone (A–C)</p>
+        <p class="p-img_cp_txt">
+          Projection onto the XZ plane. The appearance changes with the chosen EDO and steps,
+          reflecting how the third tone relates to the root in frequency ratio.
+        </p>
+      </div>
+
+      <div class="p-img_mod u-mTop60">
+        <span class="p-img_wrap u-bd">
+          <img src="../images/lissage3d_4.png" class="contents_img" alt="YZ projection of the 3D Lissajous triad">
+        </span>
+        <p class="p-img_cp_ttl">YZ Projection: Second–Third Tone (B–C)</p>
+        <p class="p-img_cp_txt">
+          Even when the interval content is the same, projections can look different because the coordinate roles and
+          the \(\sin/\cos\) ordering can change across planes.
+        </p>
+      </div>
+
+      <div class="p-img_mod u-mTop60">
+        <span class="p-img_wrap u-bd">
+          <img src="../images/lissage3d_5.png" class="contents_img" alt="3D shape showing how the triad closes in space">
+        </span>
+        <p class="p-img_cp_ttl">3D Shape: Observing How a Triad “Closes” in Space</p>
+        <p class="p-img_cp_txt">
+          The simultaneous relationship among the three tones (A, B, C) is examined as a 3D structure.
+          A “triad” that can look overly complex in 2D can appear more simply in 3D.
+        </p>
+      </div>
+
+      <div class="p-img_mod u-mTop60">
+        <span class="p-img_wrap u-bd">
+          <img src="../images/lissage3d_6.png" class="contents_img" alt="Example parameter settings in Desmos that approximate simple just ratios">
+        </span>
+        <p class="p-img_cp_ttl">Parameter Example: EDO=665 Approximating Simple Just Ratios</p>
+        <p class="p-img_cp_txt">
+          Example settings \(e_{do}=665\), \(s_{tep}=214\), \(s_{tep2}=389\) yield values like
+          \(B\approx1.2498929\) and \(C\approx1.4999999\) in Desmos, close to ratios such as \(5/4\) and \(3/2\).
+        </p>
+      </div>
+
+      <div class="p-spectbl_wrap">
+        <table class="p-spectbl">
+          <colgroup>
+            <col width="25%;">
+          </colgroup>
+          <tbody>
+            <tr>
+              <th>Output Link</th>
+              <td>
+                <a href="https://www.desmos.com/3d/evpjsc2hxn" class="p-speclink" target="_blank" rel="noopener">
+                  Desmos 3D page (interactive)
+                </a>
+              </td>
+            </tr>
+            <tr>
+              <th>Application Used</th>
+              <td>
+                <p class="u-bold">Desmos (3D) + tone()</p>
+                <p class="u-subTxt">
+                  (Official site:
+                  <a href="https://www.desmos.com/" class="p-speclink u-sublink" target="_blank" rel="noopener">
+                    https://www.desmos.com/
+                  </a>)
+                </p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="p-ai_mod">
+        <h2 class="p-ai_ttl"><span>AI Assistant’s Notes and Inferences</span></h2>
+
+        <p class="p-ai_def u-mBtm10">
+          This system can be understood as extending the idea that
+          <strong>ratios closer to simple rational numbers tend to produce Lissajous figures that close more cleanly</strong>,
+          from two tones to <strong>triads (three simultaneous frequencies)</strong>.
+          The overtone option strengthens perception: subtle differences that are hard to notice with a single sine
+          partial can appear as <strong>audible beating</strong> between certain partials.
+        </p>
+
+        <ul class="p-ai_txt">
+          <li>
+            By increasing EDO and selecting appropriate steps, it becomes possible to approximate ratios such as \(5/4\) and \(3/2\) very closely.
+            In such cases one may expect a paired change: the curve looks “more orderly / more closed,” and beating becomes less prominent (or shifts in character).
+          </li>
+          <li>
+            The observation that “XY and YZ look different” is not merely a visual quirk: it highlights how
+            <strong>phase choices (sin/cos) and coordinate assignments</strong> influence what features become visible in a projection.
+          </li>
+          <li>
+            A natural next step would be to define simple quantitative measures of “complexity” across projections
+            (e.g. intersection count, periodicity, curvature statistics), and compare those against tuning parameters.
+          </li>
+        </ul>
+
+        <p class="p-ai_def">
+          Overall, the project tightly links <strong>ratio structure (EDO vs. simple just ratios)</strong>,
+          <strong>geometry (3D parametric curves and projections)</strong>, and <strong>listening (overtone-based beating)</strong>
+          into a single interactive experiment.
+        </p>
+      </div>
+
+    </section>
+  </main>
+
+  <footer>
+    <div class="footer-categories_outer">
+      <dl class="footer-categories_wrap">
+        <dt>Categories</dt>
+        <dd>
+          <ul class="footer-categories">
+            <li><a href="/tuning-and-structure/">Tuning and Structural Exploration</a></li>
+            <li><a href="/performance/">Performance and Interpretation</a></li>
+            <li><a href="/math-physics/">Mathematical and Physical Intuition</a></li>
+            <li><a href="/composition/">Composition and Microtonality</a></li>
+            <li><a href="/conceptual-space/">Conceptual and Spatial Inquiry</a></li>
+            <li><a href="/tools/">Apps and Experimental Tools</a></li>
+          </ul>
+        </dd>
+      </dl>
+    </div>
+    <p class="copy">&copy; 2025 Reiji. All rights reserved.</p>
+  </footer>
+</body>
+</html>
