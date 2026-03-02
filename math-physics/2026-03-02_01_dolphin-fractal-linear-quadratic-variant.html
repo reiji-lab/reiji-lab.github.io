@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dolphin Fractal — A Mandelbrot-Derived Transformation with Absolute-Value Folding</title>
+  <meta name="description" content="A Desmos-based fractal by Reiji (age 10) created by transforming a Mandelbrot-style iteration with a linear x-term and an absolute-value fold. The global shape resembles a downward-swimming dolphin, while deep zooms reveal persistent stripe-like structures.">
+  <meta name="robots" content="noindex,follow">
+  <link rel="stylesheet" href="../css/reset.css">
+  <link rel="stylesheet" media="screen and (min-width: 1025px)" href="../css/style_pc.css">
+  <link rel="stylesheet" media="screen and (max-width: 1024px)" href="../css/style_sp.css">
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-8BWCJ4H4HD"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-8BWCJ4H4HD');
+  </script>
+</head>
+
+<body>
+  <header class="p-sub_head">
+    <div class="p-headline_bg">
+      <div class="p-top_mainTtl">
+        <span class="p-mTtl_sub1">Reiji's</span> <span class="p-mTtl_sub2">Explorations</span><span class="p-mTtl_sub3">in Sound & Structure</span>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <nav class="breadcrumb">
+      <ul class="breadcrumb_inner">
+        <li><a href="/">Home</a> &gt; </li>
+        <li><a href="/math-physics/">Mathematical and Physical Intuition</a> &gt; </li>
+        <li><span>Dolphin Fractal — A Mandelbrot-Derived Transformation with Absolute-Value Folding</span></li>
+      </ul>
+    </nav>
+
+    <p class="p-cont_date">March 2, 2026</p>
+
+    <div class="p-title_bg">
+      <div class="p-title_bg_inner">
+        <h1 class="p-wide_ttl_head_single">Dolphin Fractal — A Mandelbrot-Derived Transformation with Absolute-Value Folding</h1>
+      </div>
+    </div>
+
+    <section id="main_contents">
+      <p class="p-overview_txt">
+        <b>Overview:</b><br>
+        <b>Definition:</b> We treat a point as a pair \(z=(z.x, z.y)\) and define the iteration as a 2D mapping
+        \(f(z)=(f_x(z), f_y(z))\).
+        In this page, the “first component” means the x-component \(f_x\), and the “second component” means the y-component \(f_y\).<br><br>
+
+        This project generates a new fractal by transforming a Mandelbrot-style iteration in the <b>real plane</b>.
+        Reiji replaced the \(z.x^{2}\) term in the first component with a <b>linear</b> \(z.x\) term (keeping \(z.y^{2}\)),
+        and introduced an <b>absolute-value fold</b> in the second component.
+        The global silhouette resembles a dolphin swimming downward, while deep zooms reveal stripe-like structures
+        that persist across scales.
+      </p>
+
+      <p class="disclaimer">
+        <b>Note:</b> All content on this page is originally explained by Reiji in Japanese.
+        The English version is translated by AI and structured by a parent, with Reiji's final approval.
+      </p>
+
+      <h2 class="p-wide_ttl"><span>Reiji's Words and Ideas</span></h2>
+      <ul class="p-obs_numlist">
+        <li>
+          I wanted to create a new fractal by transforming the formula used for the Mandelbrot set.
+          The standard Mandelbrot iteration can be written (in real components) as:
+          <div class="p-math_box">
+            <span class="formula-line">\( f(z)=\left(z.x^{2}-z.y^{2}+x,\; 2z.xz.y+y\right) \)</span>
+            <span class="formula-line">\( D(z)=\sqrt{z.x^{2}+z.y^{2}} \)</span>
+            <span class="formula-line">\( D\!\left(f^{(n)}(x,y)\right)\le 2 \)</span>
+          </div>
+        </li>
+
+        <li>
+          This time, I changed the recurrence to:
+          <div class="p-math_box">
+            <span class="formula-line">\( f(z)=\left(z.x-z.y^{2}+x,\;-\mathrm{abs}\left(2z.xz.y+y\right)\right) \)</span>
+          </div>
+        </li>
+
+        <li>
+          I was curious what would happen if I changed only one side of the quadratic structure.
+          In the original Mandelbrot formula, the first component includes \(z.x^{2}-z.y^{2}\), which comes from squaring a complex number.
+          So I replaced \(z.x^{2}\) with \(z.x\), while keeping \(z.y^{2}\) as it is, to see how the overall shape would deform.
+        </li>
+
+        <li>
+          I also wanted to test the effect of adding “minus absolute value.”
+          The famous Burning Ship fractal uses absolute values, but in my version I apply it to the entire expression
+          \(2z.xz.y+y\), not only to \(2z.xz.y\).
+        </li>
+
+        <li>
+          In a previous project (Mandelbrot/Julia parameter explorer), I worked with <b>complex-number controls</b>.
+          This time I focused on directly deforming the shape, so I drew it as a real-plane mapping in Desmos.
+        </li>
+
+        <li>
+          The result looked like a dolphin swimming downward, so I named it the <b>Dolphin Fractal</b>.
+          When I zoom in, stripe-like patterns continue to appear far beyond what I initially expected.
+        </li>
+
+        <li>
+          At first I predicted the dolphin shape would repeat in a self-similar way, but instead I found long,
+          layered stripes. That difference from my prediction is what made it especially interesting.
+        </li>
+      </ul>
+
+      <!-- Implementation screenshot -->
+      <div class="p-img_mod u-mTop60">
+        <span class="p-img_wrap u-bd">
+          <img src="../images/20260302_a_7.png" class="contents_img" alt="Desmos setup showing the transformed Mandelbrot-style recurrence for the Dolphin Fractal">
+        </span>
+        <p class="p-img_cp_ttl">Desmos Implementation of the Transformed Recurrence</p>
+        <p class="p-img_cp_txt">
+          The Desmos expression list defining the mapping \(f(z)\), the distance function \(D(z)\),
+          and the escape condition \(D(f^{(n)}(x,y))\le 2\).
+        </p>
+      </div>
+
+      <!-- Image 1 -->
+      <div class="p-img_mod u-mTop60">
+        <span class="p-img_wrap u-bd">
+          <img src="../images/20260302_a_1.png" class="contents_img" alt="Dolphin Fractal overall view with diagonal band structures">
+        </span>
+        <p class="p-img_cp_ttl">Dolphin Fractal: Global View</p>
+        <p class="p-img_cp_txt">
+          The overall silhouette resembles a dolphin swimming downward.
+          Large diagonal bands appear, and the boundary contains intricate textures.
+        </p>
+      </div>
+
+      <!-- Image 2 -->
+      <div class="p-img_mod u-mTop60">
+        <span class="p-img_wrap u-bd">
+          <img src="../images/20260302_a_2.png" class="contents_img" alt="Zoomed Dolphin Fractal showing dense stripe-like textures inside broad bands">
+        </span>
+        <p class="p-img_cp_ttl">Zoom: Stripe-Like Structure Inside Broad Bands</p>
+        <p class="p-img_cp_txt">
+          Even inside a large uniform region, thin layered stripes appear and repeat as the view is magnified.
+        </p>
+      </div>
+
+      <!-- Image 3 -->
+      <div class="p-img_mod u-mTop60">
+        <span class="p-img_wrap u-bd">
+          <img src="../images/20260302_a_3.png" class="contents_img" alt="Further zoom revealing parallel stripe bands and micro-fractal textures">
+        </span>
+        <p class="p-img_cp_ttl">Deep Zoom: Parallel Bands and Micro-Textures</p>
+        <p class="p-img_cp_txt">
+          The boundary develops multiple stacked layers. The diagonal banding persists while fine details accumulate.
+        </p>
+      </div>
+
+      <!-- Image 4 -->
+      <div class="p-img_mod u-mTop60">
+        <span class="p-img_wrap u-bd">
+          <img src="../images/20260302_a_4.png" class="contents_img" alt="Zoomed boundary region forming a fan-like spread of stripes">
+        </span>
+        <p class="p-img_cp_ttl">Boundary Behavior: Fan-Like Spreading of Stripes</p>
+        <p class="p-img_cp_txt">
+          Near certain boundary regions, stripes flare outward in a fan-like structure.
+          This suggests repeated folding and re-layering of escape-time boundaries.
+        </p>
+      </div>
+
+      <!-- Image 5 -->
+      <div class="p-img_mod u-mTop60">
+        <span class="p-img_wrap u-bd">
+          <img src="../images/20260302_a_5.png" class="contents_img" alt="Large-scale curved region with layered stripe structures and a dark basin-like area">
+        </span>
+        <p class="p-img_cp_ttl">Curved Layers and a Dark Basin-Like Region</p>
+        <p class="p-img_cp_txt">
+          A large dark region appears like a basin or cavity, wrapped by multiple colored layers.
+          Thin stripes remain embedded inside the broader bands.
+        </p>
+      </div>
+
+      <!-- Image 6 -->
+      <div class="p-img_mod u-mTop60">
+        <span class="p-img_wrap u-bd">
+          <img src="../images/20260302_a_6.png" class="contents_img" alt="Dolphin Fractal overall framing showing the central silhouette and layered boundaries">
+        </span>
+        <p class="p-img_cp_ttl">Dolphin Fractal: Framing the Full Silhouette</p>
+        <p class="p-img_cp_txt">
+          A clearer framing of the “dolphin” outline and its layered boundary structure.
+          The absolute-value fold contributes to sharp edges and banded regions.
+        </p>
+      </div>
+
+      <div class="p-spectbl_wrap">
+        <table class="p-spectbl">
+          <colgroup>
+            <col width="25%;">
+          </colgroup>
+          <tbody>
+            <tr>
+              <th>Output Link</th>
+              <td>
+                <a href="https://www.desmos.com/calculator/cgbhossjuw" class="p-speclink" target="_blank" rel="noopener">Dolphin Fractal — Desmos Graph</a>
+              </td>
+            </tr>
+
+            <tr>
+              <th>Application Used</th>
+              <td>
+                <p class="u-bold">Desmos Graphing Calculator</p>
+                <p class="u-subTxt">
+                  (<a href="https://www.desmos.com/calculator" class="p-speclink u-sublink" target="_blank" rel="noopener">https://www.desmos.com/calculator</a>)
+                </p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="p-ai_mod">
+        <h2 class="p-ai_ttl"><span>AI Assistant’s Notes and Inferences</span></h2>
+
+        <p class="p-ai_def u-mBtm10">
+          This work explores what happens when a Mandelbrot-style iteration is modified by
+          (1) replacing the \(z.x^{2}\) term in the first component with a linear \(z.x\) term (while keeping \(z.y^{2}\)),
+          and (2) introducing an absolute-value fold \(-\mathrm{abs}(2z.xz.y+y)\) in the second component.
+          These operations tend to create <b>sharp folds</b>, <b>layered bands</b>, and <b>stripe-like boundaries</b>.
+        </p>
+
+        <ul class="p-ai_txt">
+          <li>
+            Because the mapping includes an absolute value, it is not “complex-analytic” in the usual sense.
+            Such non-smooth folding often produces strong banding and angular boundary features (as in Burning Ship–type families).
+          </li>
+          <li>
+            The “downward flow” of the overall silhouette may be reinforced by the second component
+            always being pushed negative by \(-|\,\cdot\,|\), which biases the dynamics toward one side of the plane.
+          </li>
+          <li>
+            The stripe patterns can be interpreted as layered escape-time boundaries:
+            regions that differ by when (or how) the orbit crosses the escape threshold stack into bands under repeated folding.
+          </li>
+          <li>
+            Reiji’s prediction—“maybe the dolphin shape will repeat self-similarly”—is a natural hypothesis,
+            but in folded (non-analytic) systems, the dominant repeating feature is often the <b>band/stripe geometry</b>
+            rather than a repeated copy of a recognizable global silhouette.
+          </li>
+        </ul>
+
+        <p class="p-ai_def">
+          In summary, this project shows a clear experimental approach:
+          isolate a meaningful structural change to a well-known system (Mandelbrot dynamics),
+          implement it in Desmos, and then test hypotheses by deep zoom observation.
+        </p>
+      </div>
+
+    </section>
+  </main>
+
+  <footer>
+    <div class="footer-categories_outer">
+      <dl class="footer-categories_wrap">
+        <dt>Categories</dt>
+        <dd>
+          <ul class="footer-categories">
+            <li><a href="/tuning-and-structure/">Tuning and Structural Exploration</a></li>
+            <li><a href="/performance/">Performance and Interpretation</a></li>
+            <li><a href="/math-physics/">Mathematical and Physical Intuition</a></li>
+            <li><a href="/composition/">Composition and Microtonality</a></li>
+            <li><a href="/conceptual-space/">Conceptual and Spatial Inquiry</a></li>
+            <li><a href="/tools/">Apps and Experimental Tools</a></li>
+          </ul>
+        </dd>
+      </dl>
+    </div>
+    <p class="copy">&copy; 2026 Reiji. All rights reserved.</p>
+  </footer>
+</body>
+</html>
