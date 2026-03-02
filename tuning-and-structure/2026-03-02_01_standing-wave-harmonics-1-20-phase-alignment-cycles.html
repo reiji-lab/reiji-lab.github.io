@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Standing-Wave Harmonics (1–20) — Observing Phase Alignment Cycles in Desmos</title>
+  <meta name="description" content="A Desmos experiment by a 10-year-old (Reiji): 20 standing-wave harmonics are drawn as sin(nx)cos(nt) for n=1..20. A weighted composite wave (1/n) is also visualized, forming a sawtooth-like shape that changes over time.">
+  <meta name="robots" content="noindex,follow">
+  <link rel="stylesheet" href="../css/reset.css">
+  <link rel="stylesheet" media="screen and (min-width: 1025px)" href="../css/style_pc.css">
+  <link rel="stylesheet" media="screen and (max-width: 1024px)" href="../css/style_sp.css">
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-8BWCJ4H4HD"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-8BWCJ4H4HD');
+</script>
+</head>
+
+<body>
+  <header class="p-sub_head">
+    <div class="p-headline_bg">
+      <div class="p-top_mainTtl">
+        <span class="p-mTtl_sub1">Reiji's</span> <span class="p-mTtl_sub2">Explorations</span><span class="p-mTtl_sub3">in Sound & Structure</span>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <nav class="breadcrumb">
+      <ul class="breadcrumb_inner">
+        <li><a href="/">Home</a> &gt; </li>
+        <li><a href="/tuning-and-structure/">Tuning and Structural Exploration</a> &gt; </li>
+        <li><span>Standing-Wave Harmonics (Desmos)</span></li>
+      </ul>
+    </nav>
+
+    <p class="p-cont_date">March 2, 2026</p>
+
+    <div class="p-title_bg">
+      <div class="p-title_bg_inner">
+        <h1 class="p-wide_ttl_head_single">
+          Standing-Wave Harmonics (1–20) — Observing Phase Alignment Cycles in Desmos
+        </h1>
+      </div>
+    </div>
+
+    <section id="main_contents">
+
+      <p class="p-overview_txt">
+        <b>Overview:</b><br>
+        This project is a Desmos implementation by <strong>Reiji (age 10)</strong>.
+        It visualizes the harmonic series by drawing <strong>20 standing waves</strong> (from the 1st harmonic to the 20th)
+        and letting them evolve over time.<br><br>
+
+        The core idea is to observe <strong>when different harmonics “line up”</strong>—i.e., when groups of waves return to
+        the same sign/shape pattern at the same time value <em>t</em>. By entering specific values such as
+        \(t=\pi\) or \(t=\pi/3\), it becomes possible to “jump” directly to time points where recognizable periodic structure emerges.<br><br>
+
+In addition, Reiji added a <strong>weighted composite wave</strong> that overlays all 20 terms with a \(1/n\) amplitude weighting:
+\[
+  \frac{1}{2}\sum_{n=1}^{20}\frac{1}{n}\sin(nx)\cos(nt)
+\]
+This composite curve forms a <strong>sawtooth-like</strong> shape, allowing the motion of 20 harmonics to be observed as a single evolving waveform.<br>
+<span class="u-subTxt">
+  (Note: The final “/2” is a display scaling factor to keep the composite curve within view; it is used to reduce amplitude for readability and does not change the qualitative shape or timing patterns being observed.)
+</span><br><br>
+
+        The displayed waves are colored as a set, and the project also includes optional sound playback using Desmos
+        <strong>tone()</strong> so the same parameter changes can be experienced both visually and aurally.
+      </p>
+
+<p class="disclaimer">
+<b>Note:</b> All content on this page is originally explained by Reiji in Japanese.
+The English version is translated by AI and structured by a parent, with Reiji's final approval.
+</p>
+
+      <h2 class="p-wide_ttl"><span>Reiji's Words and Ideas</span></h2>
+      <ul class="p-obs_numlist">
+
+        <li>
+          <b>What this is</b><br>
+          I made this to observe the periodic structure created by overtones (harmonics).
+          I draw 20 harmonics as standing waves and watch how the combined picture changes as time moves.
+          Then I can check at what time values the waves look aligned again.
+        </li>
+
+        <li>
+          <b>Standing-wave formula</b><br>
+          I draw the standing waves using:
+          \[
+            \sin\left([1...20]x\right)\cos\left([1...20]t\right)
+          \]
+          This means I am drawing the set of waves \(\sin(nx)\cos(nt)\) for \(n=1,2,\dots,20\).<br><br>
+          Because each harmonic uses \(n\cdot t\) inside \(\cos(\cdot)\), changing \(t\) changes the pattern differently for each \(n\).
+          That makes it possible to observe when the patterns match up again.
+        </li>
+
+        <li>
+          <b>What I can observe</b><br>
+          For example, the 3rd harmonic has harmonics that are multiples of 3 (6, 9, 12, ...).
+          The 5th harmonic has multiples of 5 (10, 15, 20, ...).
+          The 7th, 11th, and 13th harmonics are the same idea.
+          With this graph, I can observe time values where these “multiples” become aligned in a clear way.
+        </li>
+
+        <li>
+          <b>Using specific time values</b><br>
+          The variable \(t\) can be moved from 0 to \(\tau\) (tau), but I can also enter values directly.
+          For example, if I set \(t=\pi\), I can observe a cycle where the pattern lines up in a “2-step” way.
+          If I set \(t=\pi/3\), I can observe a cycle where the pattern lines up in a “6-step” way.
+          By changing \(t\), I can view a specific periodic structure at an exact point.
+        </li>
+
+<li>
+  <b>Composite wave (sawtooth-like)</b><br>
+  I also made a composite wave by combining the 20 terms with equal phase but different amplitudes:
+  \[
+    \frac{\sum_{n=1}^{20}\frac{1}{n}\sin\left(nx\right)\cos\left(nt\right)}{2}
+  \]
+  When I visualize this, the composite curve becomes sawtooth-like.
+  This lets me observe the motion of 20 waves as a single waveform that changes over the observation time.<br>
+  <span class="u-subTxt">
+    (Note: I divide by 2 because the graph becomes too large otherwise. This is only to fit the waveform on screen and make it easier to observe.)
+  </span>
+</li>
+
+        <li>
+          <b>Color and sound</b><br>
+          I set colors using HSV so I can distinguish the harmonics.
+          I also use <strong>tone()</strong> (for example, \(\operatorname{tone}(150\cdot a)\)) so I can listen while watching,
+          and link the idea of “alignment” to both sight and sound.
+        </li>
+
+      </ul>
+
+      <!-- Images -->
+      <div class="p-img_mod u-mTop60">
+        <span class="p-img_wrap u-bd">
+          <img src="../images/20260302_b_1.png" class="contents_img" alt="Desmos view showing 20 harmonics of sin(nx)cos(nt) with an added weighted composite (sawtooth-like) curve">
+        </span>
+        <p class="p-img_cp_ttl">Main View: 20 Standing-Wave Harmonics + a Weighted Composite Curve</p>
+        <p class="p-img_cp_txt">
+          20 waves \(\sin(nx)\cos(nt)\) (for \(n=1..20\)) are drawn together. A weighted composite
+          \(\frac{1}{2}\sum_{n=1}^{20}\frac{1}{n}\sin(nx)\cos(nt)\) is also overlaid as a single curve,
+          forming a sawtooth-like shape that evolves as \(t\) changes.
+        </p>
+      </div>
+
+      <div class="p-img_mod u-mTop60">
+        <span class="p-img_wrap u-bd">
+          <img src="../images/20260302_b_2.png" class="contents_img" alt="Desmos panel showing equations and sliders including t, hsv coloring, tone(), a parameter a, and the composite-wave expression">
+        </span>
+        <p class="p-img_cp_ttl">Controls: Time \(t\), HSV Color Set, tone(), and the Composite Wave</p>
+        <p class="p-img_cp_txt">
+          The project uses a time slider \(t\) (0 to \(\tau\)), HSV coloring to separate harmonics,
+          tone() playback, and the added composite-wave expression for observing the 20 terms as one curve.
+        </p>
+      </div>
+
+      <div class="p-img_mod u-mTop60">
+        <span class="p-img_wrap u-bd">
+          <img src="../images/20260302_b_3.png" class="contents_img" alt="Desmos view with t set to 3pi/5 showing the overlaid harmonics and the composite curve">
+        </span>
+        <p class="p-img_cp_ttl">Example: \(t=3\pi/5\) (Structured Alignment + Composite Motion)</p>
+        <p class="p-img_cp_txt">
+          Entering rational multiples of \(\pi\) can reveal different alignment structures.
+          Here \(t=3\pi/5\) produces a distinct organization across the harmonic set, and the composite curve shows the net shape at that time.
+        </p>
+      </div>
+
+      <div class="p-img_mod u-mTop60">
+        <span class="p-img_wrap u-bd">
+          <img src="../images/20260302_b_4.png" class="contents_img" alt="Desmos view with t set to pi/3 showing repeating structure and the composite curve">
+        </span>
+        <p class="p-img_cp_ttl">Example: \(t=\pi/3\) (A 6-Class Repetition + Composite Wave)</p>
+        <p class="p-img_cp_txt">
+          With \(t=\pi/3\), values like \(\cos(n\pi/3)\) repeat depending on \(n \bmod 6\),
+          and the composite curve shows how these repeating coefficient classes affect the net waveform.
+        </p>
+      </div>
+
+      <div class="p-img_mod u-mTop60">
+        <span class="p-img_wrap u-bd">
+          <img src="../images/20260302_b_5.png" class="contents_img" alt="Zoomed view around a sharp alignment point with t approximately pi (3.14159...), showing the overlaid harmonics">
+        </span>
+        <p class="p-img_cp_ttl">Example: \(t=\pi\) (A Special Time for Clear Alignment)</p>
+        <p class="p-img_cp_txt">
+          When \(t=\pi\), \(\cos(n\pi)=(-1)^n\), so many harmonics fall into a clean even/odd sign pattern.
+          This can make a sharp “lining up” point appear in the visualization.
+        </p>
+      </div>
+
+      <div class="p-spectbl_wrap">
+        <table class="p-spectbl">
+          <colgroup>
+            <col width="25%;">
+          </colgroup>
+          <tbody>
+            <tr>
+              <th>Output Link</th>
+              <td>
+                <a href="https://www.desmos.com/calculator/fmbr8vs5k5" class="p-speclink" target="_blank" rel="noopener">
+                  Desmos page (interactive)
+                </a>
+              </td>
+            </tr>
+            <tr>
+              <th>Application Used</th>
+              <td>
+                <p class="u-bold">Desmos + tone()</p>
+                <p class="u-subTxt">
+                  (Official site:
+                  <a href="https://www.desmos.com/" class="p-speclink u-sublink" target="_blank" rel="noopener">
+                    https://www.desmos.com/
+                  </a>)
+                </p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="p-ai_mod">
+        <h2 class="p-ai_ttl"><span>AI Assistant’s Notes and Inferences</span></h2>
+
+        <p class="p-ai_def u-mBtm10">
+          Mathematically, each curve is a standing-wave term \(\sin(nx)\cos(nt)\), and the project overlays \(n=1..20\).
+          “Alignment” can be understood as moments when the set of coefficients \(\{\cos(nt)\}\) falls into a small number of repeating values
+          (often driven by modular structure when \(t\) is a rational multiple of \(\pi\)).
+        </p>
+
+        <ul class="p-ai_txt">
+          <li>
+            For \(t=\pi\), \(\cos(n\pi)=(-1)^n\), so the harmonics separate cleanly into even/odd sign groups—this often produces
+            a visually sharp alignment point.
+          </li>
+          <li>
+            For \(t=\pi/3\), \(\cos(n\pi/3)\) repeats by \(n \bmod 6\), which makes a “6-class” structure appear across the 20 waves.
+          </li>
+          <li>
+            The added composite wave uses a \(1/n\) weighting, a classic choice in Fourier synthesis that tends to produce a sawtooth-like shape.
+            With a finite number of terms (here 20), the result appears as an approximation that becomes sharper as more terms are added.
+          </li>
+        </ul>
+
+        <p class="p-ai_def">
+          Overall, this is a compact experiment that connects <strong>integer structure (harmonic series)</strong>,
+          <strong>time-phase relationships</strong>, and (optionally) <strong>listening via tone()</strong>.
+          The composite curve also provides a useful “single-wave” summary of how the 20 components combine at each time \(t\).
+        </p>
+      </div>
+
+    </section>
+  </main>
+
+  <footer>
+    <div class="footer-categories_outer">
+      <dl class="footer-categories_wrap">
+        <dt>Categories</dt>
+        <dd>
+          <ul class="footer-categories">
+            <li><a href="/tuning-and-structure/">Tuning and Structural Exploration</a></li>
+            <li><a href="/performance/">Performance and Interpretation</a></li>
+            <li><a href="/math-physics/">Mathematical and Physical Intuition</a></li>
+            <li><a href="/composition/">Composition and Microtonality</a></li>
+            <li><a href="/conceptual-space/">Conceptual and Spatial Inquiry</a></li>
+            <li><a href="/tools/">Apps and Experimental Tools</a></li>
+          </ul>
+        </dd>
+      </dl>
+    </div>
+    <p class="copy">&copy; 2025 Reiji. All rights reserved.</p>
+  </footer>
+</body>
+</html>
