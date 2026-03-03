@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sequence Pendulum Wave — Switching Sequences to Observe Position and Periodicity</title>
+  <meta name="description" content="A Desmos-based visualization by Reiji (age 10) that maps number sequences onto a rotating, pendulum-wave-like pattern. By switching the active sequence and animating phase a from 0 to τ, the viewer can compare motifs and alignment periods across primes, odds, Fibonacci, Lucas, composites, and integers.">
+  <meta name="robots" content="noindex,follow">
+  <link rel="stylesheet" href="../css/reset.css">
+  <link rel="stylesheet" media="screen and (min-width: 1025px)" href="../css/style_pc.css">
+  <link rel="stylesheet" media="screen and (max-width: 1024px)" href="../css/style_sp.css">
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-8BWCJ4H4HD"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-8BWCJ4H4HD');
+  </script>
+</head>
+
+<body>
+  <header class="p-sub_head">
+    <div class="p-headline_bg">
+      <div class="p-top_mainTtl">
+        <span class="p-mTtl_sub1">Reiji's</span> <span class="p-mTtl_sub2">Explorations</span><span class="p-mTtl_sub3">in Sound & Structure</span>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <nav class="breadcrumb">
+      <ul class="breadcrumb_inner">
+        <li><a href="/">Home</a> &gt; </li>
+        <li><a href="/math-physics/">Mathematical and Physical Intuition</a> &gt; </li>
+        <li><span>Sequence Pendulum Wave — Switching Sequences to Observe Position and Periodicity</span></li>
+      </ul>
+    </nav>
+
+    <p class="p-cont_date">March 3, 2026</p>
+
+    <div class="p-title_bg">
+      <div class="p-title_bg_inner">
+        <h1 class="p-wide_ttl_head_single">Sequence Pendulum Wave — Switching Sequences to Observe Position and Periodicity</h1>
+      </div>
+    </div>
+
+    <section id="main_contents">
+<p class="p-overview_txt">
+  <b>Overview:</b><br>
+  <b>This work focuses on building a reusable experimental setup (an observation tool) for comparing different number sequences at the same phase setting, rather than producing a single fixed pattern.</b><br><br>
+  This project is a “pendulum-wave-like” visualization (*1) that lets you observe how different number sequences
+  form patterns and periodic alignments when shown as a rotating motion.
+  Points are generated from the active sequence and connected by animated line segments.
+  By switching the sequence and comparing the same snapshot value (e.g., \(a=5.5\)),
+  you can visually explore how motifs (such as triangle- or square-like shapes) and alignment periods differ
+  across primes, odds, Fibonacci numbers, Lucas numbers, composites, and integers.<br><br>
+  <span class="u-subTxt">(*1) Visually it resembles a pendulum wave, but mathematically it maps sequence terms via complex rotation and connects the resulting points.</span>
+</p>
+
+      <p class="disclaimer">
+        <b>Note:</b> All content on this page is originally explained by Reiji in Japanese.
+        The English version is translated by AI and structured by a parent, with Reiji's final approval.
+      </p>
+
+      <h2 class="p-wide_ttl"><span>Reiji's Words and Ideas</span></h2>
+      <ul class="p-obs_numlist">
+
+        <li>
+          This is a pendulum wave that lets me observe the position of numbers and their periodicity by using a rotating motion.
+          You can switch the behavior by pressing the blue button drawn on the screen.
+          The lines connecting each number animate, so you can experience how the relative positions create motifs
+          and how the points align with different periods.
+        </li>
+
+        <li>
+          I implemented this because I wanted to know how sequences other than integers would behave.
+          When I compared different sequences at the same value (for example \(a=5.5\)),
+          I found cases where a certain sequence shows a square-like shape, and I could also see similarities across sequences.
+        </li>
+
+        <li>
+          In particular, near \(a=5.5\), the composite-number view looks like a square but has vertices in eight directions.
+          When I look at primes and odds, they also look square-like, and then when I check integers at the same moment,
+          it can look like an octagon. I want to explore many more kinds of number behaviors.
+        </li>
+
+        <li>
+          For example, near points where the pattern looks triangular—such as when \(a\) is close to \(2\tau/3\)—
+          you can roughly predict that a triangle-like shape will appear.
+          But when an unexpected appearance shows up, it becomes very interesting.
+        </li>
+
+      </ul>
+
+      <h2 class="p-wide_ttl"><span>Formulas and Variables</span></h2>
+
+      <ul class="p-obs_numlist">
+
+        <li>
+          I drew the pendulum wave using:
+          <div class="p-math_box">
+            <span class="formula-line">\( \left(\frac{e^{ia}}{c^{\frac{1}{150}}}\right)^{c} \)</span>
+          </div>
+        </li>
+
+        <li>
+          \(u\) is the line thickness for connecting the points, in pixels.
+        </li>
+
+        <li>
+          \(a\) ranges from \(0\) to \(\tau\). It controls the state of the points and lines.
+          When I animate \(a\), it looks like the whole structure is rotating.
+        </li>
+
+        <li>
+          The point color is set in HSV as:
+          <div class="p-math_box">
+            <span class="formula-line">\( C=\operatorname{hsv}\left(360\frac{c}{100},1,1\right) \)</span>
+          </div>
+          Here, uppercase \(C\) is the color, and lowercase \(c\) is used inside the color rule.
+        </li>
+
+        <li>
+          To make the starting direction easier to see, I draw a white reference line using:
+          <div class="p-math_box">
+            <span class="formula-line">\( y=0\left\{0\le x\le1\right\} \)</span>
+            <span class="formula-line">\( C_{1}=\operatorname{hsv}\left(360,0,1\right) \)</span>
+          </div>
+        </li>
+
+        <li>
+          The variables \(c,p,q,f,h,s\) store sequences.
+          The currently displayed sequence is stored in \(c\), so each time I press the button,
+          the contents of \(c\) swap (in order) with sequences stored in the other variables.
+          You can also add sequences or replace them with different ones.
+        </li>
+
+        <li>
+          The button region is defined by:
+          <div class="p-math_box">
+            <span class="formula-line">\( \left(x+\frac{5}{4}\right)^{2}+\left(y-\frac{7}{8}\right)^{2}\le\frac{1}{70} \)</span>
+          </div>
+          This acts as the clickable switch for changing which sequence is drawn.
+        </li>
+
+      </ul>
+
+      <!-- Image 0 / Full view -->
+      <div class="p-img_mod u-mTop60">
+        <span class="p-img_wrap u-bd">
+          <img src="../images/20260303_a_1.png" class="contents_img" alt="Full view of the sequence pendulum wave visualization with rotating connected points and a white reference axis">
+        </span>
+        <p class="p-img_cp_ttl">Full View: Sequence Pendulum Wave</p>
+        <p class="p-img_cp_txt">
+          A full view of the rotating, connected-point structure.
+          The white horizontal line serves as a reference direction for the starting orientation.
+        </p>
+      </div>
+
+      <!-- Image 1 / Formulas -->
+      <div class="p-img_mod u-mTop60">
+        <span class="p-img_wrap u-bd">
+          <img src="../images/20260303_a_2.png" class="contents_img" alt="Desmos expression list showing formulas, parameters (u and a), color settings, stored sequences, and the clickable switch region at a=5.5">
+        </span>
+        <p class="p-img_cp_ttl">Desmos Setup: Formulas, Parameters, and Sequence Switching (a = 5.5)</p>
+        <p class="p-img_cp_txt">
+          The expression list defining the main mapping, line thickness \(u\), phase \(a\), HSV color rule \(C\),
+          reference line, stored sequences, and the circular click region used to switch which sequence is displayed.
+        </p>
+      </div>
+
+      <!-- Image 2 / Integers -->
+      <div class="p-img_mod u-mTop60">
+        <span class="p-img_wrap u-bd">
+          <img src="../images/20260303_a_3.png" class="contents_img" alt="Snapshot of the visualization (a=5.5) when the active sequence is integers, producing layered polygon-like structure">
+        </span>
+        <p class="p-img_cp_ttl">Integers (a = 5.5)</p>
+        <p class="p-img_cp_txt">
+          With integers as the active sequence, points are dense and the connected structure often appears as layered,
+          polygon-like shells.
+        </p>
+      </div>
+
+      <!-- Image 3 / Primes -->
+      <div class="p-img_mod u-mTop60">
+        <span class="p-img_wrap u-bd">
+          <img src="../images/20260303_a_4.png" class="contents_img" alt="Snapshot of the visualization (a=5.5) when the active sequence is primes, showing larger jumps and more crossings">
+        </span>
+        <p class="p-img_cp_ttl">Primes (a = 5.5)</p>
+        <p class="p-img_cp_txt">
+          Using primes changes the spacing of points, which tends to increase jumps and crossings in the connecting lines,
+          producing a different motif structure.
+        </p>
+      </div>
+
+      <!-- Image 4 / Odds -->
+      <div class="p-img_mod u-mTop60">
+        <span class="p-img_wrap u-bd">
+          <img src="../images/20260303_a_5.png" class="contents_img" alt="Snapshot of the visualization (a=5.5) when the active sequence is odd numbers, forming square-like motifs in some regions">
+        </span>
+        <p class="p-img_cp_ttl">Odd Numbers (a = 5.5)</p>
+        <p class="p-img_cp_txt">
+          With odds, the pattern can show square-like motifs at certain snapshots.
+          Comparing this view with primes, composites, and integers at the same \(a\) reveals striking differences.
+        </p>
+      </div>
+
+      <!-- Image 5 / Fibonacci -->
+      <div class="p-img_mod u-mTop60">
+        <span class="p-img_wrap u-bd">
+          <img src="../images/20260303_a_6.png" class="contents_img" alt="Snapshot of the visualization (a=5.5) when the active sequence is Fibonacci numbers, producing sparse points and large jumps">
+        </span>
+        <p class="p-img_cp_ttl">Fibonacci Sequence (a = 5.5)</p>
+        <p class="p-img_cp_txt">
+          Fibonacci growth makes points much sparser and increases long jumps, leaving a skeletal, geometric outline.
+        </p>
+      </div>
+
+      <!-- Image 6 / Lucas -->
+      <div class="p-img_mod u-mTop60">
+        <span class="p-img_wrap u-bd">
+          <img src="../images/20260303_a_7.png" class="contents_img" alt="Snapshot of the visualization (a=5.5) when the active sequence is Lucas numbers, similar to Fibonacci but with different crossings due to initial conditions">
+        </span>
+        <p class="p-img_cp_ttl">Lucas Sequence (a = 5.5)</p>
+        <p class="p-img_cp_txt">
+          Lucas numbers have a growth behavior related to Fibonacci, but different initial conditions shift the crossings
+          and overall motif orientation.
+        </p>
+      </div>
+
+      <!-- Image 7 / Composites -->
+      <div class="p-img_mod u-mTop60">
+        <span class="p-img_wrap u-bd">
+          <img src="../images/20260303_a_8.png" class="contents_img" alt="Snapshot of the visualization (a=5.5) when the active sequence is composite numbers, showing square-like structure with multiple vertex directions">
+        </span>
+        <p class="p-img_cp_ttl">Composite Numbers (a = 5.5)</p>
+        <p class="p-img_cp_txt">
+          The composite-number view can look square-like but with vertices appearing in multiple directions.
+          Reiji notes that near \(a\approx 5.5\), this becomes especially distinctive.
+        </p>
+      </div>
+
+      <div class="p-spectbl_wrap">
+        <table class="p-spectbl">
+          <colgroup>
+            <col width="25%;">
+          </colgroup>
+          <tbody>
+            <tr>
+              <th>Output Link</th>
+              <td>
+                <a href="https://www.desmos.com/calculator/efh2tgi2ag" class="p-speclink" target="_blank" rel="noopener">Sequence Pendulum Wave — Desmos Graph</a>
+              </td>
+            </tr>
+
+            <tr>
+              <th>Application Used</th>
+              <td>
+                <p class="u-bold">Desmos Graphing Calculator</p>
+                <p class="u-subTxt">
+                  (<a href="https://www.desmos.com/calculator" class="p-speclink u-sublink" target="_blank" rel="noopener">https://www.desmos.com/calculator</a>)
+                </p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="p-ai_mod">
+        <h2 class="p-ai_ttl"><span>AI Assistant’s Notes and Inferences</span></h2>
+
+<p class="p-ai_def u-mBtm10">
+  <b>The core value is the self-built, extensible experimental setup: a framework for running quick comparisons across sequences under the same phase parameter \(a\).</b><br><br>
+  This work maps different number sequences into a rotating, connected-point visualization.
+  By keeping the same phase parameter \(a\) and switching only the active sequence,
+  it becomes possible to compare motifs and alignment behavior across sequences.
+  Reiji’s approach is experimental: form a hypothesis (e.g., “near \(a\approx 2\tau/3\) it should look triangular”)
+  and then search for both expected and unexpected structures.
+</p>
+
+        <ul class="p-ai_txt">
+          <li>
+            The parameter \(a\) acts like a phase: when it is animated, the configuration appears to rotate.
+            At certain values, the points can align in ways that produce polygon-like motifs.
+          </li>
+          <li>
+            Switching the active sequence effectively changes the “sampling” of indices, which alters density and jump sizes.
+            This is why primes, odds, Fibonacci/Lucas, composites, and integers can yield very different shapes at the same snapshot.
+          </li>
+          <li>
+            Fibonacci and Lucas sequences grow rapidly, often producing sparse point sets and strong long-range connections,
+            while integers (dense sampling) tend to form layered shells.
+          </li>
+          <li>
+            Reiji’s observation that “square-like” motifs can appear across multiple sequences (with different vertex behavior)
+            suggests that motif geometry is not only about the phase \(a\), but also about how the sequence partitions indices.
+          </li>
+        </ul>
+
+        <p class="p-ai_def">
+          In summary, this project demonstrates a clear method: implement a controllable visualization,
+          compare multiple sequences under the same parameter setting, and use the visual evidence to refine questions
+          about periodicity and structure.
+        </p>
+      </div>
+
+    </section>
+  </main>
+
+  <footer>
+    <div class="footer-categories_outer">
+      <dl class="footer-categories_wrap">
+        <dt>Categories</dt>
+        <dd>
+          <ul class="footer-categories">
+            <li><a href="/tuning-and-structure/">Tuning and Structural Exploration</a></li>
+            <li><a href="/performance/">Performance and Interpretation</a></li>
+            <li><a href="/math-physics/">Mathematical and Physical Intuition</a></li>
+            <li><a href="/composition/">Composition and Microtonality</a></li>
+            <li><a href="/conceptual-space/">Conceptual and Spatial Inquiry</a></li>
+            <li><a href="/tools/">Apps and Experimental Tools</a></li>
+          </ul>
+        </dd>
+      </dl>
+    </div>
+    <p class="copy">&copy; 2026 Reiji. All rights reserved.</p>
+  </footer>
+</body>
+</html>
