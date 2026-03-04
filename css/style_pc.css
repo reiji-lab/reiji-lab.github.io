@@ -754,6 +754,69 @@ footer{
   text-indent:-14px;
 }
 
+/* backToTop */
+#backToTop {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 9999;
+
+  width: 70px;
+  height: 70px;
+  border-radius: 999px;
+
+  display: grid;
+  place-items: center;
+  font-weight:bold;
+
+  /* 見た目はお好みで */
+  background: rgba(20, 20, 20, 0.78);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 8px 22px rgba(0,0,0,0.18);
+  cursor: pointer;
+
+  /* ふわっと */
+  opacity: 0;
+  transform: translateY(10px);
+  pointer-events: none;
+  transition: opacity 200ms ease, transform 200ms ease;
+}
+
+#backToTop svg {
+  display:block;
+  width:28px;
+  height:28px;
+}
+
+#backToTop.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+#backToTop.is-visible:hover {
+  opacity: 0.8;
+}
+
+/* 最下部付近でふわっと消す（同じ見え方でOK） */
+#backToTop.is-hidden-near-bottom {
+  opacity: 0;
+  transform: translateY(10px);
+  pointer-events: none;
+}
+
+/* キーボード操作時のフォーカス */
+#backToTop:focus-visible {
+  outline: 3px solid rgba(100, 200, 255, 0.9);
+  outline-offset: 2px;
+}
+
+/* 動きを減らす設定の人向け */
+@media (prefers-reduced-motion: reduce) {
+  #backToTop { transition: none; }
+}
+
 .u-pBtm5{
   padding-bottom:5px !important;
 }
