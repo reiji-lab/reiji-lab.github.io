@@ -72,8 +72,14 @@
           I wanted to create a new fractal by transforming the formula used for the Mandelbrot set.
           The standard Mandelbrot iteration can be written (in real components) as:
           <div class="p-math_box">
-            <span class="formula-line">\( f(z)=\left(z.x^{2}-z.y^{2}+x,\; 2z.xz.y+y\right) \)</span>
+<span class="formula-line">\( f(z)= \)</span>
+<span class="formula-line">\( (z.x^{2}-z.y^{2}+x,\; \)</span>
+<span class="formula-line">\( 2z.xz.y+y) \)</span>
+          </div>
+          <div class="p-math_box">
             <span class="formula-line">\( D(z)=\sqrt{z.x^{2}+z.y^{2}} \)</span>
+          </div>
+          <div class="p-math_box">
             <span class="formula-line">\( D\!\left(f^{(n)}(x,y)\right)\le 2 \)</span>
           </div>
         </li>
@@ -81,7 +87,9 @@
         <li>
           This time, I changed the recurrence to:
           <div class="p-math_box">
-            <span class="formula-line">\( f(z)=\left(z.x-z.y^{2}+x,\;-\mathrm{abs}\left(2z.xz.y+y\right)\right) \)</span>
+<span class="formula-line">\( f(z)= \)</span>
+<span class="formula-line">\( (z.x-z.y^{2}+x,\; \)</span>
+<span class="formula-line">\( -\mathrm{abs}\left(2z.xz.y+y\right)) \)</span>
           </div>
         </li>
 
