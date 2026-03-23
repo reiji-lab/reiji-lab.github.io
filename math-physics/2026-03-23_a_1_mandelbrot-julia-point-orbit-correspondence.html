@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Real-Time Observation of the Correspondence Between the Mandelbrot Set, Julia Sets, and Point Orbits</title>
+  <meta name="description" content="A Desmos-based exploration by Reiji (age 10) that visualizes the correspondence between the Mandelbrot set, Julia sets, and point orbits in real time on a single screen.">
+  <meta name="robots" content="noindex,follow">
+  <link rel="stylesheet" href="../css/reset.css">
+  <link rel="stylesheet" media="screen and (min-width: 1025px)" href="../css/style_pc.css">
+  <link rel="stylesheet" media="screen and (max-width: 1024px)" href="../css/style_sp.css">
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-8BWCJ4H4HD"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-8BWCJ4H4HD');
+  </script>
+</head>
+
+<body>
+  <header class="p-sub_head">
+    <div class="p-headline_bg">
+      <div class="p-top_mainTtl">
+        <span class="p-mTtl_sub1">Reiji's</span> <span class="p-mTtl_sub2">Explorations</span><span class="p-mTtl_sub3">in Sound & Structure</span>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <nav class="breadcrumb">
+      <ul class="breadcrumb_inner">
+        <li><a href="/">Home</a> &gt; </li>
+        <li><a href="/math-physics/">Mathematical and Physical Intuition</a> &gt; </li>
+        <li><span>Real-Time Observation of the Correspondence Between the Mandelbrot Set, Julia Sets, and Point Orbits</span></li>
+      </ul>
+    </nav>
+
+    <p class="p-cont_date">March 23, 2026</p>
+
+    <div class="p-title_bg">
+      <div class="p-title_bg_inner">
+        <h1 class="p-wide_ttl_head_single">Real-Time Observation of the Correspondence Between the Mandelbrot Set, Julia Sets, and Point Orbits</h1>
+      </div>
+    </div>
+
+    <section id="main_contents">
+      <p class="p-overview_txt">
+        <b>Overview:</b><br>
+        This work implements, on Desmos, a system that allows the <b>real-time observation of Julia sets corresponding to individual points in the Mandelbrot set</b>, together with the <b>iterative point orbits on both sides</b>, all within a single screen.<br><br>
+
+        In this implementation, moving a parameter point on the Mandelbrot-set side immediately redraws the corresponding Julia set.
+        In addition, arbitrary point orbits can be displayed simultaneously on both the Mandelbrot-set side and the Julia-set side.
+        This makes it possible to observe, without switching views, the correspondence between the <b>Mandelbrot set as a parameter space</b> and the <b>Julia set as a dynamical space</b> in a continuous and interactive way.<br><br>
+
+        A key feature of this implementation is that it makes it possible to observe, in real time and on the same screen,
+        <b>the periodic structure inside the Mandelbrot set and the branching tendencies that appear in the corresponding Julia sets, together with the associated point orbits</b>.
+        For example, points in the main cardioid show convergent orbital behavior, and the corresponding Julia sets tend to appear as relatively unified shapes.
+        By contrast, points in the period-2 component show orbits that alternate between two values, and the corresponding Julia sets tend to exhibit structures suggestive of two-way branching.
+        Likewise, points in period-3 components show an increase in orbital branching, and the corresponding Julia sets also display tendencies toward three-way branching.<br><br>
+
+        In addition, for points belonging to small self-similar components that appear under magnification, the Julia sets also reveal hierarchical and self-similar structures.
+        This makes it possible to visually and intuitively investigate how local periodic structures and branching behaviors in the Mandelbrot set are reflected as tendencies in the shapes of the corresponding Julia sets.
+      </p>
+
+      <p class="disclaimer">
+        <b>Note:</b> All content on this page is originally explained by Reiji in Japanese.
+        The English version is translated by AI and structured by a parent, with Reiji's final approval.
+      </p>
+
+      <h2 class="p-wide_ttl"><span>Reiji's Words and Ideas</span></h2>
+      <ul class="p-obs_numlist">
+
+        <li>
+          This is a Desmos implementation of a system that allows <b>real-time observation of Julia sets corresponding to the Mandelbrot set, together with the orbits of points in each system</b>.
+        </li>
+
+        <li>
+          The Mandelbrot set is shown on the left, and the corresponding Julia set is shown on the right.
+          When the red pointer is moved within the Mandelbrot set, the Julia set determined by that point as a parameter is drawn on the right in real time.
+          Also, when the blue pointer is moved on the Mandelbrot side, the orbit of that point can be displayed using the Mandelbrot-set formula.
+          Likewise, when the green pointer is moved on the Julia-set side, the orbit of that point can be displayed using the Julia-set formula.
+        </li>
+
+        <li>
+          This implementation makes it possible to observe, on the same screen and in real time,
+          <b>the periodic structure inside the Mandelbrot set and the branching tendencies that appear in the corresponding Julia sets, together with the point orbits</b>.
+        </li>
+
+        <li>
+          For example, inside the largest main cardioid of the Mandelbrot set, point orbits tend to converge to a single value,
+          and the corresponding Julia sets also tend to take compact shapes with fewer branches.
+          In the slightly smaller circular component to the left, the orbits tend to alternate between two values,
+          and the corresponding Julia sets show shapes that appear to split into two directions.
+          Furthermore, in the small circular components above and below the main cardioid, the orbits tend to separate into three points,
+          and the Julia sets also show structures suggestive of three-way branching.
+        </li>
+
+        <li>
+          In this way, one can see that there is a visual correspondence between the iterative behavior at each point in the Mandelbrot set and the shape of the corresponding Julia set.
+        </li>
+
+        <li>
+          Also, in the even smaller circular regions attached to the boundary of the period-2 component,
+          the orbit first splits into two and then branches further.
+          In the corresponding Julia sets, the structure is not just a simple two-way split, but includes further branching beyond that.
+        </li>
+
+        <li>
+          When zooming in, one can also observe small Mandelbrot sets that look like detached islands.
+          Although they appear separated visually, lowering the iteration count \(d\) makes it possible to confirm that they are actually connected to the main set by extremely thin structures.
+          In the Julia sets corresponding to such points, one can also observe self-similar structures in which smaller Julia-like forms appear inside the larger one.
+        </li>
+
+        <li>
+          It is very interesting because the boundary can be explored in real time.
+          <b>Please try moving the green pointer as well.</b>
+        </li>
+
+      </ul>
+
+      <h2 class="p-wide_ttl"><span>Formulas and Variables</span></h2>
+      <ul class="p-obs_numlist">
+
+        <li>
+          The Mandelbrot set is rendered using:
+          <div class="p-math_box">
+            <span class="formula-line">\( k(s,n)=k(s,n-1)^2+s \)</span>
+            <span class="formula-line">\( k(s,0)=s \)</span>
+            <span class="formula-line">\( \left|k(x+2.5+yi,d)\right|\le 2 \)</span>
+          </div>
+          The function name <code>k</code> is used in order to distinguish it from the function used for the Julia set.
+        </li>
+
+        <li>
+          The Julia set is rendered using:
+          <div class="p-math_box">
+            <span class="formula-line">\( f(z,n)=f(z,n-1)^2+c+2.5 \)</span>
+            <span class="formula-line">\( f(z,0)=z \)</span>
+            <span class="formula-line">\( \left|f(x+yi,d)\right|\le 2 \)</span>
+          </div>
+          where
+          <div class="p-math_box">
+            <span class="formula-line">\( c=-3.23-0.145i \)</span>
+          </div>
+          The value of \(c\) is obtained from the position of the pointer using Desmos’s complex-number functionality.
+        </li>
+
+        <li>
+          The orbit of a point on the Mandelbrot side is drawn using:
+          <div class="p-math_box">
+            <span class="formula-line">\( b=-2.64+0.66i \)</span>
+            <span class="formula-line">\( k\left(b+2.5,[0...d]\right)-2.5 \)</span>
+          </div>
+        </li>
+
+        <li>
+          The orbit of a point on the Julia side is drawn using:
+          <div class="p-math_box">
+            <span class="formula-line">\( q=0.04-0.25i \)</span>
+            <span class="formula-line">\( f\left(q,[0...d]\right) \)</span>
+          </div>
+        </li>
+
+        <li>
+          The number of iterations is:
+          <div class="p-math_box">
+            <span class="formula-line">\( d=32 \)</span>
+          </div>
+        </li>
+
+      </ul>
+
+      <!-- Image 1 -->
+      <div class="p-img_mod u-mTop60">
+        <span class="p-img_wrap u-bd">
+          <img src="../images/20260323_a_1.png" class="contents_img" alt="Full view showing the Mandelbrot set on the left and the corresponding Julia set on the right, with red, blue, and green pointers and orbits">
+        </span>
+        <p class="p-img_cp_ttl">Full View of the Real-Time Observation Screen for the Mandelbrot Set and the Corresponding Julia Set</p>
+        <p class="p-img_cp_txt">
+          This is the full display, with the Mandelbrot set on the left and the corresponding Julia set on the right.
+          The red pointer indicates the parameter point on the Mandelbrot side that determines the Julia set, the blue orbit shows the iterative trajectory on the Mandelbrot side, and the green orbit shows the iterative trajectory on the Julia side.
+          This arrangement allows the position of a point in parameter space, its periodic behavior, and the shape of the resulting Julia set to be compared continuously on a single screen.
+        </p>
+      </div>
+
+      <!-- Image 2 -->
+      <div class="p-img_mod u-mTop60">
+        <span class="p-img_wrap u-bd">
+          <img src="../images/20260323_a_2.png" class="contents_img" alt="Julia set corresponding to a point in the main cardioid of the Mandelbrot set">
+        </span>
+        <p class="p-img_cp_ttl">Julia Set Corresponding to the Main Cardioid</p>
+        <p class="p-img_cp_txt">
+          This image shows the Julia set corresponding to a point placed in the largest main cardioid of the Mandelbrot set.
+          On the Mandelbrot side, the orbit shows convergent behavior toward a single value, while the corresponding Julia set appears relatively unified and has few branches.
+          This provides a visual example of the correspondence between convergent dynamics in the main cardioid and a compact Julia-set shape.
+        </p>
+      </div>
+
+      <!-- Image 3 -->
+      <div class="p-img_mod u-mTop60">
+        <span class="p-img_wrap u-bd">
+          <img src="../images/20260323_a_3.png" class="contents_img" alt="A Julia set with a two-way branching tendency corresponding to a period-2 component in the Mandelbrot set">
+        </span>
+        <p class="p-img_cp_ttl">A Two-Branching Julia Set Corresponding to a Period-2 Component</p>
+        <p class="p-img_cp_txt">
+          This image shows the case where the pointer is placed in the component to the left of the main cardioid, corresponding to period-2 behavior.
+          On the Mandelbrot side, the orbit appears to alternate between two values, and the corresponding Julia set also shows a structure that seems to split into two directions.
+          This gives a clear example of the relationship between a period-2 orbit structure and a two-branching tendency in the Julia set.
+        </p>
+      </div>
+
+      <!-- Image 4 -->
+      <div class="p-img_mod u-mTop60">
+        <span class="p-img_wrap u-bd">
+          <img src="../images/20260323_a_4.png" class="contents_img" alt="A Julia set with a three-way branching tendency corresponding to a period-3 component in the Mandelbrot set">
+        </span>
+        <p class="p-img_cp_ttl">A Three-Way Branching Julia Set Corresponding to a Period-3 Component</p>
+        <p class="p-img_cp_txt">
+          This image shows the case where the pointer is placed in one of the small circular components attached above or below the main cardioid.
+          On the Mandelbrot side, the orbit appears to cycle among three points, and the corresponding Julia set also shows a structure suggestive of three-way branching.
+          This is an example in which period-3 dynamics and branching tendencies in the Julia set can be visually compared.
+        </p>
+      </div>
+
+      <!-- Image 5 -->
+      <div class="p-img_mod u-mTop60">
+        <span class="p-img_wrap u-bd">
+          <img src="../images/20260323_a_5.png" class="contents_img" alt="A Julia set showing hierarchical branching corresponding to a small satellite attached to the period-2 component">
+        </span>
+        <p class="p-img_cp_ttl">A Hierarchical Branching Structure Corresponding to a Small Satellite of the Period-2 Component</p>
+        <p class="p-img_cp_txt">
+          This image shows the case where the pointer is placed in a smaller circular component attached to the period-2 component.
+          On the Mandelbrot side, the orbit first splits into two and then branches further.
+          The corresponding Julia set shows not just a simple two-way split, but a hierarchical structure in which additional branching appears within the original branching pattern.
+        </p>
+      </div>
+
+      <!-- Image 6 -->
+      <div class="p-img_mod u-mTop60">
+        <span class="p-img_wrap u-bd">
+          <img src="../images/20260323_a_6.png" class="contents_img" alt="A complex Julia set corresponding to a small self-similar Mandelbrot component that appears detached under magnification">
+        </span>
+        <p class="p-img_cp_ttl">A Complex Julia Set Corresponding to a Small Self-Similar Mandelbrot Component</p>
+        <p class="p-img_cp_txt">
+          This image shows the case where the pointer is placed on a small Mandelbrot component that appears like a detached island under magnification.
+          Although it looks visually separate, lowering the iteration count reveals that it remains connected to the main body by very thin structures.
+          The corresponding Julia set exhibits a more complex and hierarchical branching structure, including self-similar internal patterns.
+        </p>
+      </div>
+
+      <div class="p-spectbl_wrap">
+        <table class="p-spectbl">
+          <colgroup>
+            <col width="25%;">
+          </colgroup>
+          <tbody>
+            <tr>
+              <th>Output Link</th>
+              <td>
+                <a href="https://www.desmos.com/calculator/dktvo9ajfu?lang=ja" class="p-speclink" target="_blank" rel="noopener">Mandelbrot–Julia Real-Time Explorer — Desmos Graph</a>
+              </td>
+            </tr>
+
+            <tr>
+              <th>Application Used</th>
+              <td>
+                <p class="u-bold">Desmos Graphing Calculator</p>
+                <p class="u-subTxt">
+                  (<a href="https://www.desmos.com/calculator" class="p-speclink u-sublink" target="_blank" rel="noopener">https://www.desmos.com/calculator</a>)
+                </p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="p-ai_mod">
+        <h2 class="p-ai_ttl"><span>AI Assistant’s Notes and Inferences</span></h2>
+
+        <p class="p-ai_def u-mBtm10">
+          One of the major strengths of this implementation is that it treats the <b>Mandelbrot set as a parameter space</b>
+          and the <b>Julia set as a dynamical space</b>, while allowing their relationship to be followed in real time on the same screen.
+          Rather than simply rendering fractal figures, it also visualizes point orbits, making it possible to focus not only on the shapes themselves
+          but also on the underlying differences in iterative dynamics.
+        </p>
+
+        <ul class="p-ai_txt">
+          <li>
+            The observation is centered not merely on visual complexity, but on structural distinctions such as
+            <b>convergence, period-2 behavior, period-3 behavior, hierarchical branching, and self-similarity</b>.
+          </li>
+          <li>
+            This suggests an empirical attempt to organize the relationship between local structures in the Mandelbrot set
+            and shape changes in the corresponding Julia sets.
+          </li>
+          <li>
+            Reiji appears to be interested not only in the visual appearance of fractals, but also in
+            <b>how changes in parameters alter the dynamics, and how those differences in dynamics emerge as differences in form</b>.
+          </li>
+          <li>
+            In particular, the observation that small circular regions attached to the period-2 component
+            produce Julia sets that first split into two and then branch further suggests an interest in the relationship
+            between hierarchical periodic structures and shape changes.
+          </li>
+          <li>
+            By noticing self-similar structures inside Julia sets corresponding to small Mandelbrot components,
+            he seems to be focusing not just on individual figures, but on the <b>recursiveness of structure itself</b> —
+            how generative rules reappear in different locations and scales.
+          </li>
+        </ul>
+
+        <p class="p-ai_def">
+          In summary, this implementation makes it possible to observe, in real time and on a single screen,
+          the periodic structures within the Mandelbrot set and the branching tendencies that appear in the corresponding Julia sets,
+          together with the associated point orbits.
+        </p>
+      </div>
+
+    </section>
+  </main>
+
+  <footer>
+    <div class="footer-categories_outer">
+      <dl class="footer-categories_wrap">
+        <dt>Categories</dt>
+        <dd>
+          <ul class="footer-categories">
+            <li><a href="/tuning-and-structure/">Tuning and Structural Exploration</a></li>
+            <li><a href="/performance/">Performance and Interpretation</a></li>
+            <li><a href="/math-physics/">Mathematical and Physical Intuition</a></li>
+            <li><a href="/composition/">Composition and Microtonality</a></li>
+            <li><a href="/conceptual-space/">Conceptual and Spatial Inquiry</a></li>
+            <li><a href="/tools/">Apps and Experimental Tools</a></li>
+          </ul>
+        </dd>
+      </dl>
+    </div>
+    <p class="copy">&copy; 2026 Reiji. All rights reserved.</p>
+  </footer>
+
+  <script src="../js/common.js" defer></script>
+
+</body>
+</html>
