@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3D Projection Wireframe Model of the 120-cell — Visualizing a Four-Dimensional Regular Polytope with OpenSCAD and 3D Printing</title>
+  <meta name="description" content="A project by Reiji, age 10, in which the four-dimensional regular polytope known as the 120-cell is projected into three-dimensional space and fabricated as a wireframe model using OpenSCAD and a 3D printer.">
+  <meta name="robots" content="noindex,follow">
+  <link rel="stylesheet" href="../css/reset.css">
+  <link rel="stylesheet" media="screen and (min-width: 1025px)" href="../css/style_pc.css">
+  <link rel="stylesheet" media="screen and (max-width: 1024px)" href="../css/style_sp.css">
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-8BWCJ4H4HD"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-8BWCJ4H4HD');
+  </script>
+</head>
+
+<body>
+  <header class="p-sub_head">
+    <div class="p-headline_bg">
+      <div class="p-top_mainTtl">
+        <span class="p-mTtl_sub1">Reiji's</span> <span class="p-mTtl_sub2">Explorations</span><span class="p-mTtl_sub3">in Sound & Structure</span>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <nav class="breadcrumb">
+      <ul class="breadcrumb_inner">
+        <li><a href="/">Home</a> &gt; </li>
+        <li><a href="/math-physics/">Mathematical and Physical Intuition</a> &gt; </li>
+        <li><span>3D Projection Wireframe Model of the 120-cell</span></li>
+      </ul>
+    </nav>
+
+    <p class="p-cont_date">May 17, 2026</p>
+
+    <div class="p-title_bg">
+      <div class="p-title_bg_inner">
+        <h1 class="p-wide_ttl_head_single">3D Projection Wireframe Model of the 120-cell</h1>
+        <p class="p-title_sub">Visualizing a Four-Dimensional Regular Polytope with OpenSCAD and 3D Printing</p>
+      </div>
+    </div>
+
+    <section id="main_contents">
+      <p class="p-overview_txt">
+        <b>Overview:</b><br>
+        This work is a 3D-printed wireframe model of the <b>120-cell</b>, a four-dimensional regular polytope, projected into three-dimensional space.<br><br>
+
+        The 120-cell is a four-dimensional regular polytope whose cells are regular dodecahedra.
+        In this project, vertices were generated from coordinate families related to the H4 polytope structure.
+After expanding the coordinate patterns and removing duplicates, the model contains 600 vertices.
+The edges were then reconstructed by calculating four-dimensional distances between vertex pairs and extracting only the pairs that matched the edge-length condition.
+        The resulting four-dimensional structure was then projected into three-dimensional space and modeled in OpenSCAD as a wireframe suitable for 3D printing.<br><br>
+
+        Many parts of the finished model appear to form pentagonal shapes, but these are not simply regular pentagons arranged in three-dimensional space.
+        Rather, they include distortions and overlaps caused by projecting a four-dimensional structure into three-dimensional space.
+        Therefore, this model is not a direct three-dimensional assembly of regular dodecahedra, but a physical object that makes it possible to observe
+        <b>a three-dimensional projection of a four-dimensional regular polytope</b>.
+      </p>
+
+      <p class="disclaimer">
+        <b>Note:</b> All content on this page is originally explained by Reiji in Japanese.
+        The English version is translated by AI and structured by a parent, with Reiji's final approval.
+      </p>
+
+      <h2 class="p-wide_ttl"><span>Reiji's Words and Ideas</span></h2>
+
+      <ul class="p-obs_numlist">
+        <li>
+          This work is a wireframe model of the <b>120-cell</b>, a four-dimensional regular polytope, projected into three-dimensional space.
+        </li>
+
+<li>
+  Before working with the full 120-cell, I also examined the structure of the regular dodecahedron in three dimensions.
+  Since a regular dodecahedron has regular pentagonal faces, distances involving the golden ratio \(\varphi\) appear in its diagonals and vertex relationships.
+  For example, larger pentagonal structures can involve relationships such as \(\varphi^2\), \(\varphi\sqrt{2}\), or \(\varphi\sqrt{3}\), depending on which vertices are compared.
+</li>
+
+<li>
+  However, when moving from the three-dimensional dodecahedron to the four-dimensional 120-cell, the number of possible diagonals and distance relationships increases dramatically.
+  Because of this, I needed to use four-dimensional distance calculations to determine which pairs of vertices should actually be connected as edges.
+</li>
+
+        <li>
+          The 120-cell is a four-dimensional regular polytope whose cells are regular dodecahedra.
+          In the construction process, I first generated vertices from known coordinate families, and then reconstructed the edges by judging the distances between pairs of vertices.
+          After that, I projected the four-dimensional structure into three-dimensional space and modeled it in OpenSCAD as a wireframe that could be 3D printed.
+        </li>
+
+<li>
+  The vertices of the 120-cell were generated from coordinate families related to the H4 polytope structure.
+  There are multiple coordinate patterns, and when all patterns are expanded and duplicates are removed, the model has 600 vertices.
+</li>
+
+<li>
+  After generating the 600 vertices, I did not connect every vertex to every other vertex unconditionally.
+  Instead, I calculated the four-dimensional distance between each pair of vertices and extracted only the pairs whose distance matched the edge-length condition.
+  Since manually performing the pattern extraction, duplicate detection, and four-dimensional distance checks would have been extremely difficult, I also used AI as a computational assistant.
+</li>
+
+        <li>
+          The pentagon-like parts visible in the projected model are not regular pentagons placed directly next to one another.
+          They are shapes that include distortion as a result of projecting a four-dimensional structure into three-dimensional space.
+        </li>
+
+        <li>
+          The regular dodecahedron is one of the five Platonic solids.
+          A Platonic solid is a convex polyhedron whose faces are all congruent regular polygons, and whose vertex structure is the same at every vertex.
+          The five Platonic solids are the regular tetrahedron, cube, regular octahedron, regular dodecahedron, and regular icosahedron.
+        </li>
+
+        <li>
+          In this project, I worked with the 120-cell, which has regular dodecahedra as its cells.
+          The coordinates were generated from known coordinate families, the edges were reconstructed using distance judgments, and the structure was then projected into three-dimensional space for visualization.
+          Because of this projection, the pentagon-like parts visible in the model contain distortion.
+        </li>
+
+        <li>
+          The most difficult part of the project was removing the supports after 3D printing.
+          Since the model has a very fine wireframe structure extending all the way into the interior, removing the support material was extremely difficult.
+        </li>
+      </ul>
+
+      <h2 class="p-wide_ttl"><span>Images</span></h2>
+
+      <!-- Image 1 -->
+      <div class="p-img_mod u-mTop60">
+        <span class="p-img_wrap u-bd">
+          <img src="../images/20260517_a_1.png" class="contents_img" alt="Observing the completed 120-cell projection model by holding it in hand">
+        </span>
+        <p class="p-img_cp_ttl">Observing the Completed 120-cell Projection Model by Hand</p>
+        <p class="p-img_cp_txt">
+          This is the 3D-printed wireframe model of the 120-cell projected into three-dimensional space.
+          By holding and rotating the model, one can observe the complex overlaps and depth produced by the projection of a four-dimensional structure into three dimensions.
+        </p>
+      </div>
+
+      <!-- Image 2 -->
+      <div class="p-img_mod u-mTop60">
+        <span class="p-img_wrap u-bd">
+          <img src="../images/20260517_a_2.png" class="contents_img" alt="The 120-cell projection model constructed in OpenSCAD">
+        </span>
+        <p class="p-img_cp_ttl">The 120-cell Projection Model Constructed in OpenSCAD</p>
+        <p class="p-img_cp_txt">
+          This image shows the 120-cell projection model generated in OpenSCAD.
+          Vertices were generated from four-dimensional coordinates, and edges reconstructed by distance judgment are displayed as a wireframe.
+          This on-screen model served as the source data for the actual 3D print.
+        </p>
+      </div>
+
+      <!-- Image 3 -->
+      <div class="p-img_mod u-mTop60">
+        <span class="p-img_wrap u-bd">
+          <img src="../images/20260517_a_3.png" class="contents_img" alt="Comparison between the 3D-printed model and the OpenSCAD rendering">
+        </span>
+        <p class="p-img_cp_ttl">Comparison Between the 3D-printed Model and the OpenSCAD Rendering</p>
+        <p class="p-img_cp_txt">
+          This photo compares the OpenSCAD rendering on the screen with the actual 3D-printed model.
+          It shows that the thin wireframe and internal structure were reproduced without being significantly crushed in the printed output.
+        </p>
+      </div>
+
+      <!-- Image 4 -->
+      <div class="p-img_mod u-mTop60">
+        <span class="p-img_wrap u-bd">
+          <img src="../images/20260517_a_4.png" class="contents_img" alt="Whiteboard notes organizing the properties of polytopes">
+        </span>
+        <p class="p-img_cp_ttl">Whiteboard Notes Organizing the Properties of Polytopes</p>
+        <p class="p-img_cp_txt">
+          These whiteboard notes organize relationships among two-dimensional regular polygons, three-dimensional Platonic solids, and four-dimensional regular polytopes.
+          The notes compare numbers of faces, cells, and angle relationships while considering the structure of the 120-cell.
+        </p>
+      </div>
+
+<!-- Image 5 -->
+<div class="p-img_mod u-mTop60">
+  <span class="p-img_wrap u-bd">
+    <img src="../images/20260517_a_8.png" class="contents_img" alt="Whiteboard notes and a small physical model used to examine pentagonal distance relationships in a regular dodecahedron">
+  </span>
+  <p class="p-img_cp_ttl">Notes on Pentagonal Distance Relationships in a Regular Dodecahedron</p>
+  <p class="p-img_cp_txt">
+    This image shows notes used to think about the three-dimensional regular dodecahedron, whose faces are regular pentagons.
+    The whiteboard diagram and the small numbered physical model were used to examine how vertices, diagonals, and pentagonal structures relate to one another.
+    Since the 120-cell has regular dodecahedra as its cells, understanding the distance relationships that appear in the dodecahedron, including those involving the golden ratio \(\varphi\), helped provide a basis for thinking about the more complex four-dimensional structure.
+  </p>
+</div>
+
+      <!-- Image 6 -->
+      <div class="p-img_mod u-mTop60">
+        <span class="p-img_wrap u-bd">
+          <img src="../images/20260517_a_5.png" class="contents_img" alt="Coordinate calculation notes for the 5-cell and 8-cell">
+        </span>
+        <p class="p-img_cp_ttl">Coordinate Calculation Notes for the 5-cell and 8-cell</p>
+        <p class="p-img_cp_txt">
+          Since the 120-cell has a very large number of vertices, it is difficult to write out the whole structure by hand.
+          These notes record the process of manually thinking through the coordinates of the 5-cell and 8-cell as comparison examples.
+          They show an attempt to understand four-dimensional figures by treating them as coordinate-based objects and then projecting them.
+        </p>
+      </div>
+
+      <!-- Image 7 -->
+      <div class="p-img_mod u-mTop60">
+        <span class="p-img_wrap u-bd">
+          <img src="../images/20260517_a_6.png" class="contents_img" alt="The 120-cell projection model after support removal">
+        </span>
+        <p class="p-img_cp_ttl">The 120-cell Projection Model After Support Removal</p>
+        <p class="p-img_cp_txt">
+          This is the 120-cell projection model after 3D printing and support removal.
+          Thin wireframe structures extend not only over the exterior but also throughout the interior, showing why removing the supports was so difficult.
+        </p>
+      </div>
+
+      <!-- Image 8 -->
+      <div class="p-img_mod u-mTop60">
+        <span class="p-img_wrap u-bd">
+          <img src="../images/20260517_a_7.png" class="contents_img" alt="Close-up photograph of the internal structure of the 120-cell projection model">
+        </span>
+        <p class="p-img_cp_ttl">Close-up View of the Internal Structure</p>
+        <p class="p-img_cp_txt">
+          This close-up photograph shows the interior of the completed model.
+          Multiple layers of wireframe structure overlap, revealing the complex internal structure that appears when a four-dimensional regular polytope is projected into three-dimensional space.
+        </p>
+      </div>
+
+      <div class="p-spectbl_wrap">
+        <table class="p-spectbl">
+          <colgroup>
+            <col width="25%;">
+          </colgroup>
+          <tbody>
+            <tr>
+              <th>Output</th>
+              <td>
+                <p class="u-bold">120-cell 3D Projection Wireframe Model</p>
+                <p class="u-subTxt">A projected model of a four-dimensional regular polytope generated in OpenSCAD and fabricated with a 3D printer.</p>
+              </td>
+            </tr>
+
+            <tr>
+              <th>Tools Used</th>
+              <td>
+                <p class="u-bold">OpenSCAD / 3D Printer</p>
+                <p class="u-subTxt">Four-dimensional coordinate generation, edge reconstruction by distance judgment, three-dimensional projection, wireframe modeling, and 3D printing.</p>
+              </td>
+            </tr>
+
+            <tr>
+              <th>Subject</th>
+              <td>
+                <p class="u-bold">120-cell</p>
+                <p class="u-subTxt">A four-dimensional regular polytope whose cells are regular dodecahedra.</p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="p-ai_mod">
+        <h2 class="p-ai_ttl"><span>AI Assistant’s Notes and Inferences</span></h2>
+
+        <p class="p-ai_def u-mBtm10">
+          The important point of this work is not simply that a complex spherical-looking 3D model was made.
+          Rather, its significance lies in the fact that
+          <b>a four-dimensional regular polytope was treated as coordinate data and transformed into a mathematically structured object that could be fabricated by 3D printing</b>.
+        </p>
+
+        <ul class="p-ai_txt">
+          <li>
+            The 120-cell is a four-dimensional regular polytope whose cells are regular dodecahedra, making it a difficult object to understand intuitively.
+            Although the finished model may look like a decorative geometric object at first glance, it actually involves the mathematical process of projecting a higher-dimensional figure into a lower-dimensional space.
+          </li>
+
+          <li>
+            The production process appears to include several distinct stages:
+            generating four-dimensional coordinates, judging distances between vertices to determine edges, projecting from four dimensions into three dimensions, converting the result into a wireframe in OpenSCAD,
+            adjusting thicknesses and connections for 3D printing, printing the model, and finally removing the supports.
+          </li>
+
+<li>
+  The use of AI in this project appears to have functioned mainly as computational assistance rather than as a replacement for the mathematical idea itself.
+  Reiji identified the target structure, understood that the 120-cell should be generated from coordinate families, and recognized that edge extraction required four-dimensional distance checks.
+  AI was then used to help with tasks that are impractical to perform manually, such as pattern expansion, duplicate removal, and repeated distance calculations.
+</li>
+
+          <li>
+            Reiji’s explanation that the pentagon-like parts are not simply regular pentagons, but include distortion caused by projection, is especially important.
+            It shows that he distinguishes between the visible projected form and the original higher-dimensional structure.
+          </li>
+
+<li>
+  The whiteboard notes suggest that he was connecting multiple ideas, including regular polygons, regular dodecahedra, Platonic solids, the 5-cell, the 8-cell, the 120-cell, cell counts, dihedral angles, coordinate representations, and projection.
+  The additional notes on the regular dodecahedron are especially useful because they show how he connected the 120-cell back to its three-dimensional cell structure and to pentagonal distance relationships involving the golden ratio.
+</li>
+
+          <li>
+            For a project made at age 10, it is particularly notable that it crosses several domains: mathematics, programming, 3D CAD, and 3D printing.
+            The value of the work lies not only in the beauty of the finished object, but also in the process of generating a structure from coordinates, projecting it, and making it work as a physical model.
+          </li>
+        </ul>
+
+        <p class="p-ai_def">
+          In summary, this work does not merely treat a four-dimensional regular polytope as an abstract mathematical object.
+          It transforms that object into a physical model that can be held and observed.
+          The central achievement of this project is the way it connects higher-dimensional geometry, visualization, modeling, and fabrication into a single workflow.
+        </p>
+      </div>
+
+    </section>
+  </main>
+
+  <footer>
+    <div class="footer-categories_outer">
+      <dl class="footer-categories_wrap">
+        <dt>Categories</dt>
+        <dd>
+          <ul class="footer-categories">
+            <li><a href="/tuning-and-structure/">Tuning and Structural Exploration</a></li>
+            <li><a href="/performance/">Performance and Interpretation</a></li>
+            <li><a href="/math-physics/">Mathematical and Physical Intuition</a></li>
+            <li><a href="/composition/">Composition and Microtonality</a></li>
+            <li><a href="/conceptual-space/">Conceptual and Spatial Inquiry</a></li>
+            <li><a href="/tools/">Apps and Experimental Tools</a></li>
+          </ul>
+        </dd>
+      </dl>
+    </div>
+    <p class="copy">&copy; 2026 Reiji. All rights reserved.</p>
+  </footer>
+
+  <script src="../js/common.js" defer></script>
+
+</body>
+</html>
