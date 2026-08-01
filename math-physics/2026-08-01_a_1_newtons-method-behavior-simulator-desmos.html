@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Newton’s Method Behavior Simulator — Exploring Convergence, Irregular Motion, and Cyclic Behavior in Desmos</title>
+
+  <meta name="description" content="A Desmos simulator created by Reiji, age 10, to explore how Newton’s method behaves with different functions and initial guesses, including convergence, large jumps, irregular-looking motion, and attracting cycles.">
+
+  <meta name="robots" content="noindex,follow">
+
+  <link rel="stylesheet" href="../css/reset.css">
+  <link rel="stylesheet" media="screen and (min-width: 1025px)" href="../css/style_pc.css">
+  <link rel="stylesheet" media="screen and (max-width: 1024px)" href="../css/style_sp.css">
+
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-8BWCJ4H4HD"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-8BWCJ4H4HD');
+  </script>
+</head>
+
+<body>
+
+  <header class="p-sub_head">
+    <div class="p-headline_bg">
+      <div class="p-top_mainTtl">
+        <span class="p-mTtl_sub1">Reiji's</span> <span class="p-mTtl_sub2">Explorations</span><span class="p-mTtl_sub3">in Sound & Structure</span>
+      </div>
+    </div>
+  </header>
+
+  <main>
+
+    <nav class="breadcrumb">
+      <ul class="breadcrumb_inner">
+        <li><a href="/">Home</a> &gt; </li>
+        <li><a href="/math-physics/">Mathematical and Physical Intuition</a> &gt; </li>
+        <li><span>Newton’s Method Behavior Simulator</span></li>
+      </ul>
+    </nav>
+
+    <p class="p-cont_date">August 1, 2026</p>
+
+    <div class="p-title_bg">
+      <div class="p-title_bg_inner">
+        <h1 class="p-wide_ttl_head_single">Newton’s Method Behavior Simulator</h1>
+        <p class="p-title_sub">Exploring Convergence, Irregular Motion, and Cyclic Behavior in Desmos</p>
+      </div>
+    </div>
+
+    <section id="main_contents">
+
+      <p class="p-overview_txt">
+        <b>Overview:</b><br>
+        This project is a simulator implemented in Desmos to explore how Newton’s method behaves when applied to different functions and different initial guesses.<br><br>
+
+        Rather than using Newton’s method only as a procedure for calculating roots, Reiji created the simulator in order to observe what happens to the sequence of approximations itself.
+        By moving the initial value \(x_0\), changing the function \(P(x)\), and displaying successive iterations on the \(x\)-axis, he investigated cases in which the approximations converge toward a root, make unexpectedly large jumps, appear to move irregularly, or become trapped in periodic cycles.<br><br>
+
+        The project began when he attempted to calculate repeated Newton iterations by hand.
+        Because examining many different cases quickly became what he described as <b>“a nightmare of long calculations”</b>, he implemented the process in Desmos so that he could experiment with many functions and initial values and observe their behavior directly.
+      </p>
+
+      <p class="disclaimer">
+        <b>Note:</b> All content on this page is originally explained by Reiji in Japanese.
+        The English version is translated by AI and structured by a parent, with Reiji's final approval.
+      </p>
+
+
+      <h2 class="p-wide_ttl"><span>Reiji's Words and Ideas</span></h2>
+
+      <ul class="p-obs_numlist">
+
+        <li>
+          This is a simulator that I implemented in Desmos to use Newton’s method to approximate the roots of a function \(P(x)\), meaning the points where its graph reaches zero, and to observe the process by which those roots are found.
+        </li>
+
+        <li>
+          I made it because I wanted to see how Newton’s method behaves with many different kinds of functions, including polynomials, trigonometric functions, exponential functions, and logarithmic functions.
+          For example, \(e^x\) itself has no real root, so changing it to something such as \(e^x-1\) makes it possible to observe behavior toward a root.
+        </li>
+
+        <li>
+          I wanted to understand Newton’s method more deeply by watching its behavior and understanding what the method is actually doing.
+          At first I tried calculating it by hand, but after repeatedly doing the calculations I ended up in a nightmare of long calculations.
+          Because of that, I implemented this simulator so that I could observe many different patterns by changing the function and the initial guess.
+        </li>
+
+        <li>
+          One thing I found by using this simulator is that there are cases where the points show irregular behavior that looks chaotic, and cases where they do not.
+        </li>
+
+        <li>
+          In other cases, the points may find a root and converge toward it, or they may enter something like an attracting cycle in which they repeatedly move between two or three points.
+        </li>
+
+        <li>
+          When the motion looks chaotic or irregular, I found that this can happen when the initial guess is far from the root, especially near local maxima or minima where the slope of the tangent becomes small.
+          In those situations, the next point can jump a long distance and the sequence can appear to move irregularly.
+        </li>
+
+        <li>
+          Entering an attracting cycle seems to be fairly rare, but one example is
+
+          \[
+          P(x)=x^3-2x+2.
+          \]
+
+          If the first estimate is
+
+          \[
+          x_0=0,
+          \]
+
+          then Newton’s method gives
+
+          \[
+          0\rightarrow1\rightarrow0\rightarrow1\rightarrow\cdots
+          \]
+
+          so the sequence continues moving back and forth between 0 and 1.
+        </li>
+
+        <li class="u-mBtm60">
+          When I moved the initial guess little by little around 0 and observed what happened, within the range I tested I could see behavior that was drawn into this 0–1 cycle until approximately a boundary near
+
+          \[
+          0.133333\ldots
+          \]
+
+          was crossed.
+        </li>
+
+        <li class="u-mBtm60">
+          <b>Example: \(P(x)=5x^5-2x^4-6x^3+x^2+x-1\)</b><br><br>
+
+          As an example, consider the polynomial
+
+          \[
+          P(x)=5x^5-2x^4-6x^3+x^2+x-1.
+          \]
+
+          There is no general formula using only arithmetic operations and radicals that solves every fifth-degree equation.
+
+          For this particular polynomial, Newton’s method can be used to obtain a numerical approximation of its real root:
+
+          \[
+          x\approx1.22582899678.
+          \]
+
+          Since a value like this is difficult to predict accurately in advance, the graph can be drawn and Newton’s method can be applied repeatedly from an initial guess in order to search for the root.
+        </li>
+
+        <li class="u-mBtm60">
+          <b>Calculating the derivative</b><br><br>
+
+          Each term of \(P(x)\) can be differentiated using
+
+          \[
+          \frac{d}{dx}ax^b=abx^{b-1}.
+          \]
+
+          Therefore,
+
+          \[
+          P'(x)=25x^4-8x^3-18x^2+2x+1.
+          \]
+        </li>
+
+        <li>
+          <b>Newton’s iteration</b><br><br>
+
+          Newton’s method repeatedly uses the formula
+
+          \[
+          x_{n+1}
+          =
+          x_n-\frac{P(x_n)}{P'(x_n)}.
+          \]
+
+          For example, if the first estimate is
+
+          \[
+          x_0=-0.54,
+          \]
+
+          then
+
+          \[
+          x_1
+          =
+          -0.54-\frac{P(-0.54)}{P'(-0.54)},
+          \]
+
+          giving approximately
+
+          \[
+          x_1\approx-0.90188491.
+          \]
+
+          The next value is then calculated using
+
+          \[
+          x_2
+          =
+          x_1-\frac{P(x_1)}{P'(x_1)},
+          \]
+
+          and the same process is repeated.
+        </li>
+
+        <li>
+          On the graph, this can be understood as drawing the tangent line to the function at the current estimate and using the point where that tangent crosses the \(x\)-axis as the next estimate.
+          When the conditions are favorable, repeating this process brings the sequence closer to a root.
+        </li>
+
+        <li>
+          When considering the limiting behavior mathematically, the iteration can continue indefinitely.
+          For this simulator, however, I chose to calculate up to 32 iterations because that was a practical number for observing the behavior.
+        </li>
+
+        <li>
+          When the first estimate is already near the root, the sequence often reaches a point where its displayed value changes very little within roughly ten iterations.
+        </li>
+
+        <li>
+          With this example polynomial, even an initial estimate as far away as
+
+          \[
+          x_0=500
+          \]
+
+          begins to approach the root rapidly after more than 30 iterations, and by approximately the 32nd iteration it is already very close to the root.
+        </li>
+
+        <li class="u-mBtm60">
+          If the number of iterations is increased, this particular polynomial can even be observed moving toward the root from an extremely distant initial estimate such as
+
+          \[
+          x_0=100000000.
+          \]
+
+          However, Newton’s method does not necessarily find a root for every function and every initial estimate.
+          It may converge to a root, jump to very distant values, or enter a cycle among several points.
+          Observing these differences is one of the reasons I created the simulator.
+        </li>
+
+        <li class="u-mBtm60">
+          <b>Different behavior from different initial guesses</b><br><br>
+
+          The initial estimate \(x_0\) can be changed by moving the pointer inside the graph.
+
+          Using the same polynomial,
+
+          \[
+          P(x)=5x^5-2x^4-6x^3+x^2+x-1,
+          \]
+
+          different starting positions produce very different paths.
+        </li>
+
+        <li class="u-mBtm60">
+          <b>\(x_0=-0.54\)</b><br><br>
+
+          If the initial estimate is
+
+          \[
+          x_0=-0.54,
+          \]
+
+          then after 32 iterations,
+
+          \[
+          x_{32}\approx1.22595521.
+          \]
+
+          This is already quite close to the real root,
+
+          \[
+          x\approx1.22582899678.
+          \]
+
+          The numbers 1, 2, 3, and so on displayed along the \(x\)-axis show the positions produced by each iteration.
+          The position marked “32” therefore shows where the 32nd estimate has reached.
+        </li>
+
+        <li class="u-mBtm60">
+          <b>\(x_0=2.086\)</b><br><br>
+
+          If the initial estimate is changed to
+
+          \[
+          x_0=2.086,
+          \]
+
+          then
+
+          \[
+          x_{32}\approx1.225829,
+          \]
+
+          which is essentially at the position of the root.
+        </li>
+
+        <li class="u-mBtm60">
+          <b>\(x_0=-1.6\)</b><br><br>
+
+          In contrast, when the initial estimate is
+
+          \[
+          x_0=-1.6,
+          \]
+
+          the 32nd value is
+
+          \[
+          x_{32}\approx-7.82810773,
+          \]
+
+          so at that point it is still far away from the root.
+
+          From the first 32 iterations alone, I do not know what will happen after that.
+
+          If the iteration is continued, it might eventually find a root and converge, or it might enter an attracting cycle in which it repeatedly moves between two, three, or more points.
+
+          Therefore, if the number “32” appears somewhere other than near an intersection between the graph and the \(x\)-axis, that alone does not mean that Newton’s method will never find a root.
+
+          At the 32nd iteration, the sequence might still be on its way toward a root, it might be passing through very distant values, or it might later enter an attracting cycle.
+
+          In this way, even for the same function, changing the initial estimate can greatly change the path followed by the iteration.
+          The simulator makes it possible to observe these differences simply by moving the pointer.
+        </li>
+
+        <li class="u-mBtm60">
+          <b>Using functions other than polynomials</b><br><br>
+
+          The expression after \(P(x)=\) can be replaced in order to observe Newton’s method with functions other than polynomials.
+
+          For example, a trigonometric function such as
+
+          \[
+          P(x)=\sin(x)
+          \]
+
+          can be entered.
+
+          Exponential and logarithmic functions can also be tested to observe how the iteration behaves with different kinds of functions.
+        </li>
+
+        <li class="u-mBtm60">
+          <b>When the tangent slope becomes zero</b><br><br>
+
+          One interesting example is
+
+          \[
+          P(x)=\sin(x)+\frac12\sin(2x).
+          \]
+
+          This function has infinitely many roots.
+
+          Consider one of its valleys at
+
+          \[
+          x=-\frac{\pi}{3}.
+          \]
+
+          Differentiating the function gives
+
+          \[
+          P'(x)=\cos(x)+\cos(2x).
+          \]
+
+          Substituting
+
+          \[
+          x=-\frac{\pi}{3}
+          \]
+
+          gives
+
+          \[
+          P'\left(-\frac{\pi}{3}\right)
+          =
+          \cos\left(-\frac{\pi}{3}\right)
+          +
+          \cos\left(-\frac{2\pi}{3}\right),
+          \]
+
+          and therefore
+
+          \[
+          P'\left(-\frac{\pi}{3}\right)
+          =
+          \frac12-\frac12
+          =
+          0.
+          \]
+
+          This means that the tangent line is horizontal at this position and its slope is zero.
+        </li>
+
+        <li>
+          Since Newton’s method uses
+
+          \[
+          x_{n+1}
+          =
+          x_n-\frac{P(x_n)}{P'(x_n)},
+          \]
+
+          choosing this point exactly as an estimate makes the denominator
+
+          \[
+          P'(x_n)
+          \]
+
+          equal to zero, so the next value is undefined.
+        </li>
+
+        <li>
+          Even when the estimate is not exactly at that position, if it is extremely close, \(P'(x_n)\) can become a very small value close to zero.
+
+          In that case,
+
+          \[
+          \frac{P(x_n)}{P'(x_n)}
+          \]
+
+          can become extremely large, causing the next estimate to jump a very long distance.
+        </li>
+
+        <li>
+          Through these experiments, I found that Newton’s method does not always move toward a root in a simple sequence of gradually smaller steps.
+          Depending on the shape of the function and the initial estimate, the points can behave in very different ways.
+        </li>
+
+      </ul>
+
+
+      <h2 class="p-wide_ttl"><span>Images</span></h2>
+
+
+      <!-- Image 1 -->
+      <div class="p-img_mod u-mTop60">
+        <span class="p-img_wrap u-bd">
+          <img src="../images/20260801_a_1.png" class="contents_img" alt="Polynomial graph used in the Newton's method behavior simulator">
+        </span>
+
+        <p class="p-img_cp_ttl">Polynomial Used for Observing Newton’s Method</p>
+
+        <p class="p-img_cp_txt">
+          The graph shows
+
+          \[
+          P(x)=5x^5-2x^4-6x^3+x^2+x-1.
+          \]
+
+          The numbered positions along the \(x\)-axis show successive estimates generated by Newton’s method from the chosen initial value.
+        </p>
+      </div>
+
+
+      <!-- Image 2 -->
+      <div class="p-img_mod u-mTop60">
+        <span class="p-img_wrap u-bd">
+          <img src="../images/20260801_a_2.png" class="contents_img" alt="Newton's method iteration from an initial estimate of negative 0.54">
+        </span>
+
+        <p class="p-img_cp_ttl">Iteration from \(x_0=-0.54\)</p>
+
+        <p class="p-img_cp_txt">
+          With the initial estimate
+
+          \[
+          x_0=-0.54,
+          \]
+
+          the 32nd iteration gives
+
+          \[
+          x_{32}\approx1.22595521,
+          \]
+
+          placing the estimate close to the real root.
+        </p>
+      </div>
+
+
+      <!-- Image 3 -->
+      <div class="p-img_mod u-mTop60">
+        <span class="p-img_wrap u-bd">
+          <img src="../images/20260801_a_3.png" class="contents_img" alt="Newton's method iteration from an initial estimate of 2.086">
+        </span>
+
+        <p class="p-img_cp_ttl">Iteration from \(x_0=2.086\)</p>
+
+        <p class="p-img_cp_txt">
+          When the initial estimate is
+
+          \[
+          x_0=2.086,
+          \]
+
+          the 32nd iteration reaches approximately
+
+          \[
+          x_{32}=1.225829,
+          \]
+
+          essentially coinciding with the real root.
+        </p>
+      </div>
+
+
+      <!-- Image 4 -->
+      <div class="p-img_mod u-mTop60">
+        <span class="p-img_wrap u-bd">
+          <img src="../images/20260801_a_4.png" class="contents_img" alt="Newton's method iteration from an initial estimate of negative 1.6">
+        </span>
+
+        <p class="p-img_cp_ttl">A Distant 32nd Iteration from \(x_0=-1.6\)</p>
+
+        <p class="p-img_cp_txt">
+          With
+
+          \[
+          x_0=-1.6,
+          \]
+
+          the 32nd estimate is
+
+          \[
+          x_{32}\approx-7.82810773,
+          \]
+
+          far from the visible root at this stage.
+          From these 32 iterations alone, it is not yet known whether continued iteration would eventually converge to a root, enter an attracting cycle, or follow some other path.
+        </p>
+      </div>
+
+
+      <!-- Image 5 -->
+      <div class="p-img_mod u-mTop60">
+        <span class="p-img_wrap u-bd">
+          <img src="../images/20260801_a_5.png" class="contents_img" alt="Newton's method simulator applied to a trigonometric function with infinitely many roots">
+        </span>
+
+        <p class="p-img_cp_ttl">Exploring a Trigonometric Function with Infinitely Many Roots</p>
+
+        <p class="p-img_cp_txt">
+          This screen shows the simulator applied to
+
+          \[
+          P(x)=\sin(x)+\frac12\sin(2x).
+          \]
+
+          The initial estimate can be moved interactively to observe how Newton’s method behaves near roots, extrema, and points where the derivative becomes very small or zero.
+        </p>
+      </div>
+
+
+      <!-- Image 6 -->
+      <div class="p-img_mod u-mTop60">
+        <span class="p-img_wrap u-bd">
+          <img src="../images/20260801_a_6.png" class="contents_img" alt="Whiteboard notes showing Newton's method calculations and sketches">
+        </span>
+
+        <p class="p-img_cp_ttl">Whiteboard Calculations and Sketches</p>
+
+        <p class="p-img_cp_txt">
+          These notes were written by Reiji while explaining the simulator.
+          They show the derivative of the example polynomial, the Newton iteration formula, the first calculations beginning from \(x_0=-0.54\), and sketches used to think about tangent lines and the movement of successive estimates.
+        </p>
+      </div>
+
+
+      <div class="p-spectbl_wrap">
+        <table class="p-spectbl">
+
+          <colgroup>
+            <col width="25%;">
+          </colgroup>
+
+          <tbody>
+
+            <tr>
+              <th>Output</th>
+              <td>
+                <p class="u-bold">Newton’s Method Behavior Simulator</p>
+                <p class="u-subTxt">
+                  An interactive Desmos simulator for observing repeated Newton iterations with different functions and initial estimates.
+                </p>
+                <p class="u-subTxt">
+                  <a href="https://www.desmos.com/calculator/k72vtia4sd" target="_blank" rel="noopener noreferrer">
+                    Open the simulator in Desmos
+                  </a>
+                </p>
+              </td>
+            </tr>
+
+            <tr>
+              <th>Application Used</th>
+              <td>
+                <p class="u-bold">Desmos Graphing Calculator</p>
+                <p class="u-subTxt">
+                  Used to define the function and its derivative, calculate 32 successive Newton iterations, display each estimate on the \(x\)-axis, and interactively change the initial value.
+                </p>
+              </td>
+            </tr>
+
+            <tr>
+              <th>Method</th>
+              <td>
+                <p class="u-bold">Newton’s Method</p>
+                <p class="u-subTxt">
+                  Repeated numerical approximation using
+
+                  \[
+                  x_{n+1}=x_n-\frac{P(x_n)}{P'(x_n)}.
+                  \]
+                </p>
+              </td>
+            </tr>
+
+          </tbody>
+
+        </table>
+      </div>
+
+
+      <div class="p-ai_mod">
+
+        <h2 class="p-ai_ttl"><span>AI Assistant’s Notes and Inferences</span></h2>
+
+        <p class="p-ai_def u-mBtm10">
+          The central value of this project is not simply that Newton’s method was implemented correctly.
+          More importantly,
+          <b>the algorithm was turned into an experimental system for observing the dynamics of repeated numerical approximation</b>.
+        </p>
+
+        <ul class="p-ai_txt">
+
+          <li>
+            Reiji’s stated purpose was to understand Newton’s method by observing its behavior rather than only learning the formula.
+            This shifts the activity from carrying out a prescribed numerical procedure to investigating how an iterative process behaves under changing conditions.
+          </li>
+
+          <li>
+            The decision to build the simulator emerged directly from a limitation encountered during manual calculation.
+            Repeated calculations quickly became impractical when many initial values and different functions were to be compared.
+            Implementing the process in Desmos therefore allowed the same mathematical rule to become an experimental object that could be manipulated repeatedly.
+          </li>
+
+          <li>
+            The displayed sequence
+
+            \[
+            x_0,x_1,x_2,\ldots,x_{32}
+            \]
+
+            effectively treats Newton’s method as an iterated map.
+            A root corresponds to a fixed point of this iteration, while other starting values may produce long transients, large jumps, or periodic behavior.
+          </li>
+
+          <li>
+            The example
+
+            \[
+            P(x)=x^3-2x+2
+            \]
+
+            is particularly significant.
+            From \(x_0=0\), Newton’s method produces the exact periodic orbit
+
+            \[
+            0\rightarrow1\rightarrow0\rightarrow1\rightarrow\cdots.
+            \]
+
+            This demonstrates directly that Newton’s method is not guaranteed to converge to a root from every starting value.
+          </li>
+
+          <li>
+            Reiji also explored how changing the initial value around this example altered the observed behavior.
+            His observation of an approximate boundary near \(0.133333\ldots\) should be understood as an experimentally observed transition within the range he tested, rather than as a formally proved mathematical boundary.
+          </li>
+
+          <li>
+            His use of the phrase “chaotic-looking” is also important to interpret carefully.
+            The simulator clearly reveals irregular and highly sensitive-looking numerical behavior, especially when an iteration approaches a point where the derivative is small.
+            However, the project does not attempt to establish chaos in the formal dynamical-systems sense.
+          </li>
+
+          <li>
+            The trigonometric example
+
+            \[
+            P(x)=\sin(x)+\frac12\sin(2x)
+            \]
+
+            makes another structural feature of Newton’s method visible.
+
+            At
+
+            \[
+            x=-\frac{\pi}{3},
+            \]
+
+            the derivative is zero.
+            Because \(P'(x)\) appears in the denominator of Newton’s formula, the next iteration is undefined at the exact point and can become extremely large for nearby values where the derivative is very small.
+          </li>
+
+          <li>
+            The case beginning from
+
+            \[
+            x_0=-1.6
+            \]
+
+            is also useful because the project intentionally does not infer a final outcome from only 32 observed iterations.
+            At the 32nd step the estimate is far from the root, but the simulator as configured does not determine from that fact alone whether later iterations would converge, enter a periodic cycle, or exhibit another form of behavior.
+            Preserving that uncertainty is consistent with the exploratory nature of the work.
+          </li>
+
+          <li>
+            For a project created at age 10, a particularly notable feature is the transition from a textbook numerical method to questions about iteration, initial-value dependence, periodic orbits, derivative singularities, and the visual behavior of an algorithm.
+            These questions connect naturally with ideas that are later formalized in numerical analysis and dynamical systems.
+          </li>
+
+        </ul>
+
+        <p class="p-ai_def">
+          In summary, this simulator transforms Newton’s method from a static formula into something that can be experimented with.
+          By varying functions and initial estimates and observing the sequence of generated points, the project investigates not only when the method succeeds in finding a root, but also what the iteration itself can do when convergence is not immediate or straightforward.
+        </p>
+
+      </div>
+
+    </section>
+  </main>
+
+
+  <footer>
+
+    <div class="footer-categories_outer">
+
+      <dl class="footer-categories_wrap">
+
+        <dt>Categories</dt>
+
+        <dd>
+          <ul class="footer-categories">
+            <li><a href="/tuning-and-structure/">Tuning and Structural Exploration</a></li>
+            <li><a href="/performance/">Performance and Interpretation</a></li>
+            <li><a href="/math-physics/">Mathematical and Physical Intuition</a></li>
+            <li><a href="/composition/">Composition and Microtonality</a></li>
+            <li><a href="/conceptual-space/">Conceptual and Spatial Inquiry</a></li>
+            <li><a href="/tools/">Apps and Experimental Tools</a></li>
+          </ul>
+        </dd>
+
+      </dl>
+
+    </div>
+
+    <p class="copy">&copy; 2026 Reiji. All rights reserved.</p>
+
+  </footer>
+
+  <script src="../js/common.js" defer></script>
+
+</body>
+</html>
