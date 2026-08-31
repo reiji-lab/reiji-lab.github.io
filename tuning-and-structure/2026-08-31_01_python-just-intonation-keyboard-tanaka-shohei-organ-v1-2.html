@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Timbre Design and Performance-Range Expansion in a Python Just-Intonation Keyboard v1.2 Referencing Tanaka Shōhei’s Just-Intonation Organ</title>
+  <meta name="description" content="A Python just-intonation keyboard v1.2 by Reiji (age 10), referencing Tanaka Shōhei’s just-intonation organ. This version adds reed-organ-like timbre design, harmonic-component control, attack echo, and octave shifting from -2 to +2 octaves, with a performance trial using the Bourrée theme from J. S. Bach BWV 996.">
+  <meta name="robots" content="noindex,follow">
+  <link rel="stylesheet" href="../css/reset.css">
+  <link rel="stylesheet" media="screen and (min-width: 1025px)" href="../css/style_pc.css">
+  <link rel="stylesheet" media="screen and (max-width: 1024px)" href="../css/style_sp.css">
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-8BWCJ4H4HD"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-8BWCJ4H4HD');
+</script>
+
+</head>
+
+<body>
+  <header class="p-sub_head">
+    <div class="p-headline_bg">
+      <div class="p-top_mainTtl">
+        <span class="p-mTtl_sub1">Reiji's</span> <span class="p-mTtl_sub2">Explorations</span><span class="p-mTtl_sub3">in Sound & Structure</span>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <nav class="breadcrumb">
+      <ul class="breadcrumb_inner">
+        <li><a href="/">Home</a> &gt; </li>
+        <li><a href="/tuning-and-structure/">Tuning and Structural Exploration</a> &gt; </li>
+        <li><span>Python Just-Intonation Keyboard v1.2 Referencing Tanaka Shōhei’s Organ</span></li>
+      </ul>
+    </nav>
+
+    <p class="p-cont_date">August 31, 2026</p>
+
+    <div class="p-title_bg">
+      <div class="p-title_bg_inner">
+        <h1 class="p-wide_ttl_head_single">
+          Timbre Design and Performance-Range Expansion in a Python Just-Intonation Keyboard v1.2 Referencing Tanaka Shōhei’s Just-Intonation Organ
+        </h1>
+      </div>
+    </div>
+
+    <section id="main_contents">
+
+      <p class="p-overview_txt">
+        <b>Overview:</b><br>
+        This project is version 1.2 of a Python just-intonation keyboard implemented by <strong>Reiji (age 10)</strong>,
+        referencing Dr. Tanaka Shōhei’s just-intonation organ.<br><br>
+
+        In the previous Python version, Reiji used an almost triangle-wave sound in order to make the pitch ratios easier to hear.
+        In this v1.2 version, he instead attempts to approach a reed-organ-like timbre by adjusting the strength of each harmonic component
+        from the fundamental through the seventh component, adding phase differences between the components, and applying a light nonlinear process
+        to give the tone a slightly harder reed-like character.<br><br>
+
+        This version also adds octave control for the entire keyboard. The previous version was essentially limited to one octave,
+        but v1.2 allows the whole keyboard range to be shifted up or down by key operation. Pressing Q lowers the keyboard by one octave,
+        pressing W raises it by one octave, and pressing A resets it to the original 1x position. The available range is from -2 octaves to +2 octaves.<br><br>
+
+        Through this update, the keyboard develops from a tool mainly for confirming just-intonation pitch ratios into a more performable experimental instrument interface.
+        The performance trial uses the theme from J. S. Bach’s BWV 996, V. Bourrée, to test the reed-organ-like timbre and the expanded octave range.
+      </p>
+
+      <p class="disclaimer">
+        <b>Note:</b> All content on this page is originally explained by Reiji in Japanese.
+        The English version is translated by AI and structured by a parent, with Reiji's final approval.
+      </p>
+
+      <div class="p-mov_mod u-mTop60">
+        <span class="p-mov_wrap">
+          <iframe
+            src="https://www.youtube.com/embed/Td_rmMoewjw"
+            title="Python Just-Intonation Keyboard Trial — BWV 996 – V. Bourrée Theme after Tanaka Shōhei"
+            frameborder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowfullscreen>
+          </iframe>
+        </span>
+      </div>
+
+      <h2 class="p-wide_ttl"><span>Reiji's Words and Ideas</span></h2>
+
+      <ul class="p-obs_numlist">
+
+        <li>
+          <b>What this is</b><br>
+          This is version 1.2 of the keyboard that I implemented in Python, referencing Dr. Tanaka Shōhei’s just-intonation organ.
+        </li>
+
+        <li>
+          <b>Main difference from the previous version: timbre</b><br>
+          The first major difference from the previous version is the timbre.
+          In the previous version, I used an almost triangle-wave sound so that the pitch intervals would be easy to hear.
+          In this version, I individually set the strengths of the components from the fundamental through the seventh component,
+          and tried to bring the sound closer to a reed-organ-like timbre.
+        </li>
+
+        <li>
+          <b>Harmonic-component settings</b><br>
+          The main parameters I used are as follows:<br><br>
+
+<pre><code>harmonics = [
+    (1, 1.00),
+    (2, 0.73),
+    (3, 0.52),
+    (4, 0.41),
+    (5, 0.31),
+    (6, 0.27),
+    (7, 0.24),
+]
+
+phase = 0.10 * mul
+drive = 1.55</code></pre>
+
+          For example, <code>(2, 0.73)</code> represents the strength of the second component,
+          <code>(3, 0.52)</code> represents the strength of the third component,
+          and <code>(7, 0.24)</code> represents the strength of the seventh component.<br><br>
+
+          <code>phase</code> is a value used to create phase differences between harmonic components.
+          <code>drive = 1.55</code> is a setting that adds a reed-like hardness to the sound through a light nonlinear process using <code>tanh</code>.
+          However, if the sound is made too hard, the higher components become too strong and the sound becomes too metallic or harsh,
+          so in this version I adjusted the sound mainly around the low-to-mid harmonic components.
+        </li>
+
+        <li>
+          <b>Important distinction: timbre components and 7-limit intervals</b><br>
+          The seventh component discussed here is a harmonic component used for creating the timbre.
+          It does not mean that the tuning system itself adopts 7-limit pitch ratios.
+          The pitch-ratio structure referencing Tanaka Shōhei’s just-intonation organ is kept as before;
+          this update focuses on how those pitches are sounded as timbre.
+        </li>
+
+        <li>
+          <b>Octave control</b><br>
+          In the previous version, only one octave could be sounded.
+          In this version, I made it possible to shift the entire keyboard up or down by key operation,
+          increasing the range of pieces that can be performed.<br><br>
+
+          Each time the Q key is pressed, the whole keyboard is lowered by one octave.
+          Each time the W key is pressed, the whole keyboard is raised by one octave.
+          Pressing the A key resets it to the initial state, meaning the 1x position.
+          The range can be shifted from -2 octaves to +2 octaves.
+        </li>
+
+        <li>
+          <b>Attack echo</b><br>
+          I also added a short attack echo that is layered only at the moment a key is pressed.
+          Instead of mixing echo into the sustained tone itself, this adds a short resonance only to the beginning of the sound,
+          giving the attack slightly more presence.
+        </li>
+
+        <li>
+          <b>Future plans</b><br>
+          In the future, I plan to implement a transposition function.
+          I also want to make a version compatible with a MIDI keyboard, so that the physical limitations of the PC keyboard can be removed.
+        </li>
+
+        <li>
+          <b>How to run the program</b><br>
+          This application is written in Python.<br><br>
+
+          <a href="/script/tanakaOrgan_v1_2.py" class="p-mainTxtLink" download>
+            Download tanakaOrgan_v1_2.py
+          </a>
+
+          <br><br>
+
+          First, save the file <code>tanakaOrgan_v1_2.py</code> in any folder.
+          The following example assumes that the file has been saved in the <code>Downloads</code> folder.<br><br>
+
+          Open a terminal, Command Prompt, or PowerShell, move to the folder where the file is saved, install the required library, and run the app.
+          The commands are as follows:<br><br>
+
+          <code>cd Downloads</code><br>
+          <code>python -m pip install pygame</code><br>
+          <code>python tanakaOrgan_v1_2.py</code><br><br>
+
+          <span class="u-subTxt">
+            Note: <code>Downloads</code> is only an example. Please replace it with the actual folder where the file is saved.
+            If the file name is changed, replace <code>tanakaOrgan_v1_2.py</code> with the new file name.
+          </span>
+        </li>
+
+        <li>
+          <b>Building a Windows exe file</b><br>
+          If a Python environment is available, it is also possible to create a Windows executable file manually.<br><br>
+
+          Save <code>tanakaOrgan_v1_2.py</code> in any folder.
+          The following example assumes that the file has been saved in the <code>Downloads</code> folder.<br><br>
+
+          Open a terminal, Command Prompt, or PowerShell, and run the following commands:<br><br>
+
+          <code>cd Downloads</code><br>
+          <code>python -m pip install pyinstaller</code><br>
+          <code>python -m PyInstaller --onefile --windowed tanakaOrgan_v1_2.py</code><br><br>
+
+          When the build is complete, an exe file will be generated inside the <code>dist</code> folder.<br><br>
+
+          <span class="u-subTxt">
+            Note: <code>Downloads</code> is only an example. Please replace it according to the actual save location.
+          </span>
+        </li>
+
+        <li>
+          <b>Supplementary note</b><br>
+          This application is an experimental tool for testing the layout, pitch-ratio switching, timbre design, octave control,
+          and sound generation of a just-intonation keyboard referencing Tanaka Shōhei’s just-intonation organ.
+          The ratio display for each key, the P-key switching function, the Q/W/A octave-control functions, the reed-organ-like timbre settings,
+          the attack echo, and the sound-generation process are defined in the source code.
+        </li>
+
+      </ul>
+
+      <!-- Images -->
+      <div class="p-img_mod u-mTop60">
+        <span class="p-img_wrap u-bd">
+          <img src="../images/20260831_a_1.png" class="contents_img" alt="Full view of Python just-intonation keyboard v1.2 with octave-control information displayed">
+        </span>
+        <p class="p-img_cp_ttl">Full View of the Python Just-Intonation Keyboard v1.2</p>
+        <p class="p-img_cp_txt">
+          A full view of the new keyboard interface. Information about the octave-control function has been added to the mode display at the upper left.
+          Q lowers the keyboard to 1/2x, W raises it to 2x, and A resets it to the original position.
+          The P-key pitch-ratio switching function remains available.
+          The ratio, octave state, frequency, and cent value of the last played key are displayed at the top of the screen.
+        </p>
+      </div>
+
+      <div class="p-img_mod u-mTop60">
+        <span class="p-img_wrap u-bd">
+          <img src="../images/20260831_a_2.png" class="contents_img" alt="Code section setting harmonic components for a reed-organ-like timbre">
+        </span>
+        <p class="p-img_cp_ttl">Harmonic-Component Settings for a Reed-Organ-Like Timbre</p>
+        <p class="p-img_cp_txt">
+          The code section where the reed-organ-like timbre is designed.
+          The strengths of the components from the fundamental through the seventh component are individually specified,
+          and phase differences are added between the harmonic components.
+          A light nonlinear process using <code>drive</code> gives the sound a reed-like hardness.
+          The sound is adjusted mainly around the low-to-mid harmonic components, avoiding an overly harsh high-harmonic character.
+        </p>
+      </div>
+
+      <div class="p-img_mod u-mTop60">
+        <span class="p-img_wrap u-bd">
+          <img src="../images/20260831_a_3.png" class="contents_img" alt="Code section implementing octave-control functions in Python just-intonation keyboard v1.2">
+        </span>
+        <p class="p-img_cp_ttl">Implementation of Octave-Control Processing</p>
+        <p class="p-img_cp_txt">
+          The main code section for the octave-control function.
+          <code>set_octave_shift()</code> updates the octave shift and limits the movable range from -2 octaves to +2 octaves.
+          When the octave is changed, the currently sounding notes are stopped once, and the display information is updated.
+          The Q, W, and A keys correspond to octave down, octave up, and reset.
+        </p>
+      </div>
+
+      <div class="p-spectbl_wrap">
+        <table class="p-spectbl">
+          <colgroup>
+            <col width="25%;">
+          </colgroup>
+          <tbody>
+            <tr>
+              <th>Source Code</th>
+              <td>
+                <a href="/script/tanakaOrgan_v1_2.py" class="p-speclink" download>
+                  Download tanakaOrgan_v1_2.py
+                </a>
+              </td>
+            </tr>
+
+            <tr>
+              <th>Performance Trial Video</th>
+              <td>
+                <a href="https://youtu.be/Td_rmMoewjw" class="p-speclink" target="_blank" rel="noopener">
+                  Python Just-Intonation Keyboard Trial — BWV 996 – V. Bourrée Theme after Tanaka Shōhei
+                </a>
+              </td>
+            </tr>
+
+            <tr>
+              <th>Application Used</th>
+              <td>
+                <p class="u-subTxt">Python / tkinter / pygame / AI-assisted coding</p>
+              </td>
+            </tr>
+
+            <tr>
+              <th>Tuning Settings</th>
+              <td>
+                <p class="u-subTxt u-mBtm10">Reference pitch: 1/1 = 261.625565 Hz</p>
+                <p class="u-subTxt u-mBtm10">Pitch ratios are defined as rational-number intervals based on just intonation.</p>
+                <p class="u-subTxt">Certain tones can be switched using the P key, referencing the pitch-switching structure of Tanaka Shōhei’s just-intonation organ.</p>
+              </td>
+            </tr>
+
+            <tr>
+              <th>Version 1.2 Updates</th>
+              <td>
+                <p class="u-subTxt u-mBtm10">Reed-organ-like timbre design using individually weighted harmonic components.</p>
+                <p class="u-subTxt u-mBtm10">Octave shifting from -2 to +2 octaves using Q, W, and A keys.</p>
+                <p class="u-subTxt">Short attack echo added only at the beginning of each note.</p>
+              </td>
+            </tr>
+
+            <tr>
+              <th>Sound Settings</th>
+              <td>
+                <p class="u-subTxt u-mBtm10">The sound is built from components from the fundamental through the seventh component.</p>
+                <p class="u-subTxt u-mBtm10">The component strengths, phase differences, and light nonlinear processing are adjusted to approach a reed-organ-like timbre.</p>
+                <p class="u-subTxt">The seventh component here refers to timbre design, not to adopting a 7-limit tuning system.</p>
+              </td>
+            </tr>
+
+            <tr>
+              <th>Performance Trial</th>
+              <td>
+                <p class="u-subTxt u-mBtm10">J. S. Bach: BWV 996 – V. Bourrée Theme</p>
+                <p class="u-subTxt">A short performance trial using the v1.2 keyboard and its expanded octave range.</p>
+              </td>
+            </tr>
+
+            <tr>
+              <th>Recording date</th>
+              <td>
+                <p class="u-subTxt u-mBtm10">August 31, 2026</p>
+                <p class="u-subTxt">Performance by a 10-year-old</p>
+              </td>
+            </tr>
+
+            <tr>
+              <th>Previous Version</th>
+              <td>
+                <p class="u-subTxt">
+                  <a href="https://reiji-lab.org/tuning-and-structure/2026-05-04_01_python-just-intonation-keyboard-tanaka-shohei-organ.html" class="p-speclink" target="_blank" rel="noopener">
+                    Python Just-Intonation Keyboard v1.0 — May 4, 2026
+                  </a>
+                </p>
+              </td>
+            </tr>
+
+            <tr>
+              <th>Reference</th>
+              <td>
+                <p class="u-bold">Tanaka Shōhei’s Just-Intonation Organ</p>
+                <p class="u-subTxt">
+                  The keyboard layout and pitch-switching idea in this project reference the structure of Dr. Tanaka Shōhei’s just-intonation organ.
+                </p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="p-ai_mod">
+        <h2 class="p-ai_ttl"><span>AI Assistant’s Notes and Inferences</span></h2>
+
+        <p class="p-ai_def u-mBtm10">
+          This v1.2 update appears to move the project further toward the design of a small experimental electronic instrument.
+          The earlier Python version already reconstructed a just-intonation keyboard based on rational pitch ratios and PC-keyboard performance.
+          In this version, Reiji extends the instrument in three practical directions: timbre, attack character, and playable range.
+        </p>
+
+        <ul class="p-ai_txt">
+          <li>
+            The timbre update is significant because Reiji is not simply replacing one waveform with another.
+            He treats the strength of each harmonic component, the phase differences between components, and the hardness added by nonlinear processing
+            as controllable parameters for shaping the sound.
+          </li>
+
+          <li>
+            The distinction between harmonic components and 7-limit tuning is important.
+            The seventh component in the sound source is part of timbre design.
+            It should not be confused with a claim that the tuning system itself has been changed into a 7-limit system.
+          </li>
+
+          <li>
+            The octave-shift function expands the keyboard from a one-octave pitch-confirmation tool into a more practical performance interface.
+            By allowing the whole keyboard to move from -2 to +2 octaves, the system becomes suitable for testing a wider range of melodies.
+          </li>
+
+          <li>
+            The attack echo is also an interesting design choice.
+            Because it is added only at the beginning of the sound rather than mixed into the sustained loop,
+            it gives the onset more presence without changing the continuous pitch-ratio structure too much.
+          </li>
+
+          <li>
+            Using the Bourrée theme from J. S. Bach’s BWV 996 as a performance trial is appropriate for this version.
+            Compared with the earlier BWV 691 chorale-theme trial, this melody benefits more clearly from the expanded octave range and from a more instrument-like timbre.
+          </li>
+
+          <li>
+            Overall, v1.2 keeps the theoretical basis of the earlier Tanaka Shōhei-inspired just-intonation keyboard while expanding the project toward sound design,
+            performance usability, and future MIDI-keyboard compatibility.
+            This makes the work valuable not only as a tuning experiment, but also as a prototype for an original performance tool.
+          </li>
+        </ul>
+      </div>
+
+    </section>
+  </main>
+
+  <footer>
+    <div class="footer-categories_outer">
+      <dl class="footer-categories_wrap">
+        <dt>Categories</dt>
+        <dd>
+          <ul class="footer-categories">
+            <li><a href="/tuning-and-structure/">Tuning and Structural Exploration</a></li>
+            <li><a href="/performance/">Performance and Interpretation</a></li>
+            <li><a href="/math-physics/">Mathematical and Physical Intuition</a></li>
+            <li><a href="/composition/">Composition and Microtonality</a></li>
+            <li><a href="/conceptual-space/">Conceptual and Spatial Inquiry</a></li>
+            <li><a href="/tools/">Apps and Experimental Tools</a></li>
+          </ul>
+        </dd>
+      </dl>
+    </div>
+    <p class="copy">&copy; 2025 Reiji. All rights reserved.</p>
+  </footer>
+
+<script src="../js/common.js" defer></script>
+
+</body>
+</html>
