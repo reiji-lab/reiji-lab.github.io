@@ -1,0 +1,87 @@
+/* Dedicated ratio-comparison tables for the Tanaka keyboard v1.3 page.
+   Kept separate from .p-spectbl to avoid changing existing pages. */
+.p-ratio_tbl_ttl {
+  font-family: Verdana, sans-serif;
+  font-size: 20px;
+  font-weight: bold;
+  line-height: 1.45;
+  margin: 30px 0 10px;
+}
+
+.p-ratio_tbl_wrap {
+  max-width: 1000px;
+  margin: 0 auto 35px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.p-ratio_tbl {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid #BFBFBF;
+  font-family: Verdana, sans-serif;
+  font-size: 18px;
+  line-height: 1.5;
+  font-variant-numeric: tabular-nums;
+}
+
+.p-ratio_tbl th,
+.p-ratio_tbl td {
+  border: 1px solid #BFBFBF;
+  padding: 13px 20px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.p-ratio_tbl thead th {
+  background: #F2F2F2;
+  font-weight: bold;
+}
+
+.p-ratio_tbl tbody th {
+  font-weight: bold;
+  background: #F8F8F8;
+}
+
+/* Code examples are narrower than body text and preserve line breaks. */
+.p-code_sample {
+  max-width: 1000px;
+  overflow-x: auto;
+  margin: 15px auto 30px;
+  padding: 20px 24px;
+  border: 1px solid #BFBFBF;
+  background: #F7F7F7;
+  line-height: 1.7;
+}
+
+.p-code_sample code {
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  font-size: 16px;
+  white-space: pre;
+}
+
+@media screen and (max-width: 1024px) {
+  .p-ratio_tbl_ttl {
+    font-size: 16px;
+    margin: 25px 0 10px;
+  }
+
+  .p-ratio_tbl {
+    font-size: 14px;
+  }
+
+  .p-ratio_tbl th,
+  .p-ratio_tbl td {
+    padding: 10px 8px;
+  }
+
+  .p-code_sample {
+    padding: 15px;
+  }
+
+  .p-code_sample code {
+    font-size: 13px;
+  }
+}
