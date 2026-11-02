@@ -254,6 +254,9 @@
   function createKey({id,left,width,top,height,kind,key,oct,center=false}){
     const div=document.createElement('div');
     div.className='play-key '+(kind==='white'?'white-key':'upper-key')+(kind==='gray'?' gray-key':'');
+    // 上段と同化しやすい3か所の下段・中段の鍵だけを別の色にする。
+    // E=C♯−1、Y=F♯−1、J=B（基準Cでの表示）。音名は移調後も切り替わる。
+    if(kind==='black' && ['E','Y','J'].includes(key)) div.classList.add('lower-black-contrast');
     div.dataset.note=id;div.dataset.key=key;
     div.style.left=`${left}%`;div.style.width=`${width}%`;
     if(kind!=='white'){div.style.top=`${top}%`;div.style.height=`${height}%`;}
@@ -368,6 +371,16 @@
   el('octave-reset').addEventListener('click',()=>octaveStep(0));
   window.addEventListener('blur',()=>stopAll());
   document.addEventListener('visibilitychange',()=>{if(document.hidden)stopAll();});
+  // iPad Safari: 複数指で弾いてもWebページ自体を拡大させない。
+  // Web AudioやPointerEventによるマルチタッチ演奏には触れない。
+  for (const eventName of ['gesturestart','gesturechange']) {
+    document.addEventListener(eventName, event => {
+      if (event.cancelable) event.preventDefault();
+    }, {passive:false});
+  }
+  document.addEventListener('touchmove', event => {
+    if (event.touches.length > 1 && event.cancelable) event.preventDefault();
+  }, {passive:false});
   installPointers();renderTuning();renderKeyboard();updateUI();updateRatios();
   // GitHub Pages (HTTPS) 配置時のみ、舞台での回線途絶に備えて静的資材を保存。
   // 初回閲覧後、機内モードでの再起動テストが必要（キャッシュ動作は保証しない）。

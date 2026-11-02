@@ -42,3 +42,28 @@ button:focus-visible{outline:3px solid #ffda83;outline-offset:2px}
 .keyboard .upper-key .key-ratio {font-size:clamp(7px,.72vw,10px);letter-spacing:-.05em;}
 .keyboard .upper-key.gray-key {border-color:#62746c;}
 .keyboard .upper-key.pressed{border-bottom-width:1px;}
+
+/* iPad Safari演奏モード: 全演奏画面でページのスクロール／ピンチ拡大を無効化。 */
+html, body, .app, .keyboard { touch-action: none; -webkit-user-select: none; user-select: none; }
+
+/* 演奏時の識別性：C♯−1(E)、F♯−1(Y)、B(J)にあたる中段・下段の黒鍵。
+   史料準拠の位置・寸法は一切変えず、上段黒鍵との明度差だけを強める。 */
+.keyboard .upper-key.lower-black-contrast {
+  background: linear-gradient(160deg, #728996 0%, #5c7380 57%, #455b67 100%);
+  border: 1.5px solid #a7c3d0;
+  box-shadow: inset 0 2px 0 #dce7ec69;
+  color: #ffffff;
+}
+.keyboard .upper-key.lower-black-contrast .key-note-name {
+  color: #fff4ce;
+  text-shadow: 0 1px 1px #1d343c;
+}
+.keyboard .upper-key.lower-black-contrast .key-ratio {
+  color: #e5f5ff;
+}
+.keyboard .upper-key.lower-black-contrast.pressed {
+  background: linear-gradient(#e7bd80, #c88b5a);
+  border-color: #ffe2ab;
+}
+.keyboard .upper-key.lower-black-contrast.pressed .key-note-name,
+.keyboard .upper-key.lower-black-contrast.pressed .key-ratio {color: #24352f; text-shadow:none;}
