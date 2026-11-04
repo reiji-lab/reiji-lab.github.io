@@ -46,8 +46,7 @@ button:focus-visible{outline:3px solid #ffda83;outline-offset:2px}
 /* iPad Safari演奏モード: 全演奏画面でページのスクロール／ピンチ拡大を無効化。 */
 html, body, .app, .keyboard { touch-action: none; -webkit-user-select: none; user-select: none; }
 
-/* 演奏時の識別性：C♯−1(E)、F♯−1(Y)、B(J)にあたる中段・下段の黒鍵。
-   史料準拠の位置・寸法は一切変えず、上段黒鍵との明度差だけを強める。 */
+/* 元の青灰色コントラスト：最初の青色版のカラーリングを復元。 */
 .keyboard .upper-key.lower-black-contrast {
   background: linear-gradient(160deg, #728996 0%, #5c7380 57%, #455b67 100%);
   border: 1.5px solid #a7c3d0;
