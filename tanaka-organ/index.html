@@ -6,26 +6,26 @@
   <meta name="theme-color" content="#173c36">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>田中正平 純正調オルガン風｜iPad版</title>
-
 <meta name="robots" content="noindex,follow">
+  <title>田中正平 純正調オルガン風｜iPad版</title>
   <link rel="stylesheet" href="./style.css">
   <script src="./app.js" defer></script>
 </head>
 <body>
   <main id="app" class="app">
     <header class="head">
-      <div class="heading"><span class="eyebrow">JUST INTONATION · EXTENDED 64 KEYS</span><h1>田中正平 <span>純正調オルガン風</span></h1></div>
+      <div class="heading"><span class="eyebrow" id="keyboard-mode-caption">JUST INTONATION · EXTENDED 64 KEYS</span><h1>田中正平 <span>純正調オルガン風</span></h1></div>
       <div class="status"><span class="status-light" id="audio-light"></span><span id="audio-status">音声を有効にしてください</span><button type="button" id="sound-on" class="enable-btn">♪ 音を有効にする</button></div>
     </header>
 
     <section class="tuning" aria-label="18調の選択">
-      <div class="section-caption"><strong>移調</strong><span>18の固定調名から選択 · 調名を押すと移調 · 鍵盤の比率は調の主音基準</span></div>
+      <div class="section-caption"><strong>移調</strong><span id="mode-description">18の固定調名から選択 · 調名を押すと移調 · 鍵盤の比率は調の主音基準</span></div>
       <div class="tonic-grid" id="tonic-grid"></div>
     </section>
 
     <section class="controls" aria-label="演奏コントロール">
       <div class="controls-left">
+        <button type="button" class="switch switch-tuning" id="toggle-tuning" aria-pressed="false" aria-label="12平均律に切り替える"><span class="tuning-switch-name">12平均律へ</span><span class="tuning-switch-sub">切り替え</span></button>
         <button type="button" class="switch switch-p" id="toggle-p" aria-pressed="false">P <span>切替</span></button>
         <button type="button" class="switch switch-o" id="toggle-o" aria-pressed="false">O <span>7th</span></button>
         <button type="button" class="switch switch-sustain" id="toggle-sustain" aria-pressed="false">SUSTAIN <span>OFF</span></button>
@@ -42,7 +42,7 @@
       </div>
     </section>
 
-    <section class="instrument" aria-label="白鍵22本・全64鍵の拡張鍵盤">
+    <section id="instrument" class="instrument" aria-label="純正調・白鍵22本・64鍵">
       <div class="keyboard-heading"><span>−2 WHITE</span><span>LOWER OCTAVE</span><span>UPPER OCTAVE</span><span>+5 WHITE</span></div>
       <div id="keyboard" class="keyboard" role="group" aria-label="マルチタッチ演奏鍵盤"></div>
       <div class="keyboard-foot"><span id="note-status">鍵盤に触れるか、マウスでクリックして演奏</span><span>複数の指で和音 · サステインONで音を保持</span></div>

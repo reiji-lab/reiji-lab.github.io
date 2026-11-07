@@ -84,7 +84,7 @@
   const LOW_WHITE_OFFSET = -2, HIGH_WHITE_OFFSET = 19;
   const WHITE_COUNT = HIGH_WHITE_OFFSET - LOW_WHITE_OFFSET + 1;
   const el = id => document.getElementById(id);
-  const state = {tonic:9, p:false,o:false,octave:0,sustain:false};
+  const state = {tonic:9, p:false,o:false,octave:0,sustain:false,equal:false};
   const keyElements = new Map();
   const pointerNotes = new Map();
   const heldCounts = new Map();
@@ -102,6 +102,28 @@
   }
   function frequency(oct,key) {
     return BASE_FREQ*parseRatio(TONICS[state.tonic][1])*parseRatio(ratioFor(key))*Math.pow(2,oct+state.octave);
+  }
+  // 12平均律ではC4=261.625565Hzを固定基準とする。
+  // 18調は最も近い100セント単位へ写像し、すべての鍵間隔を厳密に2^(1/12)とする。
+  const EDO_WHITE_SEMITONES = [0,2,4,5,7,9,11];
+  const EDO_BLACK_AFTER = new Set([0,1,3,4,5]);
+  function equalTonicSemitones(){
+    return Math.round(12*Math.log2(parseRatio(TONICS[state.tonic][1])));
+  }
+  function equalWhiteSemitone(position){
+    const octave=Math.floor(position/7);
+    const index=((position%7)+7)%7;
+    return octave*12+EDO_WHITE_SEMITONES[index];
+  }
+  function equalName(semitone){
+    const n=((semitone+equalTonicSemitones())%12+12)%12;
+    return CHROMATIC_GERMAN[n];
+  }
+  function equalCents(semitone){
+    return `${semitone*100}¢`;
+  }
+  function equalFrequency(semitone){
+    return BASE_FREQ*Math.pow(2,(equalTonicSemitones()+semitone+12*state.octave)/12);
   }
   // 鍵盤上の分数は選択された調の主音を1とした比率。
   // 拡張した下の音は÷2、3オクターブ目は×4。表示用の分数も正確に約分。
@@ -204,7 +226,10 @@
   function startVoice(id) {
     if(!ensureAudio())return;
     if(voices.has(id))stopVoice(id,true); // サステイン保持中に再打鍵→再発音
-    const {oct,key}=noteFromId(id),freq=frequency(oct,key),now=context.currentTime;
+    const edo=id.startsWith('edo:');
+    const semitone=edo?Number(id.slice(4)):null;
+    const {oct,key}=edo?{oct:null,key:null}:noteFromId(id);
+    const freq=edo?equalFrequency(semitone):frequency(oct,key),now=context.currentTime;
     const osc=makeOscillator(freq,now),gain=context.createGain();
     gain.gain.setValueAtTime(0,now);
     gain.gain.linearRampToValueAtTime(.13,now+.010);
@@ -213,7 +238,9 @@
     osc.onended=()=>{try{osc.disconnect();gain.disconnect();}catch(_){}};
     voices.set(id,{osc,gain,freq});
     attackEcho(freq,now);
-    el('note-status').textContent=`${nameFor(oct,key)} · ${TONICS[state.tonic][0]} ${minorMode()?'短調':'長調'} · 比率 ${ratioFor(key)} · ${freq.toFixed(3)} Hz`;
+    el('note-status').textContent=edo
+      ? `${equalName(semitone)} · 12平均律 · 基準主音から ${equalCents(semitone)} · ${freq.toFixed(3)} Hz`
+      : `${nameFor(oct,key)} · ${TONICS[state.tonic][0]} ${minorMode()?'短調':'長調'} · 比率 ${ratioFor(key)} · ${freq.toFixed(3)} Hz`;
     updateKeyVisual(id);
   }
   function updateKeyVisual(id){
@@ -268,20 +295,24 @@
     });
   }
   const octaveLabel = oct => oct===-1?'低音拡張':oct===2?'高音拡張':`第${oct+1}オクターブ`;
-  function createKey({id,left,width,top,height,kind,key,oct,center=false,upperCenter=false}){
+  function createKey({id,left,width,top,height,kind,key,oct,center=false,upperCenter=false,edoSemi=null}){
+    const isEqual=edoSemi!==null;
     const div=document.createElement('div');
-    div.className='play-key '+(kind==='white'?'white-key':'upper-key')+(kind==='gray'?' gray-key':'');
+    div.className='play-key '+(kind==='white'?'white-key':'upper-key')+(kind==='gray'?' gray-key':'')+(isEqual?' edo-piano-key':'');
     // 上段と同化しやすい3か所の下段・中段の鍵だけを別の色にする。
     // E=C♯−1、Y=F♯−1、J=B（基準Cでの表示）。音名は移調後も切り替わる。
-    if(kind==='black' && ['E','Y','J'].includes(key)) div.classList.add('lower-black-contrast');
-    div.dataset.note=id;div.dataset.key=key;
+    if(!isEqual && kind==='black' && ['E','Y','J'].includes(key)) div.classList.add('lower-black-contrast');
+    div.dataset.note=id;if(!isEqual)div.dataset.key=key;
     div.style.left=`${left}%`;div.style.width=`${width}%`;
     if(kind!=='white'){div.style.top=`${top}%`;div.style.height=`${height}%`;}
-    div.setAttribute('role','button');div.setAttribute('aria-label',`${octaveLabel(oct)}、比率 ${displayedRatio(oct,key)}`);
+    const pitch=isEqual?equalCents(edoSemi):displayedRatio(oct,key);
+    const name=isEqual?equalName(edoSemi):nameFor(oct,key);
+    div.setAttribute('role','button');
+    div.setAttribute('aria-label',isEqual?`12平均律 ${name}、主音から${pitch}`:`${octaveLabel(oct)}、比率 ${pitch}`);
     const note=document.createElement('span');note.className='key-note-name';
-    note.textContent=nameFor(oct,key);
+    note.textContent=name;
     const ratio=document.createElement('span');ratio.className='key-ratio';
-    ratio.textContent=displayedRatio(oct,key);
+    ratio.textContent=pitch;
     div.appendChild(note);div.appendChild(ratio);
     if(kind==='white'){
       const octlabel=document.createElement('span');octlabel.className='key-oct';
@@ -292,6 +323,7 @@
   }
   function renderKeyboard(){
     const area=el('keyboard');area.replaceChildren();keyElements.clear();
+    if(state.equal){renderEqualKeyboard();return;}
     const w=100/WHITE_COUNT;
     // 白鍵22本：元のC～C（15本）＋左にA・H（2本）＋右にD・E・F・G・A（5本）。
     for(let position=LOW_WHITE_OFFSET;position<=HIGH_WHITE_OFFSET;position++){
@@ -332,24 +364,82 @@
       });
     }
   }
+  // 同じ22白鍵・同じC位置に12平均律37鍵を描く。
+  // 黒鍵はC-D、D-E、F-G、G-A、A-Hの間だけに1本ずつ置く。
+  function renderEqualKeyboard(){
+    const area=el('keyboard');
+    const w=100/WHITE_COUNT;
+    for(let position=LOW_WHITE_OFFSET;position<=HIGH_WHITE_OFFSET;position++){
+      const oct=Math.floor(position/7),semitone=equalWhiteSemitone(position);
+      createKey({id:`edo:${semitone}`,left:(position-LOW_WHITE_OFFSET)*w,width:w,
+        kind:'white',oct,edoSemi:semitone,center:position===7,upperCenter:position===14});
+    }
+    for(const position of [0,7,14]){
+      const marker=document.createElement('div');marker.className='octave-marker';
+      marker.style.left=`${(position-LOW_WHITE_OFFSET)*w}%`;
+      area.appendChild(marker);
+    }
+    for(let position=LOW_WHITE_OFFSET;position<HIGH_WHITE_OFFSET;position++){
+      const col=((position%7)+7)%7;
+      if(!EDO_BLACK_AFTER.has(col))continue;
+      const semitone=equalWhiteSemitone(position)+1;
+      const width=w*.66,center=(position-LOW_WHITE_OFFSET+1)*w;
+      createKey({id:`edo:${semitone}`,left:center-width/2,width,top:0,height:60,
+        kind:'black',oct:Math.floor(position/7),edoSemi:semitone});
+    }
+  }
   function updateRatios(){
     for(const [id,elem] of keyElements){
-      const {oct,key}=noteFromId(id);
-      const ratio=ratioFor(key),name=nameFor(oct,key);
-      elem.querySelector('.key-ratio').textContent=displayedRatio(oct,key);
-      elem.querySelector('.key-note-name').textContent=name;
-      elem.setAttribute('aria-label',`${octaveLabel(oct)}、${name}、比率 ${displayedRatio(oct,key)}`);
-      elem.classList.toggle('ratio-switched',ratio!==BASE[key]);
+      if(id.startsWith('edo:')){
+        const semitone=Number(id.slice(4)),name=equalName(semitone),pitch=equalCents(semitone);
+        elem.querySelector('.key-ratio').textContent=pitch;
+        elem.querySelector('.key-note-name').textContent=name;
+        elem.setAttribute('aria-label',`12平均律 ${name}、主音から${pitch}`);
+        elem.classList.remove('ratio-switched');
+      }else{
+        const {oct,key}=noteFromId(id);
+        const ratio=ratioFor(key),name=nameFor(oct,key);
+        elem.querySelector('.key-ratio').textContent=displayedRatio(oct,key);
+        elem.querySelector('.key-note-name').textContent=name;
+        elem.setAttribute('aria-label',`${octaveLabel(oct)}、${name}、比率 ${displayedRatio(oct,key)}`);
+        elem.classList.toggle('ratio-switched',ratio!==BASE[key]);
+      }
     }
   }
   function updateUI(){
     el('toggle-p').setAttribute('aria-pressed',String(state.p));
     el('toggle-o').setAttribute('aria-pressed',String(state.o));
+    el('toggle-p').disabled=state.equal;
+    el('toggle-o').disabled=state.equal;
+    const toggle=el('toggle-tuning');
+    toggle.setAttribute('aria-pressed',String(state.equal));
+    toggle.setAttribute('aria-label',state.equal?'純正調に切り替える':'12平均律に切り替える');
+    toggle.querySelector('.tuning-switch-name').textContent=state.equal?'純正調へ':'12平均律へ';
+    toggle.querySelector('.tuning-switch-sub').textContent=state.equal?'戻す':'切り替え';
     el('octave-text').textContent=(state.octave>=0?'+':'')+state.octave;
-    el('mode-label').textContent=`${TONICS[state.tonic][0]} ${minorMode()?'短調':'長調'}`;
-    el('tuning-value').textContent=`固定基準比 ${TONICS[state.tonic][1]}`;
+    const tonicName=TONICS[state.tonic][0];
+    if(state.equal){
+      const nearest=((equalTonicSemitones()%12)+12)%12;
+      el('mode-label').textContent=`${CHROMATIC_GERMAN[nearest]} · 12平均律`;
+      el('tuning-value').textContent='C基準 261.625565Hz · 100¢刻み';
+      el('mode-description').textContent='12平均律：18調の主音は最寄りの半音に変換 · P/Oは純正調専用';
+      el('keyboard-mode-caption').textContent='12-TONE EQUAL TEMPERAMENT · 37 KEYS';
+      el('instrument').setAttribute('aria-label','12平均律・白鍵22本・37鍵');
+    }else{
+      el('mode-label').textContent=`${tonicName} ${minorMode()?'短調':'長調'}`;
+      el('tuning-value').textContent=`固定基準比 ${TONICS[state.tonic][1]}`;
+      el('mode-description').textContent='18の固定調名から選択 · 調名を押すと移調 · 鍵盤の比率は調の主音基準';
+      el('keyboard-mode-caption').textContent='JUST INTONATION · EXTENDED 64 KEYS';
+      el('instrument').setAttribute('aria-label','純正調・白鍵22本・64鍵');
+    }
   }
-  function changeMode(which){stopAll();state[which]=!state[which];updateUI();updateRatios();}
+  function changeTuning(){
+    stopAll();
+    state.equal=!state.equal;
+    renderKeyboard();updateUI();updateRatios();
+    el('note-status').textContent=state.equal?'12平均律に切替（100¢刻み）':'純正調に戻しました';
+  }
+  function changeMode(which){if(state.equal)return;stopAll();state[which]=!state[which];updateUI();updateRatios();}
   function octaveStep(n){
     const next=Math.max(MIN_SHIFT,Math.min(MAX_SHIFT,n));
     if(next!==state.octave){stopAll();state.octave=next;updateUI();}
@@ -389,6 +479,7 @@
     area.addEventListener('lostpointercapture',up);
   }
   el('sound-on').addEventListener('click',ensureAudio);
+  el('toggle-tuning').addEventListener('click',changeTuning);
   el('toggle-p').addEventListener('click',()=>changeMode('p'));
   el('toggle-o').addEventListener('click',()=>changeMode('o'));
   el('toggle-sustain').addEventListener('click',()=>changeSustain());
@@ -419,6 +510,8 @@
     tonics:()=>TONICS.map(x=>({label:x[0],ratio:x[1],minor:x[2]})),
     ratioFor:key=>ratioFor(key),displayedRatio:(oct,key)=>displayedRatio(oct,key),frequency:(oct,key)=>frequency(oct,key),
     state:()=>({...state}),activeVoices:()=>voices.size,whiteCount:()=>el('keyboard').querySelectorAll('.white-key').length,
-    noteCount:()=>el('keyboard').querySelectorAll('.play-key').length
+    noteCount:()=>el('keyboard').querySelectorAll('.play-key').length,
+    equalTonicSemitones:()=>equalTonicSemitones(),equalFrequency:semitone=>equalFrequency(semitone),
+    equalWhiteSemitone:position=>equalWhiteSemitone(position)
   });
 })();

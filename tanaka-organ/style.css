@@ -82,3 +82,24 @@ html, body, .app, .keyboard { touch-action: none; -webkit-user-select: none; use
   .keyboard .upper-key .key-note-name{font-size:clamp(7px,.68vw,9px);}
   .keyboard .upper-key .key-ratio{font-size:clamp(6.5px,.59vw,8px);}
 }
+
+/* 2026-11-07: 純正調/12平均律ワンタッチ切替。起動時は純正調。 */
+.controls-left {flex-shrink:0;}
+.switch-tuning {min-width:112px;padding:5px 10px;background:#c9e4d1;color:#173c36;border-color:#c9e4d1;}
+.switch-tuning .tuning-switch-name{display:block;margin:0;font-size:13px;font-weight:850;color:inherit;}
+.switch-tuning .tuning-switch-sub{display:block;margin-top:2px;font-size:10px;font-weight:650;color:inherit;}
+.switch-tuning[aria-pressed="true"]{background:#e0cbff;color:#392b56;border-color:#d6bbf7;}
+.switch:disabled {opacity:.32;cursor:default;}
+.keyboard .edo-piano-key.upper-key {border-radius:0 0 4px 4px;border-bottom-width:4px;
+  background:linear-gradient(#273530,#111917);border-color:#091e17;box-shadow:1px 3px 4px #0006;gap:7px;}
+.keyboard .edo-piano-key.upper-key.pressed {background:linear-gradient(#ca8564,#a75d4a);border-bottom-color:#713928;}
+.keyboard .edo-piano-key.upper-key .key-note-name {font-size:clamp(10px,.97vw,13px);letter-spacing:0;}
+.keyboard .edo-piano-key.upper-key .key-ratio {font-size:clamp(8px,.77vw,10px);letter-spacing:-.045em;}
+.keyboard .edo-piano-key.white-key .key-note-name {font-size:clamp(10px,1.1vw,14px);}
+@media (max-width:1080px) and (orientation:landscape){
+  .controls {gap:6px;}
+  .controls-left, .controls-right {gap:4px;}
+  .switch-tuning {min-width:106px;padding:5px 7px;}
+  .switch {padding-left:8px;padding-right:8px;}
+  .octave-control button {padding-left:9px;padding-right:9px;}
+}
