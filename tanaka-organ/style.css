@@ -66,3 +66,19 @@ html, body, .app, .keyboard { touch-action: none; -webkit-user-select: none; use
 }
 .keyboard .upper-key.lower-black-contrast.pressed .key-note-name,
 .keyboard .upper-key.lower-black-contrast.pressed .key-ratio {color: #24352f; text-shadow:none;}
+
+/* 2026-11-07: 白鍵を下2本・上5本延長。22白鍵（64音）用の文字サイズ。 */
+.keyboard-heading {grid-template-columns:2fr 7fr 7fr 6fr; font-size:clamp(8px,.80vw,10px);letter-spacing:.07em;}
+.keyboard-heading span {white-space:nowrap;overflow:hidden;text-overflow:clip;}
+.keyboard-heading span:not(:last-child){border-right:1px solid #91ae914a;}
+.keyboard-heading span:first-child{border-right:1px solid #91ae914a;}
+.keyboard .white-key .key-note-name {font-size:clamp(9px,.95vw,13px);letter-spacing:-.045em;}
+.keyboard .white-key .key-ratio {font-size:clamp(8px,.83vw,11px);letter-spacing:-.035em;}
+.keyboard .white-key .key-oct {font-size:8px;}
+.keyboard .upper-key .key-note-name {font-size:clamp(8px,.69vw,10px);letter-spacing:-.07em;}
+.keyboard .upper-key .key-ratio {font-size:clamp(7px,.61vw,9px);letter-spacing:-.075em;}
+@media (max-height:690px) and (orientation:landscape) {
+  .keyboard .white-key .key-note-name{font-size:clamp(8px,.9vw,11px);}
+  .keyboard .upper-key .key-note-name{font-size:clamp(7px,.68vw,9px);}
+  .keyboard .upper-key .key-ratio{font-size:clamp(6.5px,.59vw,8px);}
+}

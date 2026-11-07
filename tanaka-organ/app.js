@@ -79,6 +79,10 @@
   }
   const WHITES = ['Z','X','C','V','B','N','M',','];
   const COLUMNS = [['S','E','4'],['D','R'],['F'],['G','Y','7'],['H','U'],['J','I'],['K']];
+  // 既存のC～C（白鍵15本）から、下へ2本・上へ5本の白鍵を延長。
+  // 白鍵位置は元の下端Cを0、1オクターブ上を7、2オクターブ上を14とする。
+  const LOW_WHITE_OFFSET = -2, HIGH_WHITE_OFFSET = 19;
+  const WHITE_COUNT = HIGH_WHITE_OFFSET - LOW_WHITE_OFFSET + 1;
   const el = id => document.getElementById(id);
   const state = {tonic:9, p:false,o:false,octave:0,sustain:false};
   const keyElements = new Map();
@@ -100,11 +104,14 @@
     return BASE_FREQ*parseRatio(TONICS[state.tonic][1])*parseRatio(ratioFor(key))*Math.pow(2,oct+state.octave);
   }
   // 鍵盤上の分数は選択された調の主音を1とした比率。
-  // 2オクターブ目は×2（最後の主音は4/1）。移調操作だけでは分数は変えない。
+  // 拡張した下の音は÷2、3オクターブ目は×4。表示用の分数も正確に約分。
+  // 調の主音基準の比率なので、移調操作だけでは分数は変えない。
   function displayedRatio(oct,key) {
-    const [n,d]=ratioFor(key).split('/').map(Number);
-    const numerator=n*(oct===1?2:1),factor=gcd(numerator,d);
-    return `${numerator/factor}/${d/factor}`;
+    let [n,d]=ratioFor(key).split('/').map(Number);
+    if(oct>0)n*=2**oct;
+    else if(oct<0)d*=2**(-oct);
+    const factor=gcd(n,d);
+    return `${n/factor}/${d/factor}`;
   }
   const idFor = (oct,key) => `${oct}:${key}`;
   function noteFromId(id) { const [oct,key]=id.split(':');return {oct:Number(oct),key}; }
@@ -260,7 +267,8 @@
       });container.appendChild(b);
     });
   }
-  function createKey({id,left,width,top,height,kind,key,oct,center=false}){
+  const octaveLabel = oct => oct===-1?'低音拡張':oct===2?'高音拡張':`第${oct+1}オクターブ`;
+  function createKey({id,left,width,top,height,kind,key,oct,center=false,upperCenter=false}){
     const div=document.createElement('div');
     div.className='play-key '+(kind==='white'?'white-key':'upper-key')+(kind==='gray'?' gray-key':'');
     // 上段と同化しやすい3か所の下段・中段の鍵だけを別の色にする。
@@ -269,7 +277,7 @@
     div.dataset.note=id;div.dataset.key=key;
     div.style.left=`${left}%`;div.style.width=`${width}%`;
     if(kind!=='white'){div.style.top=`${top}%`;div.style.height=`${height}%`;}
-    div.setAttribute('role','button');div.setAttribute('aria-label',`第${oct+1}オクターブ、比率 ${ratioFor(key)}`);
+    div.setAttribute('role','button');div.setAttribute('aria-label',`${octaveLabel(oct)}、比率 ${displayedRatio(oct,key)}`);
     const note=document.createElement('span');note.className='key-note-name';
     note.textContent=nameFor(oct,key);
     const ratio=document.createElement('span');ratio.className='key-ratio';
@@ -277,41 +285,51 @@
     div.appendChild(note);div.appendChild(ratio);
     if(kind==='white'){
       const octlabel=document.createElement('span');octlabel.className='key-oct';
-      octlabel.textContent=center?'Ⅰ→Ⅱ':(oct===0?'Ⅰ':'Ⅱ');
+      octlabel.textContent=center?'Ⅰ→Ⅱ':upperCenter?'Ⅱ→Ⅲ':oct===-1?'低':oct===2?'Ⅲ':oct===0?'Ⅰ':'Ⅱ';
       div.appendChild(octlabel);
     }
     el('keyboard').appendChild(div);keyElements.set(id,div);
   }
   function renderKeyboard(){
     const area=el('keyboard');area.replaceChildren();keyElements.clear();
-    const w=100/15;
-    // 2オクターブ：15本の白鍵と、各オクターブ14本の上鍵＝43音。
-    for(let position=0;position<=14;position++){
-      // 15白鍵＝7 + 共通主音1 + 7。最後は上段の「,」＝4/1。
-      // 7番目は下段の「,」と上段のZが同一音なので、上段Zとして1回だけ生成。
-      const oct=position<7?0:1;
-      const key=position<7?WHITES[position]:WHITES[position-7];
-      createKey({id:idFor(oct,key),left:position*w,width:w,kind:'white',key,oct,center:position===7});
+    const w=100/WHITE_COUNT;
+    // 白鍵22本：元のC～C（15本）＋左にA・H（2本）＋右にD・E・F・G・A（5本）。
+    for(let position=LOW_WHITE_OFFSET;position<=HIGH_WHITE_OFFSET;position++){
+      // 既存の鍵IDは変更しない。下側だけoct=-1、上側だけoct=2を使用する。
+      // 基準Cの2オクターブ上は従来通り1:','で一回だけ生成。
+      let oct,key;
+      if(position<0){oct=-1;key=WHITES[position+7];}
+      else if(position<7){oct=0;key=WHITES[position];}
+      else if(position<=14){oct=1;key=WHITES[position-7];}
+      else {oct=2;key=WHITES[position-14];}
+      createKey({
+        id:idFor(oct,key),left:(position-LOW_WHITE_OFFSET)*w,width:w,
+        kind:'white',key,oct,center:position===7,upperCenter:position===14
+      });
     }
-    const marker=document.createElement('div');marker.className='octave-marker';area.appendChild(marker);
-    for(let oct=0;oct<=1;oct++){
-      for(let col=0;col<COLUMNS.length;col++){
-        const keys=COLUMNS[col];
-        const center=(oct*7+col+1)*w;
-        // 史料の1オクターブ鍵盤図（IMG_0878）に基づく列ごとの寸法。
-        // 全上鍵の上端は白鍵と同じ 0%。縦方向は途切れなく積み重ねる。
-        // 3段：上 0–30.5%、中 30.5–45%、下 45–63.5%。
-        // 2段：上 0–45%、下 45–63.5%。1段：上 0–30.5%。
-        // 先のWeb版の 3〜4% の縦隙間、1段列の過剰な長さを解消。
-        let specs=[];
-        if(keys.length===3)specs=[['gray',45,18.5],['black',30.5,14.5],['black',0,30.5]];
-        else if(keys.length===2)specs=[[keys[0]==='J'?'black':'gray',45,18.5],['black',0,45]];
-        else specs=[['black',0,30.5]];
-        keys.forEach((key,i)=>{
-          const [kind,top,height]=specs[i],width=w*.94;
-          createKey({id:idFor(oct,key),left:center-width/2,width,top,height,kind,key,oct});
-        });
-      }
+    // 各Cの左端を境界として表示（既存の中央境界も位置を補正）。
+    for(const position of [0,7,14]){
+      const marker=document.createElement('div');marker.className='octave-marker';
+      marker.style.left=`${(position-LOW_WHITE_OFFSET)*w}%`;
+      area.appendChild(marker);
+    }
+    // 上鍵の配列と高さは元の史料準拠設計を再利用する。
+    // 左端は前のオクターブの後半2列、右端は次のオクターブの前半5列。
+    for(let position=LOW_WHITE_OFFSET;position<HIGH_WHITE_OFFSET;position++){
+      const oct=Math.floor(position/7);
+      const col=((position%7)+7)%7;
+      const keys=COLUMNS[col];
+      const center=(position-LOW_WHITE_OFFSET+1)*w;
+      // 3段：上 0–30.5%、中 30.5–45%、下 45–63.5%。
+      // 2段：上 0–45%、下 45–63.5%。1段：上 0–30.5%。
+      let specs=[];
+      if(keys.length===3)specs=[['gray',45,18.5],['black',30.5,14.5],['black',0,30.5]];
+      else if(keys.length===2)specs=[[keys[0]==='J'?'black':'gray',45,18.5],['black',0,45]];
+      else specs=[['black',0,30.5]];
+      keys.forEach((key,i)=>{
+        const [kind,top,height]=specs[i],width=w*.94;
+        createKey({id:idFor(oct,key),left:center-width/2,width,top,height,kind,key,oct});
+      });
     }
   }
   function updateRatios(){
@@ -320,7 +338,7 @@
       const ratio=ratioFor(key),name=nameFor(oct,key);
       elem.querySelector('.key-ratio').textContent=displayedRatio(oct,key);
       elem.querySelector('.key-note-name').textContent=name;
-      elem.setAttribute('aria-label',`第${oct+1}オクターブ、${name}、比率 ${displayedRatio(oct,key)}`);
+      elem.setAttribute('aria-label',`${octaveLabel(oct)}、${name}、比率 ${displayedRatio(oct,key)}`);
       elem.classList.toggle('ratio-switched',ratio!==BASE[key]);
     }
   }
