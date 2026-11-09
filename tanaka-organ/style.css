@@ -67,8 +67,8 @@ html, body, .app, .keyboard { touch-action: none; -webkit-user-select: none; use
 .keyboard .upper-key.lower-black-contrast.pressed .key-note-name,
 .keyboard .upper-key.lower-black-contrast.pressed .key-ratio {color: #24352f; text-shadow:none;}
 
-/* 2026-11-08: 白鍵を下7本・上4本まで拡張。26白鍵（純正調77鍵/12平均律44鍵）用の文字サイズ。 */
-.keyboard-heading {grid-template-columns:7fr 7fr 7fr 4fr; font-size:clamp(8px,.76vw,10px);letter-spacing:.06em;}
+/* 2026-11-09: 白鍵を下7本・上5本まで拡張。27白鍵（純正調80鍵/12平均律46鍵）用の文字サイズ。 */
+.keyboard-heading {grid-template-columns:7fr 7fr 7fr 5fr; font-size:clamp(8px,.76vw,10px);letter-spacing:.06em;}
 .keyboard-heading span {white-space:nowrap;overflow:hidden;text-overflow:clip;}
 .keyboard-heading span:not(:last-child){border-right:1px solid #91ae914a;}
 .keyboard-heading span:first-child{border-right:1px solid #91ae914a;}
