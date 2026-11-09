@@ -409,7 +409,7 @@
       const col=((position%7)+7)%7;
       if(!EDO_BLACK_AFTER.has(col))continue;
       const semitone=equalWhiteSemitone(position)+1;
-      const width=w*.66,center=(position-LOW_WHITE_OFFSET+1)*w;
+      const width=w*.94,center=(position-LOW_WHITE_OFFSET+1)*w; // 純正調の上鍵と同じ横幅
       createKey({id:`edo:${semitone}`,left:center-width/2,width,top:0,height:60,
         kind:'black',oct:Math.floor(position/7),edoSemi:semitone});
     }
