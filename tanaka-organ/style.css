@@ -67,8 +67,8 @@ html, body, .app, .keyboard { touch-action: none; -webkit-user-select: none; use
 .keyboard .upper-key.lower-black-contrast.pressed .key-note-name,
 .keyboard .upper-key.lower-black-contrast.pressed .key-ratio {color: #24352f; text-shadow:none;}
 
-/* 2026-11-07: 白鍵を下2本・上5本延長。22白鍵（64音）用の文字サイズ。 */
-.keyboard-heading {grid-template-columns:2fr 7fr 7fr 6fr; font-size:clamp(8px,.80vw,10px);letter-spacing:.07em;}
+/* 2026-11-08: 白鍵を下7本・上4本まで拡張。26白鍵（純正調77鍵/12平均律44鍵）用の文字サイズ。 */
+.keyboard-heading {grid-template-columns:7fr 7fr 7fr 4fr; font-size:clamp(8px,.76vw,10px);letter-spacing:.06em;}
 .keyboard-heading span {white-space:nowrap;overflow:hidden;text-overflow:clip;}
 .keyboard-heading span:not(:last-child){border-right:1px solid #91ae914a;}
 .keyboard-heading span:first-child{border-right:1px solid #91ae914a;}
@@ -103,3 +103,6 @@ html, body, .app, .keyboard { touch-action: none; -webkit-user-select: none; use
   .switch {padding-left:8px;padding-right:8px;}
   .octave-control button {padding-left:9px;padding-right:9px;}
 }
+
+/* 12平均律はコンマ補正・長短調の重複なし：6列×2段の12音表示 */
+.tonic-grid.equal-tonics { grid-template-columns:repeat(6,minmax(0,1fr)); }

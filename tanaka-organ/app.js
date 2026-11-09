@@ -50,6 +50,13 @@
     '256/243':'D♭','32/27':'E♭','320/243':'F−1',
   });
   const CHROMATIC_GERMAN = ['C','D♭','D','E♭','E','F','F♯','G','A♭','A','B','H'];
+  // 12平均律用の移調板：シントニックコンマ補正表記や長短調の重複は不要。
+  // 純正調の18調データは一切変更しない。各ボタンは従来の代表調を選ぶ。
+  // ドイツ式音名 B=変ロ、H=ロ。
+  const EDO_TONIC_CHOICES = [
+    ['C',9],['D♭',10],['D',11],['E♭',13],['E',14],['F',16],
+    ['F♯',17],['G',0],['A♭',2],['A',3],['B',6],['H',7]
+  ];
   function gcd(a,b){while(b!==0){const tmp=b;b=a%b;a=tmp;}return a;}
   function normalizedRatio(a,b){
     while(a<b)a*=2;
@@ -79,9 +86,9 @@
   }
   const WHITES = ['Z','X','C','V','B','N','M',','];
   const COLUMNS = [['S','E','4'],['D','R'],['F'],['G','Y','7'],['H','U'],['J','I'],['K']];
-  // 既存のC～C（白鍵15本）から、下へ2本・上へ5本の白鍵を延長。
+  // 既存のC～C（白鍵15本）から、下へさらに広げて合計7本分、上は4本分まで表示する。
   // 白鍵位置は元の下端Cを0、1オクターブ上を7、2オクターブ上を14とする。
-  const LOW_WHITE_OFFSET = -2, HIGH_WHITE_OFFSET = 19;
+  const LOW_WHITE_OFFSET = -7, HIGH_WHITE_OFFSET = 18;
   const WHITE_COUNT = HIGH_WHITE_OFFSET - LOW_WHITE_OFFSET + 1;
   const el = id => document.getElementById(id);
   const state = {tonic:9, p:false,o:false,octave:0,sustain:false,equal:false};
@@ -283,6 +290,25 @@
   }
   function renderTuning() {
     const container=el('tonic-grid');container.replaceChildren();
+    container.classList.toggle('equal-tonics',state.equal);
+    if(state.equal){
+      // 12平均律は1半音につき1個のボタン。選択中の純正調名の−1は表示しない。
+      const active=((equalTonicSemitones()%12)+12)%12;
+      EDO_TONIC_CHOICES.forEach(([name,tonicIndex],semitone)=>{
+        const selected=semitone===active;
+        const b=document.createElement('button');b.type='button';
+        b.className='tonic-btn'+(selected?' active':'');
+        b.textContent=name;
+        b.setAttribute('aria-label',`${name}へ移調（12平均律）`);
+        b.setAttribute('aria-pressed',String(selected));
+        b.addEventListener('click',()=>{
+          if(selected)return;
+          stopAll();state.tonic=tonicIndex;renderTuning();updateUI();updateRatios();
+        });container.appendChild(b);
+      });
+      return;
+    }
+    // 純正調は元の18調、長短調、−1補正の文字をすべて維持。
     TONICS.forEach(([name,ratio,minor],index)=>{
       const b=document.createElement('button');b.type='button';
       b.className='tonic-btn'+(minor?' minor':'')+(state.tonic===index?' active':'');
@@ -325,7 +351,7 @@
     const area=el('keyboard');area.replaceChildren();keyElements.clear();
     if(state.equal){renderEqualKeyboard();return;}
     const w=100/WHITE_COUNT;
-    // 白鍵22本：元のC～C（15本）＋左にA・H（2本）＋右にD・E・F・G・A（5本）。
+    // 白鍵26本：元のC～C（15本）＋左にC・D・E・F・G・A・H（7本）＋右にD・E・F・G（4本）。
     for(let position=LOW_WHITE_OFFSET;position<=HIGH_WHITE_OFFSET;position++){
       // 既存の鍵IDは変更しない。下側だけoct=-1、上側だけoct=2を使用する。
       // 基準Cの2オクターブ上は従来通り1:','で一回だけ生成。
@@ -364,7 +390,7 @@
       });
     }
   }
-  // 同じ22白鍵・同じC位置に12平均律37鍵を描く。
+  // 同じ26白鍵・同じC位置に12平均律44鍵を描く。
   // 黒鍵はC-D、D-E、F-G、G-A、A-Hの間だけに1本ずつ置く。
   function renderEqualKeyboard(){
     const area=el('keyboard');
@@ -422,21 +448,21 @@
       const nearest=((equalTonicSemitones()%12)+12)%12;
       el('mode-label').textContent=`${CHROMATIC_GERMAN[nearest]} · 12平均律`;
       el('tuning-value').textContent='C基準 261.625565Hz · 100¢刻み';
-      el('mode-description').textContent='12平均律：18調の主音は最寄りの半音に変換 · P/Oは純正調専用';
-      el('keyboard-mode-caption').textContent='12-TONE EQUAL TEMPERAMENT · 37 KEYS';
-      el('instrument').setAttribute('aria-label','12平均律・白鍵22本・37鍵');
+      el('mode-description').textContent='12平均律：12音の移調（100¢刻み） · P/Oは純正調専用';
+      el('keyboard-mode-caption').textContent='12-TONE EQUAL TEMPERAMENT · 44 KEYS';
+      el('instrument').setAttribute('aria-label','12平均律・白鍵26本・44鍵');
     }else{
       el('mode-label').textContent=`${tonicName} ${minorMode()?'短調':'長調'}`;
       el('tuning-value').textContent=`固定基準比 ${TONICS[state.tonic][1]}`;
       el('mode-description').textContent='18の固定調名から選択 · 調名を押すと移調 · 鍵盤の比率は調の主音基準';
-      el('keyboard-mode-caption').textContent='JUST INTONATION · EXTENDED 64 KEYS';
-      el('instrument').setAttribute('aria-label','純正調・白鍵22本・64鍵');
+      el('keyboard-mode-caption').textContent='JUST INTONATION · EXTENDED 77 KEYS';
+      el('instrument').setAttribute('aria-label','純正調・白鍵26本・77鍵');
     }
   }
   function changeTuning(){
     stopAll();
     state.equal=!state.equal;
-    renderKeyboard();updateUI();updateRatios();
+    renderTuning();renderKeyboard();updateUI();updateRatios();
     el('note-status').textContent=state.equal?'12平均律に切替（100¢刻み）':'純正調に戻しました';
   }
   function changeMode(which){if(state.equal)return;stopAll();state[which]=!state[which];updateUI();updateRatios();}
