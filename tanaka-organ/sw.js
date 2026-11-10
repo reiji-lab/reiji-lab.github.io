@@ -1,5 +1,5 @@
 /* GitHub Pages /tanaka-organ/ 内の資材だけを対象にする。オンライン優先・オフライン時キャッシュ利用。 */
-const CACHE_NAME='tanaka-organ-ipad-2026-11-09-27white-5upper-v11';
+const CACHE_NAME='tanaka-organ-ipad-2026-11-10-touch-keyheight-v13';
 const FILES=['./','./index.html','./style.css','./app.js','./README.txt'];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE_NAME).then(c=>c.addAll(FILES)).then(()=>self.skipWaiting()));

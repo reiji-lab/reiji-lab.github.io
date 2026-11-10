@@ -106,3 +106,8 @@ html, body, .app, .keyboard { touch-action: none; -webkit-user-select: none; use
 
 /* 12平均律はコンマ補正・長短調の重複なし：6列×2段の12音表示 */
 .tonic-grid.equal-tonics { grid-template-columns:repeat(6,minmax(0,1fr)); }
+
+/* Windowsタッチモニター対策：鍵盤内のテキスト選択や長押しメニューを抑制 */
+#keyboard, #keyboard .play-key, #keyboard .play-key * {
+  touch-action: none; -webkit-touch-callout: none; -webkit-user-select: none; user-select: none;
+}

@@ -379,11 +379,11 @@
       const keys=COLUMNS[col];
       const center=(position-LOW_WHITE_OFFSET+1)*w;
       // 3段：上 0–30.5%、中 30.5–45%、下 45–63.5%。
-      // 2段：上 0–45%、下 45–63.5%。1段：上 0–30.5%。
+      // 2段：上 0–45%、下 45–63.5%。1段：E♯−2とH♯−2もD♯−2と同じ0–45%。
       let specs=[];
       if(keys.length===3)specs=[['gray',45,18.5],['black',30.5,14.5],['black',0,30.5]];
       else if(keys.length===2)specs=[[keys[0]==='J'?'black':'gray',45,18.5],['black',0,45]];
-      else specs=[['black',0,30.5]];
+      else specs=[['black',0,45]];
       keys.forEach((key,i)=>{
         const [kind,top,height]=specs[i],width=w*.94;
         createKey({id:idFor(oct,key),left:center-width/2,width,top,height,kind,key,oct});
@@ -478,7 +478,18 @@
   }
   function installPointers(){
     const area=el('keyboard');
+    // Windowsのタッチパネルで長押しが右クリック扱いになる場合への対策。
+    // 鍵盤内だけでブラウザ標準の右クリックメニューを禁止する（他のUIはそのまま）。
+    area.addEventListener('contextmenu',e=>{e.preventDefault();e.stopPropagation();});
+    area.addEventListener('selectstart',e=>e.preventDefault());
+    area.addEventListener('dragstart',e=>e.preventDefault());
+    // タッチ長押しの既定動作を抑え、PointerEventでの演奏を継続する。
+    area.addEventListener('touchstart',e=>{
+      if(e.cancelable)e.preventDefault();
+    },{passive:false});
     area.addEventListener('pointerdown',e=>{
+      // マウスの右クリック・中クリックは発音に使わない。
+      if(e.pointerType==='mouse' && e.button!==0)return;
       const note=hitKeyAt(e.clientX,e.clientY);if(!note)return;
       e.preventDefault();
       // 鍵盤全体で指を追い、スライド中もキー移動を認識。
