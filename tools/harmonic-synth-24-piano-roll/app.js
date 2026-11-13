@@ -2,6 +2,14 @@
   'use strict';
   const $ = id => document.getElementById(id);
   const MAX_LANES = 40, MAX_PARTIALS = 24, MAX_NOTES = 512, LABEL_WIDTH = 282;
+  const TET_MIN_MIDI = 36, TET_MAX_MIDI = 95; // C2 through B6 (5 octaves)
+  const PITCH_NAMES = ['C','C♯','D','D♯','E','F','F♯','G','G♯','A','A♯','B'];
+  const PITCH_FLATS = ['','D♭','','E♭','','','G♭','','A♭','','B♭',''];
+  const noteName = midi => PITCH_NAMES[midi%12] + (Math.floor(midi/12)-1);
+  const alternateName = midi => PITCH_FLATS[midi%12] ? PITCH_FLATS[midi%12] + (Math.floor(midi/12)-1) : '';
+  const isBlackKey = midi => [1,3,6,8,10].includes(midi%12);
+  const newTetLane = midi => ({id:id('lane-'),midi,volume:85,name:noteName(midi),notes:[]});
+  const makeTetLanes = () => Array.from({length:TET_MAX_MIDI-TET_MIN_MIDI+1}, (_,i)=>newTetLane(TET_MAX_MIDI-i));
   const waves = [['sine','正弦波'],['triangle','三角波'],['sawtooth','ノコギリ波'],['square','矩形波']];
   const clamp = (n,lo,hi) => Math.min(hi,Math.max(lo,n));
   const fmt = x => Number(x.toFixed(6)).toString();
@@ -60,7 +68,15 @@
   let baseHz=DEFAULT_SONG.baseHz, master=DEFAULT_SONG.master,
       tempo=DEFAULT_SONG.tempo, beatsPerBar=DEFAULT_SONG.beatsPerBar,
       bars=DEFAULT_SONG.bars, snap=DEFAULT_SONG.snap, beatPx=54;
-  let lanes=makeDefaultLanes(), selected=null;
+  let ratioLanes=makeDefaultLanes(), tetLanes=makeTetLanes();
+  let rollMode='ratio', a4Hz=440, tetFirstVisit=true;
+  let lanes=ratioLanes, selected=null;
+  const laneFrequency = lane => rollMode==='tet'?a4Hz*Math.pow(2,(lane.midi-69)/12):baseHz*parseRatio(lane.ratio);
+  const laneName = lane => rollMode==='tet'?noteName(lane.midi):(lane.name||lane.ratio);
+  const cloneLanes = list => list.map(l=>({id:id('lane-'),name:l.name||'',ratio:l.ratio,midi:l.midi,volume:l.volume,notes:l.notes.map(n=>newNote(n.start,n.duration,n.volume))}));
+  const savedLanes = list => list.map(l=>({name:l.name, ...(Number.isInteger(l.midi)?{midi:l.midi}:{ratio:l.ratio}),volume:l.volume,notes:l.notes.map(n=>({start:n.start,duration:n.duration,volume:n.volume}))}));
+  const currentRatioLanes = () => rollMode==='ratio'?lanes:ratioLanes;
+  const currentTetLanes = () => rollMode==='tet'?lanes:tetLanes;
   let partials=DEFAULT_SONG.partials.map(p=>({...p}));
   let ctx=null, masterGain=null, analyser=null, previewBus=null, audition=false;
   let oscBank=[],gainBank=[], sequenceBus=null, sequenceNodes=new Set(),playing=false;
@@ -183,12 +199,12 @@
       : scheduleNote(bus,at,duration,frequency,volume,snapshot,cache,headroom,nodes);
   }
   async function previewLane(lane){
-    const r=parseRatio(lane.ratio), freq=baseHz*r;
+    const freq=laneFrequency(lane);
     await setupAudio();
     const cache=new Map(),nodes=new Set(),bus=ctx.createGain();bus.connect(masterGain);
     scheduleActiveNote(bus,ctx.currentTime+.02,.65,freq,lane.volume/100,partials.map(p=>({...p})),cache,.7,nodes);
     setTimeout(()=>{try{bus.disconnect();}catch(_e){}},1250);
-    status(`${lane.name||lane.ratio}：${fixedHz(freq)} Hz を試聴しました。`);
+    status(`${laneName(lane)}：${fixedHz(freq)} Hz を試聴しました。`);
     animate();
   }
   function stopSequence(announce=true){
@@ -208,7 +224,7 @@
   function songEvents(){
     const events=[];
     for(const lane of lanes){
-      const freq=baseHz*parseRatio(lane.ratio);
+      const freq=laneFrequency(lane);
       for(const note of lane.notes){events.push({freq,start:note.start,duration:note.duration,volume:lane.volume*note.volume/10000});}
     }
     if(events.length===0)throw Error('音符がありません。タイムラインの空白をクリックして配置してください。');
@@ -283,11 +299,11 @@
   function renderInspector(){
     const s=getSelected(),enabled=!!s;
     ['noteStart','noteDuration','noteVolume','deleteNote'].forEach(key=>{$(key).disabled=!enabled;});
-    $('selectionName').textContent=s?`${s.lane.name||s.lane.ratio}（${s.lane.ratio}）`:'音符を選択してください';
+    $('selectionName').textContent=s?(rollMode==='tet'?`${noteName(s.lane.midi)}（12平均律 / MIDI ${s.lane.midi}）`:`${s.lane.name||s.lane.ratio}（${s.lane.ratio}）`):'音符を選択してください';
     if(s){
       $('noteStart').value=beatString(s.note.start);$('noteDuration').value=beatString(s.note.duration);$('noteVolume').value=s.note.volume;
       $('positionLabel').textContent=`第${Math.floor((s.note.start+1e-9)/beatsPerBar)+1}小節 / ${beatString(s.note.start%beatsPerBar+1)}拍目 → 長さ ${beatString(s.note.duration)}拍。1拍は4分音符です。`;
-    }else{$('noteStart').value='';$('noteDuration').value='';$('noteVolume').value='';$('positionLabel').textContent='空白をクリックすると、その行の音程比で音符が追加されます。空白の区間が休符です。';}
+    }else{$('noteStart').value='';$('noteDuration').value='';$('noteVolume').value='';$('positionLabel').textContent=rollMode==='tet'?'空白をクリックすると、その行の12平均律の音符が追加されます。空白の区間が休符です。':'空白をクリックすると、その行の音程比で音符が追加されます。空白の区間が休符です。';}
   }
   function selectNote(laneId,noteId){selected={laneId,noteId};
     document.querySelectorAll('.note-block').forEach(el=>el.classList.toggle('selected',el.dataset.noteId===noteId));
@@ -316,7 +332,7 @@
     const total=totalBeats(),width=total*beatPx,barWidth=beatsPerBar*beatPx;
     container.innerHTML='';container.style.width=(LABEL_WIDTH+width)+'px';
     const ruler=document.createElement('div');ruler.className='ruler-row';
-    const corner=document.createElement('div');corner.className='corner';corner.innerHTML='<span>音程比（自由入力）</span><small>音量%</small>';
+    const corner=document.createElement('div');corner.className='corner';corner.innerHTML=rollMode==='tet'?'<span>鍵盤 / 12平均律</span><small>音量%</small>':'<span>音程比（自由入力）</span><small>音量%</small>';
     const rulerTrack=document.createElement('div');rulerTrack.className='ruler-track';rulerTrack.style.width=width+'px';
     for(let bar=0;bar<bars;bar++){
       const label=document.createElement('div');label.className='bar-label';label.style.left=bar*barWidth+'px';label.style.width=barWidth+'px';label.textContent=`${bar+1} 小節`;rulerTrack.append(label);
@@ -336,28 +352,48 @@
     lanes.forEach((lane,laneIndex)=>{
       const row=document.createElement('div');row.className='note-row';
       const info=document.createElement('div');info.className='lane-info';
-      const index=document.createElement('span');index.className='lane-index';index.textContent=String(laneIndex+1).padStart(2,'0');
-      const ratio=document.createElement('input');ratio.className='lane-ratio';ratio.value=lane.ratio;ratio.title='周波数比。例：3/2、23/16';ratio.setAttribute('aria-label',`第${laneIndex+1}音の周波数比`);
-      ratio.addEventListener('change',()=>{
-        try{const val=parseRatio(ratio.value);if(baseHz*val<20||baseHz*val>=22050)throw Error('指定比率で発生する周波数が範囲外です。');lane.ratio=ratio.value.trim();lane.name='';renderRoll();}
-        catch(e){ratio.value=lane.ratio;sequenceStatus(e.message,'err');}
-      });
       const hz=document.createElement('span');hz.className='lane-hz';
-      try{hz.textContent=fixedHz(baseHz*parseRatio(lane.ratio))+' Hz';}catch(e){hz.textContent='無効';info.classList.add('bad-ratio');}
-      const vol=document.createElement('input');vol.className='lane-vol';vol.type='number';vol.min='0';vol.max='100';vol.step='1';vol.value=lane.volume;vol.title='この音の音量（%）';vol.setAttribute('aria-label',`第${laneIndex+1}音の音量`);
+      if(rollMode==='tet'){
+        row.classList.add('tet-row');
+        if(isBlackKey(lane.midi))row.classList.add('tet-black-row');
+        if(lane.midi%12===0)row.classList.add('tet-c-row');
+        const key=document.createElement('button');key.type='button';
+        key.className='piano-key '+(isBlackKey(lane.midi)?'black-key':'white-key');
+        key.textContent=noteName(lane.midi);
+        key.title=`${noteName(lane.midi)}${alternateName(lane.midi)?' / '+alternateName(lane.midi):''} · MIDI ${lane.midi} · クリックで試聴`;
+        key.setAttribute('aria-label',`${noteName(lane.midi)}を試聴`);
+        key.addEventListener('click',async()=>{try{await previewLane(lane);}catch(e){sequenceStatus(e.message,'err');}});
+        hz.textContent=fixedHz(laneFrequency(lane))+' Hz';
+        info.append(key,hz);
+      }else{
+        const index=document.createElement('span');index.className='lane-index';index.textContent=String(laneIndex+1).padStart(2,'0');
+        const ratio=document.createElement('input');ratio.className='lane-ratio';ratio.value=lane.ratio;ratio.title='周波数比。例：3/2、23/16';ratio.setAttribute('aria-label',`第${laneIndex+1}音の周波数比`);
+        ratio.addEventListener('change',()=>{
+          try{const val=parseRatio(ratio.value);if(baseHz*val<20||baseHz*val>=22050)throw Error('指定比率で発生する周波数が範囲外です。');lane.ratio=ratio.value.trim();lane.name='';renderRoll();}
+          catch(e){ratio.value=lane.ratio;sequenceStatus(e.message,'err');}
+        });
+        try{hz.textContent=fixedHz(laneFrequency(lane))+' Hz';}catch(e){hz.textContent='無効';info.classList.add('bad-ratio');}
+        info.append(index,ratio,hz);
+      }
+      const vol=document.createElement('input');vol.className='lane-vol';vol.type='number';vol.min='0';vol.max='100';vol.step='1';vol.value=lane.volume;vol.title='この音の音量（%）';vol.setAttribute('aria-label',`${laneName(lane)} の音量`);
       vol.addEventListener('change',()=>{const v=Number(vol.value);if(!Number.isInteger(v)||v<0||v>100){vol.value=lane.volume;sequenceStatus('音量は0〜100%で指定してください。','err');return;}lane.volume=v;});
       const hear=document.createElement('button');hear.className='lane-play';hear.type='button';hear.textContent='▶';hear.title='この音を試聴';hear.addEventListener('click',async()=>{try{await previewLane(lane);}catch(e){sequenceStatus(e.message,'err');}});
-      const del=document.createElement('button');del.className='lane-delete';del.type='button';del.textContent='×';del.title='この音程行を削除';del.setAttribute('aria-label',`第${laneIndex+1}音を削除`);
-      del.addEventListener('click',()=>{
-        if(lanes.length<=1){sequenceStatus('最後の1音は削除できません。','warn');return;}
-        if(lane.notes.length&&!confirm('この音程行にある音符も削除します。続けますか？'))return;
-        lanes=lanes.filter(l=>l.id!==lane.id);if(selected?.laneId===lane.id)selected=null;renderRoll();
-      });
-      info.append(index,ratio,hz,vol,hear,del);
+      if(rollMode==='tet'){
+        // Notes are fixed to the exact 12-TET MIDI pitches; the keyboard is not editable.
+        info.append(vol,hear);
+      }else{
+        const del=document.createElement('button');del.className='lane-delete';del.type='button';del.textContent='×';del.title='この音程行を削除';del.setAttribute('aria-label',`第${laneIndex+1}音を削除`);
+        del.addEventListener('click',()=>{
+          if(lanes.length<=1){sequenceStatus('最後の1音は削除できません。','warn');return;}
+          if(lane.notes.length&&!confirm('この音程行にある音符も削除します。続けますか？'))return;
+          lanes=lanes.filter(l=>l.id!==lane.id);if(selected?.laneId===lane.id)selected=null;renderRoll();
+        });
+        info.append(vol,hear,del);
+      }
       const track=document.createElement('div');track.className='lane-track';track.style.width=width+'px';
       track.style.backgroundImage='linear-gradient(to right, #455770 1px, transparent 1px), linear-gradient(to right, #354962 1px, transparent 1px), linear-gradient(to right, #29445688 1px, transparent 1px)';
       track.style.backgroundSize=`${barWidth}px 100%, ${beatPx}px 100%, ${snap*beatPx}px 100%`;
-      track.setAttribute('aria-label',`${lane.ratio} のタイムライン。空白をクリックして音符を配置`);
+      track.setAttribute('aria-label',`${laneName(lane)} のタイムライン。空白をクリックして音符を配置`);
       track.addEventListener('click',ev=>{
         if(ev.target.closest('.note-block'))return;
         if(allNotes()>=MAX_NOTES){sequenceStatus('音符は最大512個です。','warn');return;}
@@ -365,13 +401,13 @@
         const start=clamp(Math.floor((x/beatPx+1e-8)/snap)*snap,0,Math.max(0,total-snap));
         const duration=Math.min(newNoteDuration(),total-start),note=newNote(start,duration);
         lane.notes.push(note);selected={laneId:lane.id,noteId:note.id};renderRoll();
-        sequenceStatus(`音符を追加：${lane.ratio}、開始 ${beatString(start)}拍、長さ ${beatString(duration)}拍（${currentGridText()}）。`);
+        sequenceStatus(`音符を追加：${laneName(lane)}、開始 ${beatString(start)}拍、長さ ${beatString(duration)}拍（${currentGridText()}）。`);
       });
       lane.notes.forEach(note=>{
         const el=document.createElement('div');el.className='note-block';el.tabIndex=0;el.setAttribute('role','button');el.dataset.noteId=note.id;
         const w=note.duration*beatPx;el.style.left=(note.start*beatPx+1)+'px';el.style.width=Math.max(7,w-2)+'px';
         if(w<36)el.classList.add('too-small');if(w<18)el.classList.add('tiny-note');if(selected?.noteId===note.id)el.classList.add('selected');
-        const text=document.createElement('span');text.className='note-text';text.textContent=lane.ratio;
+        const text=document.createElement('span');text.className='note-text';text.textContent=laneName(lane);
         const handle=document.createElement('span');handle.className='resize-handle';handle.title='音符の長さを変更';
         el.append(text,handle);
         el.addEventListener('click',e=>{e.stopPropagation();selectNote(lane.id,note.id);});
@@ -405,12 +441,51 @@
       row.append(info,track);container.append(row);
     });
     const head=document.createElement('div');head.id='playhead';head.className='playhead';container.append(head);
-    $('trackCount').textContent=`${lanes.length} / ${MAX_LANES} 音`;
+    $('trackCount').textContent=rollMode==='tet'?`12平均律 · ${lanes.length}鍵`:`${lanes.length} / ${MAX_LANES} 音`;
     $('measureText').textContent=`${bars}小節 · ${total}拍 · ${allNotes()}音符`;
-    $('addLane').disabled=lanes.length>=MAX_LANES;
+    $('addLane').disabled=rollMode==='tet'||lanes.length>=MAX_LANES;
+    $('addLane').hidden=rollMode==='tet';
     scroll.scrollLeft=keepX;scroll.scrollTop=keepY;
     renderInspector();updateNavigator();if(playing)updatePlayhead();
   }
+  function syncRollModeUi(){
+    const ratio=rollMode==='ratio';
+    $('ratioModeButton').setAttribute('aria-selected',String(ratio));
+    $('equalModeButton').setAttribute('aria-selected',String(!ratio));
+    $('ratioModeButton').classList.toggle('active',ratio);
+    $('equalModeButton').classList.toggle('active',!ratio);
+    $('rollTitle').innerHTML=ratio?'比率ピアノロール <span class="minor">/ 最大40音程行</span>':'12平均律ピアノロール <span class="minor">/ C2〜B6・60鍵</span>';
+    $('tetTuningField').hidden=ratio;
+    $('rollGuideRatio').hidden=!ratio;
+    $('rollGuideTet').hidden=ratio;
+    $('rollPitchInfo').textContent=ratio?'基準周波数 × 入力した比率。音程は12平均律に丸めません。':'12平均律の音高＝A4基準Hz × 2^((MIDI番号−69)/12)。ピアノ鍵盤をクリックして試聴できます。';
+    $('resetScore').textContent=ratio?'禮司の初期データに戻す':'12平均律の音符をすべて消去';
+  }
+  function switchRollMode(next){
+    if(next===rollMode)return;
+    if(playing)stopSequence(false);
+    if(rollMode==='ratio')ratioLanes=lanes;else tetLanes=lanes;
+    rollMode=next;
+    lanes=rollMode==='ratio'?ratioLanes:tetLanes;
+    selected=null;
+    syncRollModeUi();renderRoll();
+    if(rollMode==='tet'&&tetFirstVisit){
+      const centerRow=TET_MAX_MIDI-60; // C4 approximately centered on first visit
+      $('scrollTimeline').scrollTop=Math.max(0,43+centerRow*52-260);
+      tetFirstVisit=false;
+    }
+    sequenceStatus(rollMode==='tet'
+      ?'12平均律ピアノロールに切り替えました。C2〜B6の60鍵。比率ピアノロールの音符は保存されたままです。'
+      :'比率ピアノロールに戻りました。純正比率の音符・位置・長さは変更していません。');
+  }
+  $('ratioModeButton').addEventListener('click',()=>switchRollMode('ratio'));
+  $('equalModeButton').addEventListener('click',()=>switchRollMode('tet'));
+  $('a4Hz').addEventListener('change',e=>{
+    const val=Number(e.target.value);
+    if(!Number.isFinite(val)||val<400||val>480){e.target.value=String(a4Hz);sequenceStatus('A4基準は400〜480 Hzで入力してください。','err');return;}
+    a4Hz=val;if(playing)stopSequence(false);renderRoll();
+    sequenceStatus(`12平均律の基準を A4 = ${a4Hz} Hz に設定しました。`);
+  });
   function updateNavigator(){
     const sc=$('scrollTimeline'),max=sc.scrollWidth-sc.clientWidth;
     $('horizontalNav').value=max>0?Math.round(sc.scrollLeft/max*1000):0;
@@ -419,7 +494,7 @@
   }
   $('scrollTimeline').addEventListener('scroll',updateNavigator,{passive:true});
   $('horizontalNav').addEventListener('input',e=>{const sc=$('scrollTimeline');sc.scrollLeft=(sc.scrollWidth-sc.clientWidth)*Number(e.target.value)/1000;});
-  $('addLane').addEventListener('click',()=>{if(lanes.length>=MAX_LANES)return;lanes.push(newLane());renderRoll();const sc=$('scrollTimeline');sc.scrollTop=sc.scrollHeight;sequenceStatus(`音程行を追加しました（${lanes.length}/${MAX_LANES}）。左側の1/1を編集してください。`);});
+  $('addLane').addEventListener('click',()=>{if(rollMode!=='ratio'||lanes.length>=MAX_LANES)return;lanes.push(newLane());renderRoll();const sc=$('scrollTimeline');sc.scrollTop=sc.scrollHeight;sequenceStatus(`音程行を追加しました（${lanes.length}/${MAX_LANES}）。左側の1/1を編集してください。`);});
   $('tempo').addEventListener('change',e=>{const v=Number(e.target.value);if(!Number.isInteger(v)||v<20||v>300){e.target.value=tempo;sequenceStatus('テンポは20〜300 BPMで指定してください。','err');return;}tempo=v;});
   $('meter').addEventListener('change',e=>{
     const nextBeatsPerBar=Number(e.target.value);
@@ -430,8 +505,8 @@
     }
     // Keep note positions and durations unchanged when regrouping measures.
     // Extend the bar count if the new meter would otherwise cut off notes.
-    const lastNoteEnd=lanes.reduce((max,lane)=>
-      lane.notes.reduce((end,note)=>Math.max(end,note.start+note.duration),max),0);
+    const lastNoteEnd=[currentRatioLanes(),currentTetLanes()].reduce((prev,list)=>
+      list.reduce((max,lane)=>lane.notes.reduce((end,note)=>Math.max(end,note.start+note.duration),max),prev),0);
     const requiredBars=Math.max(1,Math.ceil((lastNoteEnd-1e-7)/nextBeatsPerBar));
     const previousBars=bars;
     const nextBars=Math.max(bars,requiredBars);
@@ -450,7 +525,7 @@
   });
   $('bars').addEventListener('change',e=>{
     const b=Number(e.target.value);
-    if(!Number.isInteger(b)||b<1||b>64||lanes.some(l=>l.notes.some(n=>n.start+n.duration>b*beatsPerBar+1e-6))){e.target.value=bars;sequenceStatus('小節数は1〜64。配置済みの音符を切り捨てる変更はできません。','warn');return;}
+    if(!Number.isInteger(b)||b<1||b>64||[currentRatioLanes(),currentTetLanes()].some(list=>list.some(l=>l.notes.some(n=>n.start+n.duration>b*beatsPerBar+1e-6)))){e.target.value=bars;sequenceStatus('小節数は1〜64。配置済みの音符を切り捨てる変更はできません。','warn');return;}
     bars=b;renderRoll();
   });
   $('snap').addEventListener('change',e=>{
@@ -475,15 +550,30 @@
     $('preset').value='custom';
   }
   $('resetScore').addEventListener('click',()=>{
+    if(rollMode==='tet'){
+      if(!confirm('12平均律ピアノロールの音符をすべて消去します。比率ピアノロールは変更されません。よろしいですか？'))return;
+      if(playing)stopSequence(false);tetLanes=makeTetLanes();lanes=tetLanes;selected=null;renderRoll();
+      sequenceStatus('12平均律の音符をすべて消去しました。比率ピアノロールはそのままです。');return;
+    }
     if(playing)stopSequence(false);
-    baseHz=DEFAULT_SONG.baseHz;master=DEFAULT_SONG.master;tempo=DEFAULT_SONG.tempo;
-    beatsPerBar=DEFAULT_SONG.beatsPerBar;bars=DEFAULT_SONG.bars;snap=DEFAULT_SONG.snap;
-    beatPx=54;lanes=makeDefaultLanes();partials=DEFAULT_SONG.partials.map(p=>({...p}));selected=null;
+    const hasTetNotes=tetLanes.some(l=>l.notes.length>0);
+    baseHz=DEFAULT_SONG.baseHz;master=DEFAULT_SONG.master;
+    if(!hasTetNotes){
+      // Safe to restore shared timeline when the equal-temperament roll is empty.
+      tempo=DEFAULT_SONG.tempo;beatsPerBar=DEFAULT_SONG.beatsPerBar;
+      bars=DEFAULT_SONG.bars;snap=DEFAULT_SONG.snap;
+    }else{
+      // Do not silently clip notes belonging to the other piano roll.
+      bars=Math.max(bars,Math.ceil((DEFAULT_SONG.bars*DEFAULT_SONG.beatsPerBar-1e-7)/beatsPerBar));
+    }
+    beatPx=54;ratioLanes=makeDefaultLanes();lanes=ratioLanes;partials=DEFAULT_SONG.partials.map(p=>({...p}));selected=null;
     syncSongSettings();
     $('scrollTimeline').scrollLeft=0;$('scrollTimeline').scrollTop=0;
     soundSource='synth';$('soundSource').value='synth';sampleReferenceHz=DEFAULT_SONG.baseHz;$('sampleReferenceHz').value=sampleReferenceHz;syncPower();
     refreshAudio();renderMixer();renderRoll();drawVisuals();
-    sequenceStatus('禮司の初期データを復元しました：英国国歌（純正比率）、3/4拍子・14小節。音符とミキシング設定も復元しています。');
+    sequenceStatus(hasTetNotes
+      ?'禮司の英国国歌・音色を復元しました。12平均律の音符を保護するため、共有のテンポ・拍子・小節数・グリッドは維持しています。'
+      :'禮司の初期データを復元しました：英国国歌（純正比率）、3/4拍子・14小節。音符とミキシング設定も復元しています。');
   });
   function validTimbre(data){
     if(!Array.isArray(data)||data.length!==MAX_PARTIALS)throw Error('24倍音のデータが不正です。');
@@ -493,18 +583,23 @@
     const blob=new Blob([JSON.stringify(value,null,2)],{type:'application/json;charset=utf-8'}),url=URL.createObjectURL(blob);
     const a=document.createElement('a');a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),2000);
   }
-  $('saveSong').addEventListener('click',()=>exportFile('reiji-lab-ratio-roll-song.json',{
-    format:'reiji-lab-ratio-piano-roll',version:1,baseHz,master,tempo,beatsPerBar,bars,snap,sampler:{mode:soundSource,referenceHz:sampleReferenceHz,filename:sampleFilename},lanes:lanes.map(l=>({name:l.name,ratio:l.ratio,volume:l.volume,notes:l.notes.map(n=>({start:n.start,duration:n.duration,volume:n.volume}))})),partials
+  $('saveSong').addEventListener('click',()=>exportFile('reiji-lab-piano-roll-song.json',{
+    format:'reiji-lab-ratio-piano-roll',version:2,baseHz,master,tempo,beatsPerBar,bars,snap,
+    activeRoll:rollMode,a4Hz,
+    sampler:{mode:soundSource,referenceHz:sampleReferenceHz,filename:sampleFilename},
+    // Keep the legacy ratio lanes at the original root for compatibility.
+    lanes:savedLanes(currentRatioLanes()),
+    pianoRolls:{ratio:savedLanes(currentRatioLanes()),tet:savedLanes(currentTetLanes())},
+    partials
   }));
   // Full mixer export: independent from the score, including all gains and
   // partial waveform choices. Note positions and tuning ratios are metadata only
   // so that a mix cannot silently change another score's notes.
   $('saveMix').addEventListener('click',()=>{
-    exportFile('reiji-lab-ratio-roll-mixing.json',{
+    exportFile(rollMode==='tet'?'reiji-lab-12tet-mixing.json':'reiji-lab-ratio-roll-mixing.json',{
       format:'reiji-lab-ratio-roll-mixing',version:1,
-      baseHz,master,
-      lanes:lanes.map(l=>({ratio:l.ratio,name:l.name,volume:l.volume,
-        notes:l.notes.map(n=>({start:n.start,duration:n.duration,volume:n.volume}))})),
+      baseHz,master,mode:rollMode,a4Hz,
+      lanes:savedLanes(lanes),
       partials:partials.map(p=>({...p}))
     });
     sequenceStatus('曲全体のミキシング設定をダウンロードしました（音程比・音符のタイミングは変更されません）。');
@@ -517,6 +612,7 @@
       const d=JSON.parse(await f.text());
       if(d.format!=='reiji-lab-ratio-roll-mixing'||d.version!==1)
         throw Error('このアプリのミキシング設定JSONではありません。');
+      if((d.mode||'ratio')!==rollMode)throw Error('ミキシング設定のピアノロール方式が異なります。対応する方式に切り替えてください。');
       if(!Array.isArray(d.lanes)||d.lanes.length!==lanes.length)
         throw Error('音程行の数が異なります。曲を読み込んでからミキシング設定を適用してください。');
       if(!Number.isFinite(d.master)||d.master<0||d.master>100)
@@ -524,7 +620,7 @@
       const timbre=validTimbre(d.partials);
       const levels=d.lanes.map((l,i)=>{
         const source=lanes[i];
-        if(!l||l.ratio!==source.ratio||!Array.isArray(l.notes)||l.notes.length!==source.notes.length)
+        if(!l||(rollMode==='tet'?l.midi!==source.midi:l.ratio!==source.ratio)||!Array.isArray(l.notes)||l.notes.length!==source.notes.length)
           throw Error('音程比または音符の数が異なります。同じ曲のミキシング情報を使ってください。');
         if(!Number.isFinite(l.volume)||l.volume<0||l.volume>100)
           throw Error('音程行の音量が不正です。');
@@ -545,7 +641,7 @@
         v.noteLevels.forEach((level,j)=>{lanes[i].notes[j].volume=level;});});
       $('master').value=master;$('masterValue').textContent=master+'%';
       $('preset').value='custom';refreshAudio();renderMixer();renderRoll();drawVisuals();
-      sequenceStatus('ミキシング設定を読み込みました。音程比と発音位置は変更していません。');
+      sequenceStatus('ミキシング設定を読み込みました。音高と発音位置は変更していません。');
     }catch(err){announceError(err);}finally{e.target.value='';}
   });
   $('loadSong').addEventListener('click',()=>$('songFile').click());
@@ -557,18 +653,44 @@
       if(d.format!=='reiji-lab-ratio-piano-roll'||!Array.isArray(d.lanes)||d.lanes.length<1||d.lanes.length>MAX_LANES)throw Error('このアプリの曲データではありません。');
       if(![2,3,4,6].includes(d.beatsPerBar)||!Number.isInteger(d.bars)||d.bars<1||d.bars>64||!Number.isFinite(d.tempo)||d.tempo<20||d.tempo>300||!Number.isFinite(d.baseHz)||d.baseHz<20||d.baseHz>2000||!Number.isFinite(d.master)||d.master<0||d.master>100)throw Error('曲の基本設定が不正です。');
       let count=0;
-      const clean=d.lanes.map(l=>{
-        if(!l||typeof l.ratio!=='string'||!Array.isArray(l.notes)||!Number.isFinite(l.volume)||l.volume<0||l.volume>100)throw Error('音程行の値が不正です。');
-        const r=parseRatio(l.ratio);if(d.baseHz*r<20||d.baseHz*r>=22050)throw Error('周波数比が再生可能範囲外です。');
-        const notes=l.notes.map(n=>{
-          if(!n||!Number.isFinite(n.start)||n.start<0||!Number.isFinite(n.duration)||n.duration<=0||n.start+n.duration>d.bars*d.beatsPerBar+1e-6||!Number.isFinite(n.volume)||n.volume<0||n.volume>100)throw Error('音符の値が不正です。');
-          count++;return {id:id('note-'),start:n.start,duration:n.duration,volume:n.volume};
-        });return {id:id('lane-'),name:typeof l.name==='string'?l.name.slice(0,30):'',ratio:l.ratio,volume:l.volume,notes};
+      const cleanRatio=data=>{
+        if(!Array.isArray(data)||!data.length||data.length>MAX_LANES)throw Error('比率ピアノロールの行数が不正です。');
+        return data.map(l=>{
+          if(!l||typeof l.ratio!=='string'||!Array.isArray(l.notes)||!Number.isFinite(l.volume)||l.volume<0||l.volume>100)throw Error('音程行の値が不正です。');
+          const r=parseRatio(l.ratio);if(d.baseHz*r<20||d.baseHz*r>=22050)throw Error('周波数比が再生可能範囲外です。');
+          return {id:id('lane-'),name:typeof l.name==='string'?l.name.slice(0,30):'',ratio:l.ratio,volume:l.volume,notes:cleanNotes(l.notes)};
+        });
+      };
+      const cleanNotes=notes=>notes.map(n=>{
+        if(!n||!Number.isFinite(n.start)||n.start<0||!Number.isFinite(n.duration)||n.duration<=0||n.start+n.duration>d.bars*d.beatsPerBar+1e-6||!Number.isFinite(n.volume)||n.volume<0||n.volume>100)throw Error('音符の値が不正です。');
+        count++;return newNote(n.start,n.duration,n.volume);
       });
-      if(count>MAX_NOTES)throw Error('音符は512個以内にしてください。');
+      const cleanTet=data=>{
+        if(!Array.isArray(data)||data.length!==TET_MAX_MIDI-TET_MIN_MIDI+1)throw Error('12平均律ピアノロールには60鍵が必要です。');
+        const midiSeen=new Set();
+        const list=data.map(l=>{
+          if(!l||!Number.isInteger(l.midi)||l.midi<TET_MIN_MIDI||l.midi>TET_MAX_MIDI||midiSeen.has(l.midi)||!Array.isArray(l.notes)||!Number.isFinite(l.volume)||l.volume<0||l.volume>100)throw Error('12平均律ピアノロールの鍵盤データが不正です。');
+          midiSeen.add(l.midi);
+          return {id:id('lane-'),name:noteName(l.midi),midi:l.midi,volume:l.volume,notes:cleanNotes(l.notes)};
+        });
+        list.sort((a,b)=>b.midi-a.midi);
+        return list;
+      };
+      const importedRatio=cleanRatio(d.pianoRolls?.ratio||d.lanes);
+      const importedTet=d.pianoRolls?.tet?cleanTet(d.pianoRolls.tet):makeTetLanes();
+      if(count>MAX_NOTES*2)throw Error('各ピアノロールの音符は512個以内です。');
+      if(importedRatio.reduce((sum,l)=>sum+l.notes.length,0)>MAX_NOTES || importedTet.reduce((sum,l)=>sum+l.notes.length,0)>MAX_NOTES)throw Error('各ピアノロールの音符は512個以内です。');
+      const importedA4=Number.isFinite(d.a4Hz)?d.a4Hz:440;
+      if(importedA4<400||importedA4>480)throw Error('A4基準は400〜480 Hzで指定してください。');
       const importedPartials=d.partials?validTimbre(d.partials):partials;
       if(playing)stopSequence(false);
-      lanes=clean;partials=importedPartials;tempo=d.tempo;beatsPerBar=d.beatsPerBar;bars=d.bars;baseHz=d.baseHz;master=d.master;selected=null;
+      ratioLanes=importedRatio;tetLanes=importedTet;
+      rollMode=d.activeRoll==='tet'&&d.pianoRolls?.tet?'tet':'ratio';
+      lanes=rollMode==='tet'?tetLanes:ratioLanes;
+      a4Hz=importedA4;tetFirstVisit=rollMode!=='tet';
+      partials=importedPartials;tempo=d.tempo;beatsPerBar=d.beatsPerBar;bars=d.bars;baseHz=d.baseHz;master=d.master;selected=null;
+      $('a4Hz').value=String(a4Hz);
+      syncRollModeUi();
       // Old saves do not have snap; keep the old default in that case.
       snap=[1,.5,.25,2/3,1/3,1/6].find(v=>Math.abs((d.snap??.25)-v)<1e-10)??.25;
       $('snap').value=String(snap);
@@ -581,7 +703,7 @@
       updateSamplerUi();syncPower();
       $('tempo').value=tempo;$('meter').value=beatsPerBar;$('bars').value=bars;$('baseHz').value=baseHz;$('master').value=master;$('masterValue').textContent=master+'%';$('preset').value='custom';
       refreshAudio();renderMixer();renderRoll();drawVisuals();
-      sequenceStatus(`読み込み完了：${lanes.length}音階行・${count}音符。${soundSource==='sample'&&!sampleBuffer?' 音声はJSONに含まれません。WAVファイルを別途読み込んでください。':''}`);
+      sequenceStatus(`読み込み完了：${rollMode==='tet'?'12平均律':'比率'} ${lanes.length}音程行、合計${count}音符。${soundSource==='sample'&&!sampleBuffer?' 音声はJSONに含まれません。WAVファイルを別途読み込んでください。':''}`);
     }catch(err){announceError(err);}finally{e.target.value='';}
   });
   $('saveTimbre').addEventListener('click',()=>exportFile('reiji-lab-harmonics-24.json',{format:'reiji-lab-harmonic-synth-24',version:1,baseHz,master,partials}));
@@ -785,5 +907,5 @@
   }
   window.addEventListener('resize',()=>{drawVisuals();updateNavigator();},{passive:true});
   document.addEventListener('visibilitychange',()=>{if(!document.hidden)drawVisuals();});
-  syncSongSettings();$('sampleReferenceHz').value=sampleReferenceHz;renderMixer();renderRoll();syncPower();drawVisuals();updateSamplerUi();
+  syncSongSettings();$('a4Hz').value=String(a4Hz);syncRollModeUi();$('sampleReferenceHz').value=sampleReferenceHz;renderMixer();renderRoll();syncPower();drawVisuals();updateSamplerUi();
 })();
