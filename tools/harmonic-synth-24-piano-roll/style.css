@@ -12,3 +12,6 @@ button,input,select{font:inherit}button{cursor:pointer}button:disabled{cursor:no
 .subdivision-tick.triplet-tick{height:10px;border-color:#75b9c66e}
 
 .note-block.tiny-note .resize-handle{width:4px}
+
+/* Transparent development credit */
+.copyright{align-items:center;gap:12px;flex-wrap:wrap}.dev-credit{font-size:10px;color:#8292aa;letter-spacing:.02em}

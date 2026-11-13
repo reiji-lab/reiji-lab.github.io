@@ -45,19 +45,23 @@
   const id = prefix => prefix + (nextID++);
   const newNote = (start,duration,volume=100) => ({id:id('note-'),start,duration,volume});
   const newLane = (ratio='1/1',name='') => ({id:id('lane-'),ratio,volume:85,name,notes:[]});
-  function makeDemo() {
-    const config=[
-      ['15/8','B4',[[8,4]]], ['5/3','A4',[[4,4]]],
-      ['3/2','G4',[[0,4],[8,4],[12,4]]], ['4/3','F4',[[4,4]]],
-      ['5/4','E4',[[0,4],[12,4]]], ['9/8','D4',[[8,4]]],
-      ['1/1','C4',[[0,4],[4,4],[12,4]]],
-      ['3/4','G3',[[8,4]]], ['2/3','F3',[[4,4]]], ['1/2','C3',[[0,4],[12,4]]]
-    ];
-    return config.map(([ratio,name,events])=>({id:id('lane-'),ratio,name,volume:85,notes:events.map(([start,duration])=>newNote(start,duration))}));
+  // Default data is exactly the JSON saved by Reiji. Do not reduce ratios,
+  // quantize beats, re-sort note events, or reinterpret tuning symbols.
+  const DEFAULT_SONG = window.REIJI_DEFAULT_SONG;
+  if (!DEFAULT_SONG || DEFAULT_SONG.format !== 'reiji-lab-ratio-piano-roll') {
+    throw Error('初期演奏データを読み込めませんでした。default-data.js を確認してください。');
   }
-  let baseHz=261.625565, master=55, tempo=72, beatsPerBar=4, bars=4, snap=.25, beatPx=54;
-  let lanes=makeDemo(), selected=null;
-  let partials=makePartials('organ');
+  function makeDefaultLanes() {
+    return DEFAULT_SONG.lanes.map(lane => ({
+      id:id('lane-'),name:lane.name,ratio:lane.ratio,volume:lane.volume,
+      notes:lane.notes.map(note=>newNote(note.start,note.duration,note.volume))
+    }));
+  }
+  let baseHz=DEFAULT_SONG.baseHz, master=DEFAULT_SONG.master,
+      tempo=DEFAULT_SONG.tempo, beatsPerBar=DEFAULT_SONG.beatsPerBar,
+      bars=DEFAULT_SONG.bars, snap=DEFAULT_SONG.snap, beatPx=54;
+  let lanes=makeDefaultLanes(), selected=null;
+  let partials=DEFAULT_SONG.partials.map(p=>({...p}));
   let ctx=null, masterGain=null, analyser=null, previewBus=null, audition=false;
   let oscBank=[],gainBank=[], sequenceBus=null, sequenceNodes=new Set(),playing=false;
   let sequenceStart=0, sequenceEnd=0, seqCount=0, raf=0, timeArray=null;
@@ -423,11 +427,27 @@
   $('zoom').addEventListener('input',e=>{beatPx=Number(e.target.value);$('zoomLabel').textContent=beatPx+'px/拍';renderRoll();});
   $('sequencePlay').addEventListener('click',async()=>{const b=$('sequencePlay');b.disabled=true;try{await startSequence();}catch(e){announceError(e);}finally{b.disabled=false;}});
   $('sequenceStop').addEventListener('click',()=>stopSequence());
+  function syncSongSettings() {
+    $('tempo').value=tempo;
+    $('meter').value=beatsPerBar;
+    $('bars').value=bars;
+    $('snap').value=String(snap);
+    $('zoom').value=beatPx;
+    $('zoomLabel').textContent=beatPx+'px/拍';
+    $('baseHz').value=baseHz;
+    $('master').value=master;
+    $('masterValue').textContent=master+'%';
+    $('preset').value='custom';
+  }
   $('resetScore').addEventListener('click',()=>{
     if(playing)stopSequence(false);
-    tempo=72;beatsPerBar=4;bars=4;snap=.25;beatPx=54;lanes=makeDemo();selected=null;
-    $('tempo').value=tempo;$('meter').value=beatsPerBar;$('bars').value=bars;$('snap').value=String(snap);$('zoom').value=beatPx;$('zoomLabel').textContent=beatPx+'px/拍';
-    $('scrollTimeline').scrollLeft=0;$('scrollTimeline').scrollTop=0;renderRoll();sequenceStatus('サンプルを復元しました：4/4拍子・4小節、C → F → G → C。');
+    baseHz=DEFAULT_SONG.baseHz;master=DEFAULT_SONG.master;tempo=DEFAULT_SONG.tempo;
+    beatsPerBar=DEFAULT_SONG.beatsPerBar;bars=DEFAULT_SONG.bars;snap=DEFAULT_SONG.snap;
+    beatPx=54;lanes=makeDefaultLanes();partials=DEFAULT_SONG.partials.map(p=>({...p}));selected=null;
+    syncSongSettings();
+    $('scrollTimeline').scrollLeft=0;$('scrollTimeline').scrollTop=0;
+    refreshAudio();renderMixer();renderRoll();drawVisuals();
+    sequenceStatus('禮司の初期データを復元しました：英国国歌（純正比率）、3/4拍子・14小節。音符とミキシング設定も復元しています。');
   });
   function validTimbre(data){
     if(!Array.isArray(data)||data.length!==MAX_PARTIALS)throw Error('24倍音のデータが不正です。');
@@ -440,6 +460,58 @@
   $('saveSong').addEventListener('click',()=>exportFile('reiji-lab-ratio-roll-song.json',{
     format:'reiji-lab-ratio-piano-roll',version:1,baseHz,master,tempo,beatsPerBar,bars,snap,lanes:lanes.map(l=>({name:l.name,ratio:l.ratio,volume:l.volume,notes:l.notes.map(n=>({start:n.start,duration:n.duration,volume:n.volume}))})),partials
   }));
+  // Full mixer export: independent from the score, including all gains and
+  // partial waveform choices. Note positions and tuning ratios are metadata only
+  // so that a mix cannot silently change another score's notes.
+  $('saveMix').addEventListener('click',()=>{
+    exportFile('reiji-lab-ratio-roll-mixing.json',{
+      format:'reiji-lab-ratio-roll-mixing',version:1,
+      baseHz,master,
+      lanes:lanes.map(l=>({ratio:l.ratio,name:l.name,volume:l.volume,
+        notes:l.notes.map(n=>({start:n.start,duration:n.duration,volume:n.volume}))})),
+      partials:partials.map(p=>({...p}))
+    });
+    sequenceStatus('曲全体のミキシング設定をダウンロードしました（音程比・音符のタイミングは変更されません）。');
+  });
+  $('loadMix').addEventListener('click',()=>$('mixFile').click());
+  $('mixFile').addEventListener('change',async e=>{
+    const f=e.target.files?.[0];if(!f)return;
+    try{
+      if(f.size>3e5)throw Error('ファイルが大きすぎます。');
+      const d=JSON.parse(await f.text());
+      if(d.format!=='reiji-lab-ratio-roll-mixing'||d.version!==1)
+        throw Error('このアプリのミキシング設定JSONではありません。');
+      if(!Array.isArray(d.lanes)||d.lanes.length!==lanes.length)
+        throw Error('音程行の数が異なります。曲を読み込んでからミキシング設定を適用してください。');
+      if(!Number.isFinite(d.master)||d.master<0||d.master>100)
+        throw Error('マスター音量が不正です。');
+      const timbre=validTimbre(d.partials);
+      const levels=d.lanes.map((l,i)=>{
+        const source=lanes[i];
+        if(!l||l.ratio!==source.ratio||!Array.isArray(l.notes)||l.notes.length!==source.notes.length)
+          throw Error('音程比または音符の数が異なります。同じ曲のミキシング情報を使ってください。');
+        if(!Number.isFinite(l.volume)||l.volume<0||l.volume>100)
+          throw Error('音程行の音量が不正です。');
+        const noteLevels=l.notes.map((n,j)=>{
+          const original=source.notes[j];
+          if(!n||!Number.isFinite(n.start)||!Number.isFinite(n.duration)||
+            Math.abs(n.start-original.start)>1e-7||Math.abs(n.duration-original.duration)>1e-7)
+            throw Error('音符の発音位置や音価が異なります。元の曲に適用してください。');
+          if(!Number.isFinite(n.volume)||n.volume<0||n.volume>100)
+            throw Error('音符の音量が不正です。');
+          return n.volume;
+        });
+        return {volume:l.volume,noteLevels};
+      });
+      if(playing)stopSequence(false);
+      master=d.master;partials=timbre;
+      levels.forEach((v,i)=>{lanes[i].volume=v.volume;
+        v.noteLevels.forEach((level,j)=>{lanes[i].notes[j].volume=level;});});
+      $('master').value=master;$('masterValue').textContent=master+'%';
+      $('preset').value='custom';refreshAudio();renderMixer();renderRoll();drawVisuals();
+      sequenceStatus('ミキシング設定を読み込みました。音程比と発音位置は変更していません。');
+    }catch(err){announceError(err);}finally{e.target.value='';}
+  });
   $('loadSong').addEventListener('click',()=>$('songFile').click());
   $('songFile').addEventListener('change',async e=>{
     const f=e.target.files?.[0];if(!f)return;
@@ -507,5 +579,5 @@
   }
   window.addEventListener('resize',()=>{drawVisuals();updateNavigator();},{passive:true});
   document.addEventListener('visibilitychange',()=>{if(!document.hidden)drawVisuals();});
-  renderMixer();renderRoll();syncPower();drawVisuals();
+  syncSongSettings();renderMixer();renderRoll();syncPower();drawVisuals();
 })();
