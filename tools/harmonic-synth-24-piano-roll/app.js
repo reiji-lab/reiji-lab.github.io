@@ -340,9 +340,31 @@
   $('addLane').addEventListener('click',()=>{if(lanes.length>=MAX_LANES)return;lanes.push(newLane());renderRoll();const sc=$('scrollTimeline');sc.scrollTop=sc.scrollHeight;sequenceStatus(`音程行を追加しました（${lanes.length}/${MAX_LANES}）。左側の1/1を編集してください。`);});
   $('tempo').addEventListener('change',e=>{const v=Number(e.target.value);if(!Number.isInteger(v)||v<20||v>300){e.target.value=tempo;sequenceStatus('テンポは20〜300 BPMで指定してください。','err');return;}tempo=v;});
   $('meter').addEventListener('change',e=>{
-    const old=beatsPerBar;beatsPerBar=Number(e.target.value);
-    if(lanes.some(l=>l.notes.some(n=>n.start+n.duration>totalBeats()+1e-6))){beatsPerBar=old;e.target.value=old;sequenceStatus('既存の音符が収まらないため変更できません。先に小節数を増やしてください。','warn');return;}
+    const nextBeatsPerBar=Number(e.target.value);
+    if(![2,3,4,6].includes(nextBeatsPerBar)){
+      e.target.value=beatsPerBar;
+      sequenceStatus('対応していない拍子です。','err');
+      return;
+    }
+    // Keep note positions and durations unchanged when regrouping measures.
+    // Extend the bar count if the new meter would otherwise cut off notes.
+    const lastNoteEnd=lanes.reduce((max,lane)=>
+      lane.notes.reduce((end,note)=>Math.max(end,note.start+note.duration),max),0);
+    const requiredBars=Math.max(1,Math.ceil((lastNoteEnd-1e-7)/nextBeatsPerBar));
+    const previousBars=bars;
+    const nextBars=Math.max(bars,requiredBars);
+    if(nextBars>64){
+      e.target.value=beatsPerBar;
+      sequenceStatus('この拍子では64小節を超えるため変更できません。音符を減らすか小節を調整してください。','warn');
+      return;
+    }
+    if(playing)stopSequence(false);
+    beatsPerBar=nextBeatsPerBar;
+    bars=nextBars;
+    $('bars').value=bars;
     renderRoll();
+    const expanded=bars>previousBars?`音符を残すため小節数を${previousBars}→${bars}に自動調整しました。`:'音符の位置と長さは維持されます。';
+    sequenceStatus(`拍子を${beatsPerBar}/4に変更しました。${bars}小節・${totalBeats()}拍。${expanded}`);
   });
   $('bars').addEventListener('change',e=>{
     const b=Number(e.target.value);
