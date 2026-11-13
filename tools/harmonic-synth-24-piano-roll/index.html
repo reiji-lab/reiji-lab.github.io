@@ -75,8 +75,8 @@
     <div class="panel vizpanel"><div class="panelhead"><h2>倍音レベル</h2><span class="minor">第1〜24倍音の設定</span></div><canvas id="spectrumCanvas" role="img" aria-label="倍音レベルの棒グラフ"></canvas></div>
   </section>
 
-  <details id="harmonicDetails" class="panel harmonics-panel">
-    <summary>24倍音ミキサーを開く <span class="minor">／各倍音の波形・音量・ミュートを調整</span></summary>
+  <details id="harmonicDetails" class="panel harmonics-panel" open>
+    <summary>24倍音ミキサー <span class="minor">／各倍音の波形・音量・ミュートを調整</span></summary>
     <div class="detail-body">
       <div class="harmonic-tools"><button id="resetTimbre" class="btn ghost" type="button">音色のみ初期化</button><button id="saveTimbre" class="btn ghost" type="button">音色だけをJSON保存</button><button id="loadTimbre" class="btn ghost" type="button">音色を読み込み</button><input type="file" id="timbreFile" accept=".json,application/json" hidden></div>
       <div id="mixer" class="mixer"></div>
