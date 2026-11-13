@@ -1,31 +1,39 @@
-Harmonic Synth 24 - Ratio Sequencer | reiji-lab
+Harmonic Synth 24 — God Save the King (trial)
+==================================================
 
-フォルダ内の index.html をChrome / Edgeで開いてください。インターネット接続は不要です。
+OPEN:
+  index.html (Chrome / Edge), then click 「▶ 自動演奏」.
+  The score is embedded as the initial JSON. 「サンプルに戻す」 restores it.
 
-1. 倍音ミキサーで波形と音量を設定します。
-2. 自動演奏欄にJSONを入力し、「自動演奏」をクリックします。
-3. tempo はBPM、各声部の notes は音符を順番に並べます。
-4. ratio は基音周波数に対する比率（例："3/2"、"81/80"、1.25、[5,4]）。
-5. duration は拍数（2で2拍）、start は任意の絶対開始拍、ratio:null は休符。
-6. voiceまたはnoteに volume（0〜100）を付けて音量を変更できます。
-7. すべての声部は共通のAudioContext時刻でスケジュールされ、並行して鳴ります。
-8. 再生時に選択されている24倍音の音色をコピーして使います。
-9. 「演奏JSONを保存」「演奏JSONを読み込む」でスコアを再利用できます。
-10. 起動時の初期サンプルは、3声部で4分音符4つ（各 duration:1）、C → F → G → C（I → IV → V → I）を演奏します。
-    tempo:72 なので、1拍は約0.833秒。全4拍の演奏時間は約3.33秒です。
-    基音をC4=261.625565Hzとすると、比率は次の通りです。
-      和音        1拍目 C    2拍目 F    3拍目 G    4拍目 C
-      高声部      3/2       2/1       9/4       3/2
-      中声部      5/4       5/3       15/8      5/4
-      低声部      1/2       2/3       3/4       1/2
-    同じ位置の音符は同時に鳴ります。各notes配列内の音符は順番に進みます。
-    example-progression.json に起動時のサンプルと同じデータを収録しています。
-    example-chord.json は単一和音を4拍伸ばす別の例です。
-11. 音色プリセットJSONと演奏スコアJSONは別々に保存します。
+FILES:
+  index.html — UI
+  style.css — appearance
+  app.js — Web Audio + built-in default score
+  god-save-the-king.json — score you can edit/import separately
+  example-progression.json — same default score, for compatibility
+  reiji-four-beat-sample.json — original 4-beat user-supplied example
 
-波形合成は24本の波形をフーリエ係数に変換して1音につき1オシレーターのPeriodWaveを生成。
-ナイキスト周波数以上の倍音は除去します。波形の位相はWeb Audio標準の各波形の
-実装と必ずしも一致しませんが、指定された各波形の数学的なフーリエ級数に基づきます。
-音声出力は端末の音量や再生環境によって異なります。
+SCORE:
+  Source: God Save the King, just intonation arrangement by 小長谷 禮司
+  Reference: supplied PDF and accompanying special-accidental legend.
+  Trial transcription, NOT a verified exact encoding of every special accidental
+  and note duration; please compare with the original notation before research,
+  public release, or precision harmonic analysis.
+  3/4 meter, bars 1–14, then bars 7–14 repeated once; 66 quarter beats.
+  Ratio 1/1 = C4 (default base frequency 261.625565 Hz).
+  pitch annotation is informational only; playback uses ratio/start/duration.
+  -1 denotes one syntonic comma down (80/81).
+  -2 denotes two syntonic commas down (80/81)^2.
+  -7 denotes a septimal comma down (63/64).
+  #1 denotes a Pythagorean sharp lowered by one syntonic comma (135/128).
+  Exact enharmonic/spelling and comma modifiers can be edited freely.
 
-https://reiji-lab.org/
+DURATION:
+  duration 1 = quarter note; 0.5 = eighth note; 1.5 = dotted quarter;
+  3 = dotted half; 0.333333 ≈ one third of a quarter (triplet). Each
+  start counts quarter beats from the beginning; overlapping starts create chords.
+
+CONSTRAINTS:
+  The audio uses the currently selected 24 harmonic channels for each tone.
+  The JSON is a trial auralization, not a score engraving or an audited
+  reconstruction of the source organ's timbre or note-by-note tuning.
