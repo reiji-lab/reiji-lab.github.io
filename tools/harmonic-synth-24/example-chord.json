@@ -1,0 +1,32 @@
+{
+  "tempo": 90,
+  "voices": [
+    {
+      "name": "上声部（G）",
+      "notes": [
+        {
+          "ratio": "3/2",
+          "duration": 4
+        }
+      ]
+    },
+    {
+      "name": "中声部（E）",
+      "notes": [
+        {
+          "ratio": "5/4",
+          "duration": 4
+        }
+      ]
+    },
+    {
+      "name": "低声部（C）",
+      "notes": [
+        {
+          "ratio": "1/1",
+          "duration": 4
+        }
+      ]
+    }
+  ]
+}
