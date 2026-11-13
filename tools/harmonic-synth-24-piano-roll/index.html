@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#0b111d">
+  <title>Harmonic Synth 24 — Ratio Piano Roll | reiji-lab</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main class="wrap">
+  <header class="head">
+    <div><p class="eyebrow">REIJI-LAB / RATIO MUSIC WORKBENCH</p>
+      <h1>Harmonic Synth <span>24</span></h1>
+      <p class="intro">任意の周波数比で作曲するピアノロール。24倍音の音色をそのまま自動演奏に使用します。</p>
+    </div>
+    <div class="pill"><span id="powerDot" class="dot"></span><span id="powerLabel">停止中</span></div>
+  </header>
+
+  <section class="panel base-panel" aria-label="音の基本設定">
+    <div class="base-fields">
+      <label class="field">基準周波数（1/1）<span class="inunit"><input id="baseHz" type="number" min="20" max="2000" step="any" value="261.625565"><span>Hz</span></span></label>
+      <label class="field">マスター音量<span class="rangeflex"><input id="master" type="range" min="0" max="100" value="55"><output id="masterValue">55%</output></span></label>
+      <label class="field">音色プリセット<select id="preset"><option value="custom">カスタム</option><option value="pure">基音のみ</option><option value="organ" selected>オルガン風</option><option value="string">弦楽器風</option><option value="odd">奇数倍音</option><option value="twentythree">第23倍音を確認</option></select></label>
+      <button id="playButton" class="btn secondary">♪ 音色を試聴</button>
+    </div>
+  </section>
+
+  <section class="panel roll-panel" aria-labelledby="rollTitle">
+    <div class="panel-title-row">
+      <div><p class="eyebrow">VISUAL RATIO SEQUENCER</p><h2 id="rollTitle">比率ピアノロール <span class="minor">/ 最大40音階行</span></h2></div>
+      <span class="hintchip" id="trackCount">10 / 40 音</span>
+    </div>
+    <div class="settings-grid">
+      <label class="field">テンポ（BPM）<input id="tempo" type="number" min="20" max="300" value="72"></label>
+      <label class="field">拍子<select id="meter"><option value="2">2/4</option><option value="3">3/4</option><option value="4" selected>4/4</option><option value="6">6/4</option></select></label>
+      <label class="field">小節数<input id="bars" type="number" min="1" max="64" value="4"></label>
+      <label class="field">グリッド<select id="snap"><option value="1">4分音符</option><option value="0.5">8分音符</option><option value="0.25" selected>16分音符</option></select></label>
+      <label class="field">横軸の拡大率<span class="rangeflex"><input id="zoom" type="range" min="36" max="90" step="6" value="54"><output id="zoomLabel">54px/拍</output></span></label>
+    </div>
+    <div class="roll-toolbar">
+      <button type="button" id="sequencePlay" class="btn primary">▶ 自動演奏</button>
+      <button type="button" id="sequenceStop" class="btn secondary" disabled>■ 停止</button>
+      <button type="button" id="addLane" class="btn secondary">＋ 音を追加</button>
+      <button type="button" id="resetScore" class="btn ghost">サンプルに戻す</button>
+      <span id="measureText" class="small-metric">4小節 · 16拍</span>
+    </div>
+    <p class="guide">空白をクリック：音符を追加 ／ 音符をドラッグ：発音位置を移動 ／ 音符の右端をドラッグ：長さを調整 ／ 空白の区間：休符</p>
+    <div class="scroll-timeline" id="scrollTimeline" aria-label="横スクロール可能なピアノロール">
+      <div id="rollContent" class="roll-content"></div>
+    </div>
+    <div class="navigator">
+      <label for="horizontalNav">横スクロール</label>
+      <input id="horizontalNav" type="range" min="0" max="1000" value="0" aria-label="タイムラインの横位置">
+      <span id="navPosition">最初</span>
+    </div>
+    <div class="inspector" id="inspector" aria-label="選択した音符の編集">
+      <div class="inspect-title"><strong>音符の詳細</strong><span id="selectionName">音符を選択してください</span></div>
+      <div class="inspect-fields">
+        <label class="field">開始位置（拍）<input type="number" id="noteStart" min="0" step="0.25" disabled></label>
+        <label class="field">長さ（拍）<input type="number" id="noteDuration" min="0.25" step="0.25" disabled></label>
+        <label class="field">音符の音量（%）<input type="number" id="noteVolume" min="0" max="100" step="1" disabled></label>
+        <button type="button" id="deleteNote" class="btn danger" disabled>選択音符を削除</button>
+      </div>
+      <p id="positionLabel" class="micro">開始と長さは、4分音符を1拍として数えます。各行の音程比は左側で編集できます。</p>
+    </div>
+    <div class="filebar"><button type="button" class="btn ghost" id="saveSong">曲を保存（JSON）</button><button type="button" class="btn ghost" id="loadSong">保存した曲を読み込む</button><input type="file" id="songFile" accept=".json,application/json" hidden><span class="micro">JSONを手で書く必要はありません。曲の保存形式としてのみ使用します。</span></div>
+    <p class="sequence-status" id="sequenceStatus" aria-live="polite" role="status">サンプル：4/4拍子・4小節、C → F → G → C（音程比の編集用）</p>
+  </section>
+  <p id="status" class="status" role="status" aria-live="polite">音を鳴らすときは自動演奏または音色試聴を押してください。</p>
+
+  <section class="visuals" aria-label="音色波形の可視化">
+    <div class="panel vizpanel"><div class="panelhead"><h2>合成波形</h2><span id="waveLabel" class="minor">計算上の波形</span></div><canvas id="waveCanvas" role="img" aria-label="合成された波形"></canvas></div>
+    <div class="panel vizpanel"><div class="panelhead"><h2>倍音レベル</h2><span class="minor">第1〜24倍音の設定</span></div><canvas id="spectrumCanvas" role="img" aria-label="倍音レベルの棒グラフ"></canvas></div>
+  </section>
+
+  <details id="harmonicDetails" class="panel harmonics-panel">
+    <summary>24倍音ミキサーを開く <span class="minor">／各倍音の波形・音量・ミュートを調整</span></summary>
+    <div class="detail-body">
+      <div class="harmonic-tools"><button id="resetTimbre" class="btn ghost" type="button">音色のみ初期化</button><button id="saveTimbre" class="btn ghost" type="button">音色をJSON保存</button><button id="loadTimbre" class="btn ghost" type="button">音色を読み込み</button><input type="file" id="timbreFile" accept=".json,application/json" hidden></div>
+      <div id="mixer" class="mixer"></div>
+    </div>
+  </details>
+  <p class="caption">各音の周波数＝基準周波数 × 比率。12平均律への丸めは行いません。比率は <code>3/2</code> や <code>23/16</code> のように入力できます。波形の選択（正弦波以外）によって追加の高次成分が生じます。第24倍音までの加算合成と「23-limit」の音程理論は別の概念です。再生時は音量にご注意ください。</p>
+  <footer class="copyright"><a href="https://reiji-lab.org/" target="_blank" rel="noopener noreferrer">reiji-lab</a></footer>
+</main>
+<script defer src="app.js"></script>
+</body>
+</html>
