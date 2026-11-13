@@ -1,91 +1,707 @@
-<!doctype html>
-<html lang="ja">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#0b111d">
-  <title>Harmonic Synth 24 — Ratio Piano Roll | reiji-lab</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reiji's Explorations in Sound & Structure</title>
+<meta name="description" content="A portfolio of sound, mathematics, and structure—where tuning systems, abstract geometry, and musical expression converge through self-directed exploration.">
+
+<meta name="robots" content="noindex,follow">
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" media="screen and (min-width: 1025px)" href="css/style_pc.css">
+  <link rel="stylesheet" media="screen and (max-width: 1024px)" href="css/style_sp.css">
+
+<!-- MathJax 読み込み（head内 or bodyの最後） -->
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-8BWCJ4H4HD"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-8BWCJ4H4HD');
+</script>
+
 </head>
 <body>
-<main class="wrap">
-  <header class="head">
-    <div><p class="eyebrow">REIJI-LAB / RATIO MUSIC WORKBENCH</p>
-      <h1>Harmonic Synth <span>24</span></h1>
-      <p class="intro">任意の周波数比で作曲するピアノロール。24倍音の音色をそのまま自動演奏に使用します。</p>
-    </div>
-    <div class="pill"><span id="powerDot" class="dot"></span><span id="powerLabel">停止中</span></div>
+  <header>
+    <h1 class="p-top_mainTtl"><span class="p-mTtl_1">Reiji's</span><span class="p-mTtl_2">Explorations</span><span class="p-mTtl_3">in Sound & Structure</span></h1>
   </header>
 
-  <section class="panel base-panel" aria-label="音の基本設定">
-    <div class="base-fields">
-      <label class="field">基準周波数（1/1）<span class="inunit"><input id="baseHz" type="number" min="20" max="2000" step="any" value="261.625565"><span>Hz</span></span></label>
-      <label class="field">マスター音量<span class="rangeflex"><input id="master" type="range" min="0" max="100" value="55"><output id="masterValue">55%</output></span></label>
-      <label class="field">音色プリセット<select id="preset"><option value="custom">カスタム</option><option value="pure">基音のみ</option><option value="organ" selected>オルガン風</option><option value="string">弦楽器風</option><option value="odd">奇数倍音</option><option value="twentythree">第23倍音を確認</option></select></label>
-      <button id="playButton" class="btn secondary">♪ 音色を試聴</button>
-    </div>
-  </section>
+  <main>
+<div class="p-attention">
+<h2 class="p-att_ttl">Special Note</h2>
+<p class="p-att_txt">This website serves as a portfolio documenting Reiji’s self-directed inquiries in areas such as music theory, tuning systems, mathematical structures, and spatial reasoning.</p>
+<p class="p-att_txt">All content originates from Reiji’s own observations, verbal reflections, and outputs created either by hand or by directly using various tools himself. The works and outputs presented here are not merely records of tool use; they reflect Reiji’s own ideas, interpretations, and independent insights, which he implements through the actual use of tools such as Desmos, MuseScore, Entonal Studio, and other software. These have been contextualized and organized by a guardian with the support of AI technologies. <b>The primary goal is to systematically and faithfully present his cognitive processes and creative approaches.</b></p>
+<p class="p-att_txt"><b>Each page has been reviewed and approved by Reiji himself, and is published based on his own intent and consent.</b></p>
+<p class="p-att_txt">While AI interpretation is used in a supportive capacity, <b>final editorial decisions and responsibility for content curation rest entirely with the guardian.</b></p>
+<p class="p-att_txt">Each entry is composed of the following elements:</p>
+<ul class="p-att_list">
+<li><b>Title and Overview:</b> Generated through AI-assisted interpretation of Reiji’s notes and verbal commentary, then summarized and edited by the guardian.</li>
+<li><b>Reiji's Words and Ideas:</b> English translations of Reiji’s original spoken explanations in Japanese, transcribed with close attention to preserving semantic accuracy.</li>
+<li><b>Handwritten Notes and Diagrams:</b> Digitized images of Reiji’s handwritten materials.</li>
+<li><b>Tool-Based Implementations:</b> Outputs implemented directly by Reiji through his own operation of tools such as Desmos, MuseScore, Entonal Studio, and other software, based on his independent observations, ideas, and structural understanding.</li>
+<li><b>Musical Scores:</b> Notated by Reiji using MuseScore Studio 4.5.2, reflecting his own compositional and tuning choices.</li>
+<li><b>Summary Tables:</b> Structured representations of Reiji’s output, compiled by the guardian for clarity and accessibility.</li>
+<li class="u-mBtm0"><b>AI Assistant’s Notes and Inferences:</b> Analytical interpretations generated by AI based on Reiji’s verbal and visual output, used especially in cases where the original content involves advanced or abstract concepts.</li>
+</ul>
+<p class="p-att_txt u-mBtm0">This portfolio is <b>not the result of externally assigned or directed work. Rather, it is a record of intrinsically motivated inquiry, independently conceived and implemented by Reiji, made accessible through supportive editorial efforts while preserving the originality and autonomy of his thinking.</b></p>
+</div>
 
-  <section class="panel roll-panel" aria-labelledby="rollTitle">
-    <div class="panel-title-row">
-      <div><p class="eyebrow">VISUAL RATIO SEQUENCER</p><h2 id="rollTitle">比率ピアノロール <span class="minor">/ 最大40音階行</span></h2></div>
-      <span class="hintchip" id="trackCount">28 / 40 音</span>
-    </div>
-    <div class="settings-grid">
-      <label class="field">テンポ（BPM）<input id="tempo" type="number" min="20" max="300" value="72"></label>
-      <label class="field">拍子<select id="meter"><option value="2">2/4</option><option value="3" selected>3/4</option><option value="4">4/4</option><option value="6">6/4</option></select></label>
-      <label class="field">小節数<input id="bars" type="number" min="1" max="64" value="14"></label>
-      <label class="field">グリッド<select id="snap"><option value="1">4分音符</option><option value="0.5">8分音符</option><option value="0.25">16分音符</option><option value="0.6666666666666666">4分3連符（2/3拍）</option><option value="0.3333333333333333">8分3連符（1/3拍）</option><option value="0.16666666666666666" selected>16分3連符（1/6拍）</option></select></label>
-      <label class="field">横軸の拡大率<span class="rangeflex"><input id="zoom" type="range" min="36" max="90" step="6" value="54"><output id="zoomLabel">54px/拍</output></span></label>
-    </div>
-    <div class="roll-toolbar">
-      <button type="button" id="sequencePlay" class="btn primary">▶ 自動演奏</button>
-      <button type="button" id="sequenceStop" class="btn secondary" disabled>■ 停止</button>
-      <button type="button" id="addLane" class="btn secondary">＋ 音を追加</button>
-      <button type="button" id="resetScore" class="btn ghost">禮司の初期データに戻す</button>
-      <span id="measureText" class="small-metric">14小節 · 42拍</span>
-    </div>
-    <p class="guide">空白をクリック：音符を追加 ／ 音符をドラッグ：発音位置を移動 ／ 音符の右端をドラッグ：長さを調整 ／ 空白の区間：休符。<strong>3連符は「グリッド」で選択すると、3等分で配置・伸縮できます。</strong></p>
-    <div class="scroll-timeline" id="scrollTimeline" aria-label="横スクロール可能なピアノロール">
-      <div id="rollContent" class="roll-content"></div>
-    </div>
-    <div class="navigator">
-      <label for="horizontalNav">横スクロール</label>
-      <input id="horizontalNav" type="range" min="0" max="1000" value="0" aria-label="タイムラインの横位置">
-      <span id="navPosition">最初</span>
-    </div>
-    <div class="inspector" id="inspector" aria-label="選択した音符の編集">
-      <div class="inspect-title"><strong>音符の詳細</strong><span id="selectionName">音符を選択してください</span></div>
-      <div class="inspect-fields">
-        <label class="field">開始位置（拍）<input type="text" id="noteStart" inputmode="decimal" placeholder="例：1/3" disabled></label>
-        <label class="field">長さ（拍）<input type="text" id="noteDuration" inputmode="decimal" placeholder="例：1/3" disabled></label>
-        <label class="field">音符の音量（%）<input type="number" id="noteVolume" min="0" max="100" step="1" disabled></label>
-        <button type="button" id="deleteNote" class="btn danger" disabled>選択音符を削除</button>
+<section id="latest">
+  <h2 class="p-wide_ttl"><span>Latest Entries</span></h2>
+  <p>
+    The most recent additions to the portfolio — ranging from mathematical visualizations to new tuning systems and performance records.  
+    Each entry reflects Reiji’s ongoing process of discovery across sound, form, and structure.
+  </p>
+  <ul class="p-cont_list">
+
+<li>
+  <a href="/performance/2026-10-20_performance_BWV788_sinfonia2.html">
+    <div class="p-cont_listImgWrap">
+      <div class="p-cont_listImg">
+        <img src="images/thumb_1020_1.png" class="list_img" alt="Performance Record of J. S. Bach – Sinfonia No. 2 in C Minor, BWV 788">
       </div>
-      <p id="positionLabel" class="micro">開始と長さは4分音符を1拍として数えます。3連符は 1/3、2/3、1/6 のように分数で指定できます。各行の音程比は左側で編集できます。</p>
     </div>
-    <div class="filebar"><button type="button" class="btn ghost" id="saveSong">曲を保存（JSON）</button><button type="button" class="btn ghost" id="loadSong">保存した曲を読み込む</button><input type="file" id="songFile" accept=".json,application/json" hidden><span class="micro">JSONを手で書く必要はありません。曲の保存形式としてのみ使用します。</span></div>
-    <div class="filebar"><button type="button" class="btn ghost" id="saveMix">ミキシング情報をダウンロード（JSON）</button><button type="button" class="btn ghost" id="loadMix">ミキシング情報を読み込む</button><input type="file" id="mixFile" accept=".json,application/json" hidden><span class="micro">24倍音の波形・音量・ミュート、マスター、各音程行と音符の音量を別ファイルで保存します。読み込みは同じ曲に対して適用します。</span></div>
-    <p class="sequence-status" id="sequenceStatus" aria-live="polite" role="status">禮司の英国国歌（純正比率）：3/4拍子・14小節、28音程行・163音符。比率と音価は本人の保存データをそのまま使用しています。</p>
-  </section>
-  <p id="status" class="status" role="status" aria-live="polite">音を鳴らすときは自動演奏または音色試聴を押してください。</p>
-
-  <section class="visuals" aria-label="音色波形の可視化">
-    <div class="panel vizpanel"><div class="panelhead"><h2>合成波形</h2><span id="waveLabel" class="minor">計算上の波形</span></div><canvas id="waveCanvas" role="img" aria-label="合成された波形"></canvas></div>
-    <div class="panel vizpanel"><div class="panelhead"><h2>倍音レベル</h2><span class="minor">第1〜24倍音の設定</span></div><canvas id="spectrumCanvas" role="img" aria-label="倍音レベルの棒グラフ"></canvas></div>
-  </section>
-
-  <details id="harmonicDetails" class="panel harmonics-panel">
-    <summary>24倍音ミキサーを開く <span class="minor">／各倍音の波形・音量・ミュートを調整</span></summary>
-    <div class="detail-body">
-      <div class="harmonic-tools"><button id="resetTimbre" class="btn ghost" type="button">音色のみ初期化</button><button id="saveTimbre" class="btn ghost" type="button">音色だけをJSON保存</button><button id="loadTimbre" class="btn ghost" type="button">音色を読み込み</button><input type="file" id="timbreFile" accept=".json,application/json" hidden></div>
-      <div id="mixer" class="mixer"></div>
+    <div class="p-cont_listCont">
+      <p class="p-cont_listDate">October 20, 2026</p>
+      <p class="p-cont_listTtl">
+        Performance Record of J. S. Bach – Sinfonia No. 2 in C Minor, BWV 788
+      </p>
+      <p class="p-cont_listTxt">
+        A piano performance and personal musical analysis by 10-year-old Reiji.
+        Exploring harmonic relationships between scalar passages and opposing voices,
+        5-limit just intonation, harmonic tension and resolution, and expressive
+        contrasts shaped by resonance and articulation.
+      </p>
     </div>
-  </details>
-  <p class="caption">各音の周波数＝基準周波数 × 比率。12平均律への丸めは行いません。比率は <code>3/2</code> や <code>23/16</code> のように入力できます。波形の選択（正弦波以外）によって追加の高次成分が生じます。第24倍音までの加算合成と「23-limit」の音程理論は別の概念です。再生時は音量にご注意ください。</p>
-  <footer class="copyright"><a href="https://reiji-lab.org/" target="_blank" rel="noopener noreferrer">reiji-lab</a><span class="dev-credit">Developed with ChatGPT by OpenAI</span></footer>
-</main>
-<script defer src="default-data.js"></script>
-<script defer src="app.js"></script>
+  </a>
+</li>
+
+<li>
+  <a href="/tuning-and-structure/2026-10-14_01_python-just-intonation-keyboard-tanaka-shohei-organ-v1-3.html">
+    <span class="p-cont_listImgWrap">
+      <span class="p-cont_listImg">
+        <img src="images/thumb_1014_1.png"
+             class="list_img"
+             alt="Independent Knee-Lever Pitch Switching in a Python Just-Intonation Keyboard v1.3 Referencing Tanaka Shōhei’s Organ">
+      </span>
+    </span>
+    <span class="p-cont_listCont">
+      <span class="p-cont_listDate">October 14, 2026</span>
+      <span class="p-cont_listTtl">
+        Independent Knee-Lever Pitch Switching in a Python Just-Intonation Keyboard v1.3 Referencing Tanaka Shōhei’s Organ
+      </span>
+      <span class="p-cont_listTxt">
+        Reiji (age 10) develops version 1.3 of his Python just-intonation keyboard, referencing Tanaka Shōhei’s just-intonation organ. This update separates the previously combined pitch-ratio switching function into two independent controls, corresponding to the organ’s central and left knee levers. A newly introduced O-key control allows harmonic-seventh-related pitch ratios to be selected independently of the existing P-key system, improving harmonic relationships in certain passages without altering the underlying ratios. The update also introduces frequency-based audio caching to avoid redundant sound generation.
+      </span>
+    </span>
+  </a>
+</li>
+
+<li><a href="/performance/2026-10-09_performance_BWV787_sinfonia1.html">
+  <span class="p-cont_listImgWrap">
+    <span class="p-cont_listImg">
+      <img src="images/thumb_1009_1.png" class="list_img"
+           alt="Performance Record of J. S. Bach – Sinfonia No. 1 in C Major, BWV 787">
+    </span>
+  </span>
+  <span class="p-cont_listCont">
+    <span class="p-cont_listDate">October 9, 2026</span>
+    <span class="p-cont_listTtl">Performance Record of J. S. Bach – Sinfonia No. 1 in C Major, BWV 787</span>
+    <span class="p-cont_listTxt">
+      A performance record of J. S. Bach's Sinfonia No. 1 in C Major (BWV 787), recorded by Reiji at age 10.
+      His analysis explores approximately 24 appearances of the main theme, including fragments and inversions, as well as tonal progression and contrasting musical colors.
+      The interpretation emphasizes thematic clarity and the expressive role of C-sharp within the composition.
+    </span>
+  </span>
+</a></li>
+
+
+<li>
+  <a href="/tuning-and-structure/2026-08-31_01_python-just-intonation-keyboard-tanaka-shohei-organ-v1-2.html">
+    <span class="p-cont_listImgWrap">
+      <span class="p-cont_listImg">
+        <img src="images/20260831_a_thumb.png"
+             class="list_img"
+             alt="Timbre Design and Performance-Range Expansion in a Python Just-Intonation Keyboard v1.2 Referencing Tanaka Shōhei’s Just-Intonation Organ">
+      </span>
+    </span>
+    <span class="p-cont_listCont">
+      <span class="p-cont_listDate">August 31, 2026</span>
+      <span class="p-cont_listTtl">
+        Timbre Design and Performance-Range Expansion in a Python Just-Intonation Keyboard v1.2 Referencing Tanaka Shōhei’s Just-Intonation Organ
+      </span>
+      <span class="p-cont_listTxt">
+        Reiji (age 10) develops version 1.2 of a Python just-intonation keyboard referencing Tanaka Shōhei’s just-intonation organ. This update adds reed-organ-like timbre design using individually weighted harmonic components, phase differences, light nonlinear processing, attack echo, and octave shifting from -2 to +2 octaves. The expanded version is tested through a short performance of the Bourrée theme from J. S. Bach’s BWV 996.
+      </span>
+    </span>
+  </a>
+</li>
+
+<li>
+  <a href="/math-physics/2026-08-01_a_1_newtons-method-behavior-simulator-desmos.html">
+    <span class="p-cont_listImgWrap">
+      <span class="p-cont_listImg">
+        <img src="images/20260801_a_thumb.png" class="list_img" alt="Newton’s Method Behavior Simulator — Exploring Convergence, Irregular Motion, and Cyclic Behavior in Desmos">
+      </span>
+    </span>
+    <span class="p-cont_listCont">
+      <span class="p-cont_listDate">August 1, 2026</span>
+      <span class="p-cont_listTtl">Newton’s Method Behavior Simulator</span>
+      <span class="p-cont_listTxt">
+This Desmos-based simulator explores how Newton’s method behaves with different functions and initial guesses. By displaying successive iterations on the x-axis, Reiji investigates convergence toward roots, large jumps near points where the derivative becomes small, irregular-looking behavior, and attracting cycles such as the exact 0–1 periodic orbit of x³−2x+2.
+      </span>
+    </span>
+  </a>
+</li>
+
+<li><a href="/performance/2026-07-12_performance_BWV565_piano_arrangement.html">
+  <span class="p-cont_listImgWrap">
+    <span class="p-cont_listImg">
+      <img src="images/thumb_0712_1.png" class="list_img"
+           alt="J. S. Bach: Toccata and Fugue in D Minor, BWV 565 – Piano Solo Arrangement by Reiji">
+    </span>
+  </span>
+  <span class="p-cont_listCont">
+    <span class="p-cont_listDate">July 12, 2026</span>
+    <span class="p-cont_listTtl">J. S. Bach: Toccata and Fugue in D Minor, BWV 565 – Piano Solo Arrangement by Reiji</span>
+    <span class="p-cont_listTxt">
+      A piano solo arrangement and performance based on a comparative examination of the Johannes Ringk manuscript and the Bach-Gesellschaft edition edited by Wilhelm Rust.
+      The arrangement includes a redistribution of the voices in fugue mm. 58–60 and a pianistic realization of the registral brightness produced by adding a 4-foot organ stop.
+    </span>
+  </span>
+</a></li>
+
+<li>
+  <a href="/math-physics/2026-05-17_a_1_120-cell-3d-projection-wireframe-openscad.html">
+    <span class="p-cont_listImgWrap">
+      <span class="p-cont_listImg">
+        <img src="images/20260517_a_thumb.png" class="list_img" alt="3D Projection Wireframe Model of the 120-cell">
+      </span>
+    </span>
+    <span class="p-cont_listCont">
+      <span class="p-cont_listDate">May 17, 2026</span>
+      <span class="p-cont_listTtl">3D Projection Wireframe Model of the 120-cell</span>
+      <span class="p-cont_listTxt">
+This project visualizes the 120-cell, a four-dimensional regular polytope whose cells are regular dodecahedra, by projecting it into three-dimensional space and fabricating it as a wireframe model. Reiji generated the vertex structure from H4-related coordinate families, reconstructed edges through four-dimensional distance checks, modeled the result in OpenSCAD, and produced it with a 3D printer.
+      </span>
+    </span>
+  </a>
+</li>
+
+<li>
+  <a href="/tuning-and-structure/2026-05-04_01_python-just-intonation-keyboard-tanaka-shohei-organ.html">
+    <span class="p-cont_listImgWrap">
+      <span class="p-cont_listImg">
+        <img src="images/20260504_a_thumb.png"
+             class="list_img"
+             alt="Implementation and Performance Trial of a Python Just-Intonation Keyboard Referencing Tanaka Shōhei’s Just-Intonation Organ">
+      </span>
+    </span>
+    <span class="p-cont_listCont">
+      <span class="p-cont_listDate">May 4, 2026</span>
+      <span class="p-cont_listTtl">
+        Implementation and Performance Trial of a Python Just-Intonation Keyboard Referencing Tanaka Shōhei’s Just-Intonation Organ
+      </span>
+      <span class="p-cont_listTxt">
+        Reiji (age 10) implements a Python just-intonation keyboard referencing Tanaka Shōhei’s just-intonation organ. Unlike the previous Desmos version, this version links the on-screen keyboard to the PC keyboard for performance, while also displaying each tone’s ratio, frequency, and cent value. A P-key switching function reproduces part of the organ’s pitch-ratio switching mechanism.
+      </span>
+    </span>
+  </a>
+</li>
+
+<li>
+  <a href="/tuning-and-structure/2026-04-25_01_just-intonation-organ-keyboard-desmos-waveform-visualization.html">
+    <span class="p-cont_listImgWrap">
+      <span class="p-cont_listImg">
+        <img src="images/20260425_a_thumb.png"
+             class="list_img"
+             alt="A Desmos Prototype for a Just-Intonation Keyboard with Waveform Visualization, Referencing Tanaka Shōhei’s “Broad-Sense Just Intonation” Organ">
+      </span>
+    </span>
+    <span class="p-cont_listCont">
+      <span class="p-cont_listDate">April 25, 2026</span>
+      <span class="p-cont_listTtl">
+        A Desmos Prototype for a Just-Intonation Keyboard with Waveform Visualization, Referencing Tanaka Shōhei’s “Broad-Sense Just Intonation” Organ
+      </span>
+      <span class="p-cont_listTxt">
+        Reiji (age 10) implements a just-intonation keyboard in Desmos, referencing Tanaka Shōhei’s “broad-sense just intonation” organ. Each key plays a ratio-based pitch and displays its sine wave relative to C. A switching button changes selected keys to alternate just-intonation ratios, while added harmonics make wolf intervals, beating, and muddy intervals easier to hear and observe.
+      </span>
+    </span>
+  </a>
+</li>
+
+<li><a href="/performance/2026-03-29_01_performance_sinfonia-no1-bwv787-garnier-organ.html">
+  <span class="p-cont_listImgWrap">
+    <span class="p-cont_listImg">
+      <img src="images/20260329_a_thumb.png" class="list_img"
+           alt="Performance Record of J. S. Bach – Sinfonia No. 1 in C Major, BWV 787">
+    </span>
+  </span>
+  <span class="p-cont_listCont">
+    <span class="p-cont_listDate">March 29, 2026</span>
+    <span class="p-cont_listTtl">Performance Record of J. S. Bach – Sinfonia No. 1 in C Major, BWV 787 | Garnier Organ</span>
+    <span class="p-cont_listTxt">
+      Organ performance of J. S. Bach’s Sinfonia No. 1 in C Major, BWV 787 from <i>Inventions and Sinfonias</i>, recorded at Seigakuin Church on the Garnier organ.
+      The page presents the video record along with work details, reference sheet music, and recording information.
+    </span>
+  </span>
+</a></li>
+
+<li>
+  <a href="/math-physics/2026-03-23_a_1_mandelbrot-julia-point-orbit-correspondence.html">
+    <span class="p-cont_listImgWrap">
+      <span class="p-cont_listImg">
+        <img src="images/20260323_a_thumb.png" class="list_img" alt="Real-Time Observation of the Correspondence Between the Mandelbrot Set, Julia Sets, and Point Orbits">
+      </span>
+    </span>
+    <span class="p-cont_listCont">
+      <span class="p-cont_listDate">March 23, 2026</span>
+      <span class="p-cont_listTtl">Real-Time Observation of the Correspondence Between the Mandelbrot Set, Julia Sets, and Point Orbits</span>
+      <span class="p-cont_listTxt">
+This Desmos-based exploration visualizes the correspondence between the Mandelbrot set, the Julia set, and point orbits on a single screen. By moving pointers in real time, it becomes possible to compare periodic structures in the Mandelbrot set with branching tendencies and shape changes in the corresponding Julia sets.
+      </span>
+    </span>
+  </a>
+</li>
+
+<li>
+  <a href="/math-physics/2026-03-03_a_1_sequence-pendulum-wave-number-sequences.html">
+    <span class="p-cont_listImgWrap">
+      <span class="p-cont_listImg">
+        <img src="images/20260303_a_thumb.png" class="list_img" alt="Sequence Pendulum Wave — Switching Sequences to Observe Position and Periodicity">
+      </span>
+    </span>
+    <span class="p-cont_listCont">
+      <span class="p-cont_listDate">March 3, 2026</span>
+      <span class="p-cont_listTtl">Sequence Pendulum Wave — Switching Sequences to Observe Position and Periodicity</span>
+      <span class="p-cont_listTxt">
+This Desmos-based “pendulum-wave-like” visualization maps different number sequences into a rotating, connected-point pattern. By switching the active sequence and comparing the same snapshot (e.g., a = 5.5), you can observe how motifs and alignment periods change across primes, odds, Fibonacci, Lucas, composites, and integers.
+      </span>
+    </span>
+  </a>
+</li>
+
+<li>
+  <a href="/tuning-and-structure/2026-03-02_01_standing-wave-harmonics-1-20-phase-alignment-cycles.html">
+    <span class="p-cont_listImgWrap">
+      <span class="p-cont_listImg">
+        <img src="images/20260302_b_thumb.png"
+             class="list_img"
+             alt="Standing-Wave Harmonics (1–20) — Phase Alignment + Sawtooth Composite (Desmos)">
+      </span>
+    </span>
+    <span class="p-cont_listCont">
+      <span class="p-cont_listDate">March 2, 2026</span>
+      <span class="p-cont_listTtl">
+        Standing-Wave Harmonics (1–20) — Phase Alignment + Sawtooth Composite (Desmos)
+      </span>
+      <span class="p-cont_listTxt">
+        Reiji (age 10) overlays 20 standing-wave harmonics, sin(nx)cos(nt) for n=1..20, and explores when patterns visually align as time t changes (e.g., t=π, π/3, 3π/5). He also adds a 1/n-weighted composite wave that forms a sawtooth-like curve, letting the overall motion be observed as a single evolving waveform.
+      </span>
+    </span>
+  </a>
+</li>
+
+<li>
+  <a href="/math-physics/2026-03-02_01_dolphin-fractal-linear-quadratic-variant.html">
+    <span class="p-cont_listImgWrap">
+      <span class="p-cont_listImg">
+        <img src="images/20260302_a_thumb.png" class="list_img" alt="Dolphin Fractal — A Mandelbrot-Derived Transformation with Absolute-Value Folding">
+      </span>
+    </span>
+    <span class="p-cont_listCont">
+      <span class="p-cont_listDate">March 2, 2026</span>
+      <span class="p-cont_listTtl">Dolphin Fractal — A Mandelbrot-Derived Transformation with Absolute-Value Folding</span>
+      <span class="p-cont_listTxt">
+This work creates a new fractal by transforming a Mandelbrot-style iteration in the real plane.
+By replacing the x-squared term with a linear x term (while keeping y-squared) and applying a minus absolute-value fold to the y-component, the global silhouette resembles a downward-swimming dolphin, while deep zooms reveal persistent stripe-like structures.
+      </span>
+    </span>
+  </a>
+</li>
+
+<li>
+  <a href="/tuning-and-structure/2026-01-20_01_3d-lissajous-edo-triads.html">
+    <span class="p-cont_listImgWrap">
+      <span class="p-cont_listImg">
+        <img src="images/thumb_20260120_a.png"
+             class="list_img"
+             alt="Variable-EDO Triads in 3D — Lissajous Curves + Overtone Playback in Desmos">
+      </span>
+    </span>
+    <span class="p-cont_listCont">
+      <span class="p-cont_listDate">January 20, 2026</span>
+      <span class="p-cont_listTtl">
+        Variable-EDO Triads in 3D — Lissajous Curves + Overtone Playback in Desmos
+      </span>
+      <span class="p-cont_listTxt">
+        A Desmos 3D experiment that visualizes triads in any EDO (1–1200) as a 3D Lissajous curve while playing the three tones with selectable overtones (1–128). “Closeness” to simple just ratios is explored through curve simplicity/closure and audible beating between partials.
+      </span>
+    </span>
+  </a>
+</li>
+
+<li><a href="/performance/2025-12-29_01_performance_WTC1-01_Fugue_BWV846.html">
+  <span class="p-cont_listImgWrap">
+    <span class="p-cont_listImg">
+      <img src="images/thumb_1229_01.png" class="list_img"
+           alt="Performance Record of J.S. Bach – WTC I No. 1 Fugue in C Major, BWV 846">
+    </span>
+  </span>
+  <span class="p-cont_listCont">
+    <span class="p-cont_listDate">December 29, 2025</span>
+    <span class="p-cont_listTtl">Performance Record of J.S. Bach – WTC I No. 1 Fugue in C Major, BWV 846</span>
+    <span class="p-cont_listTxt">
+      Tone-color design in two directions: overtone-rich brightness for resolved passages, and a “subharmonic-like” (conceptual) ratio viewpoint for minor-like tension.
+      Notable excerpts include the prolonged E-centered tension at m. 12 and the uniquely radiant major cadence from m. 24 to the end, with a simplified just-intonation-to-12TET cent-offset explanation.
+    </span>
+  </span>
+</a></li>
+
+<li><a href="/performance/2025-12-21_01_performance_WTC1-01_Prelude_BWV846.html">
+  <span class="p-cont_listImgWrap">
+    <span class="p-cont_listImg">
+      <img src="images/thumb_1221_01.png" class="list_img"
+           alt="Performance Record of J.S. Bach – WTC I No. 1 Prelude in C Major, BWV 846">
+    </span>
+  </span>
+  <span class="p-cont_listCont">
+    <span class="p-cont_listDate">December 21, 2025</span>
+    <span class="p-cont_listTtl">Performance Record of J.S. Bach – WTC I No. 1 Prelude in C Major, BWV 846</span>
+    <span class="p-cont_listTxt">
+      Performer’s comment frames the prelude as a ratio-structure “in relation to C,” mapping local sonorities to just-intonation ratios.
+      It also explains the syntonic comma (81/80) as a theoretical mismatch in chained pure intervals, and discusses an interpretive color-shift around m. 28 (F♯ vs G♭ hearing).
+    </span>
+  </span>
+</a></li>
+
+<li>
+  <a href="/tuning-and-structure/2025-12-07_01_iv-as-dominant-11limit-just-scale.html">
+    <span class="p-cont_listImgWrap">
+      <span class="p-cont_listImg">
+        <img src="images/thumb_20251207_1.png"
+             class="list_img"
+             alt="IV as Dominant — An 11-limit 9-note Just Scale (V tones included, no V triad)">
+      </span>
+    </span>
+    <span class="p-cont_listCont">
+      <span class="p-cont_listDate">December 7, 2025</span>
+      <span class="p-cont_listTtl">
+        IV as Dominant — An 11-limit 9-note Just Scale (V Tones Included, No V Triad)
+      </span>
+      <span class="p-cont_listTxt">
+        An 11-limit 9-note just-intonation scale that keeps the tones of V but avoids the V triad,
+        allowing IV to act as a dominant. Two coexisting “C–E” pairs and the 63/33 tone create subtle
+        shifts between Just and Pythagorean major chords and controllable vibrato-like beating.
+      </span>
+    </span>
+  </a>
+</li>
+
+<li>
+  <a href="/math-physics/2025-11-17_01_mandelbrot-julia-parameter-explorer.html">
+    <span class="p-cont_listImgWrap">
+      <span class="p-cont_listImg">
+        <img src="images/thumb_20251117_a.png" class="list_img" alt="Mandelbrot and Julia Set Parameter Explorer — Dynamic Fractal Simulation and Fibonacci Structures">
+      </span>
+    </span>
+    <span class="p-cont_listCont">
+      <span class="p-cont_listDate">November 17, 2025</span>
+      <span class="p-cont_listTtl">Mandelbrot and Julia Set Parameter Explorer — Dynamic Fractal Simulation and Fibonacci Structures</span>
+      <span class="p-cont_listTxt">
+This Desmos-based exploration turns Mandelbrot and Julia set parameters into movable points, revealing convergence, divergence, Julia connectivity, and Fibonacci-related bulb structures along the boundary.
+      </span>
+    </span>
+  </a>
+</li>
+
+<li><a href="/performance/2025-10-28_01_performance_bwv869-Prelude.html">
+  <span class="p-cont_listImgWrap">
+    <span class="p-cont_listImg">
+      <img src="images/thumb_20251028_a.png" class="list_img"
+           alt="Performance Record of J.S. Bach – WTC I No. 24 Prelude in B Minor, BWV 869">
+    </span>
+  </span>
+  <span class="p-cont_listCont">
+    <span class="p-cont_listDate">October 28, 2025</span>
+    <span class="p-cont_listTtl">Performance Record of J.S. Bach – WTC I No. 24 Prelude in B Minor, BWV 869</span>
+    <span class="p-cont_listTxt">Recorded at age 9, this interpretation focuses on precise blending of overtones and subharmonics across the wide register (C♯2–C6), with attention to “playing the rest,” seconds that feel “undissonant,” and identity shifts at mm. 15 &amp; 46.</span>
+  </span>
+</a></li>
+
+<li>
+  <a href="/tuning-and-structure/2025-10-13_01_53edo-decay-and-lissajous-visualization.html">
+    <span class="p-cont_listImgWrap">
+      <span class="p-cont_listImg">
+        <img src="images/thumb_20251013_a.png" class="list_img"
+             alt="53-EDO Decay Function and Lissajous Visualization — Harmonic Interaction and Temporal Damping">
+      </span>
+    </span>
+    <span class="p-cont_listCont">
+      <span class="p-cont_listDate">October 13, 2025</span>
+      <span class="p-cont_listTtl">
+        53-EDO Decay Function and Lissajous Visualization — Harmonic Interaction and Temporal Damping
+      </span>
+      <span class="p-cont_listTxt">
+        A Desmos-based experiment combining 53-EDO sound synthesis with a sigmoid decay function and Lissajous visualization.
+        It models overtone damping and microtonal alignment, revealing how harmonic phase relationships change across 53-EDO steps.
+      </span>
+    </span>
+  </a>
+</li>
+
+<li>
+  <a href="/conceptual-space/2025-10-12_01_quaternionic-extension-in-vita-theory.html">
+    <span class="p-cont_listImgWrap">
+      <span class="p-cont_listImg">
+        <img src="images/thumb_20251012_a.png" class="list_img"
+             alt="Quaternionic Extension in Vita Theory — Infinite Folding and Real Representation">
+      </span>
+    </span>
+    <span class="p-cont_listCont">
+      <span class="p-cont_listDate">October 12, 2025</span>
+      <span class="p-cont_listTtl">
+        Quaternionic Extension in Vita Theory — Infinite Folding and Real Representation
+      </span>
+      <span class="p-cont_listTxt">
+        Reiji (age 9) extends quaternion algebra within his original Vita Theory,
+        embedding imaginary units (i, j, k) into an extended real continuum.
+        This work introduces infinitesimal hierarchies such as 1/∞, 1/ω, and 1/vita,
+        using arctan-based folding to represent infinite structures finitely.
+      </span>
+    </span>
+  </a>
+</li>
+  </ul>
+</section>
+
+    <section id="pickup">
+      <h2 class="p-wide_ttl"><span>Pick Up</span></h2>
+      <p>
+These featured entries provide intuitive gateways into the portfolio. At times, the structure and sound embedded in the work may convey its meaning more directly than verbal interpretation.
+      </p>
+    
+      <ul class="p-cont_list">
+    <li>
+      <a href="/math-physics/2025-10-08_01_julia-set-3d.html">
+        <span class="p-cont_listImgWrap">
+          <span class="p-cont_listImg"><img src="images/thumb_20251008_a.png" class="list_img" alt="3D Visualization of Julia Set — Dimensional Folding and Structural Analysis"></span>
+        </span>
+        <span class="p-cont_listCont">
+          <span class="p-cont_listDate">October 8, 2025</span>
+          <span class="p-cont_listTtl">3D Visualization of Julia Set — Dimensional Folding and Structural Analysis</span>
+          <span class="p-cont_listTxt">
+This work explores the idea that if the Mandelbrot set can be shown in 3D, the Julia set can too.
+Using Desmos 3D and a folded complex–quaternion structure, Reiji manually built iterative mappings to visualize the Julia set’s three-dimensional form.
+          </span>
+        </span>
+      </a>
+    </li>
+
+<li><a href="/tuning-and-structure/2025-08-05_01_pure-just-tuning.html">
+<span class="p-cont_listImgWrap">
+  <span class="p-cont_listImg"><img src="images/thumb_0805_1.png" class="list_img" alt="Pure Just Tuning — Complete Harmonic Modulation with 8 Notes"></span>
+</span>
+<span class="p-cont_listCont">
+  <span class="p-cont_listDate">August 5, 2025</span>
+  <span class="p-cont_listTtl">Pure Just Tuning — Complete Harmonic Modulation with 8 Notes</span>
+  <span class="p-cont_listTxt">
+    A structural redefinition of just intonation enabling full modulation. This system integrates ratios like 11/8 and 13/8 in a logarithmic scale-space, employing a cyclic alternation of fifths and fourths to maintain harmonic continuity across key shifts.
+  </span>
+</span>
+</a></li>
+
+        <li><a href="/tuning-and-structure/2025-07-28_01_lissajous_dynamic_harmony.html">
+<span class="p-cont_listImgWrap">
+<span class="p-cont_listImg"><img src="images/thumb_0728_1.png" class="list_img" alt="Dynamic Harmony and Lissajous Curves — Visualizing Relationships Between Equal Temperaments"></span>
+</span>
+<span class="p-cont_listCont">
+<span class="p-cont_listDate">July 28, 2025</span>
+<span class="p-cont_listTtl">Dynamic Harmony and Lissajous Curves — Visualizing Relationships Between Equal Temperaments</span>
+<span class="p-cont_listTxt">This work presents a system that dynamically links sound and visuals using Lissajous curves. The parametric function \((\sin At, \cos Bt)\) is used, where A is fixed at 1, and B is defined as \(B = \sqrt[a]{\pi}^n\). This construction allows the...</span>
+</span>
+        </a></li>
+
+<li><a href="/performance/2025-07-21_14_performance_bwv106_sonatina">
+<span class="p-cont_listImgWrap">
+<span class="p-cont_listImg"><img src="images/thumb_0721_14.png" class="list_img" alt="Performance Record of J.S. Bach – Gottes Zeit ist die allerbeste Zeit, BWV 106 (Self-arranged Piano Solo)"></span>
+</span>
+<span class="p-cont_listCont">
+<span class="p-cont_listDate">July 21, 2025</span>
+<span class="p-cont_listTtl">Performance Record of J.S. Bach – Gottes Zeit ist die allerbeste Zeit, BWV 106 (Self-arranged Piano Solo)</span>
+<span class="p-cont_listTxt">This is a performance record of J.S. Bach’s “Gottes Zeit ist die allerbeste Zeit” (Sonatina from BWV 106), arranged as a piano solo and recorded in June 2025 by Reiji at age 9. The arrangement is based on the 1768 manuscript...</span>
+</span>
+</a></li>
+
+        <li><a href="/math-physics/2025-05-25_01_theory_WaveDecay_LimitAnalysis.html">
+<span class="p-cont_listImgWrap">
+<span class="p-cont_listImg"><img src="images/thumb_0525_1.png" class="list_img" alt="Wave Decay and Considerations Through Limits"></span>
+</span>
+<span class="p-cont_listCont">
+<span class="p-cont_listDate">May 25, 2025</span>
+<span class="p-cont_listTtl">Wave Decay and Considerations Through Limits</span>
+<span class="p-cont_listTxt">This record explores the phenomenon of wave decay from a mathematical perspective. While watching ripples in a bathtub, Reiji began pondering: “What happens to a wave as time approaches infinity?” From this question, he analyzed...</span>
+</span>
+        </a></li>
+
+        <li><a href="/tuning-and-structure/2025-05-13_01_theory_CustomScale_phi125.html">
+<span class="p-cont_listImgWrap">
+<span class="p-cont_listImg"><img src="images/thumb_0513_1.png" class="list_img" alt="Designing a Custom Scale Incorporating φ³ and 125/32"></span>
+</span>
+<span class="p-cont_listCont">
+<span class="p-cont_listDate">May 13, 2025</span>
+<span class="p-cont_listTtl">Designing a Custom Scale Incorporating φ³ and 125/32</span>
+<span class="p-cont_listTxt">This document presents an experimental tuning system that incorporates both the irrational ratio φ³ (the cube of the golden ratio) and the just intonation ratio 125/32, which corresponds to a pure major third. Drawing inspiration from the...</span>
+</span>
+        </a></li>
+
+        <li><a href="/composition/2025-05-12_01_composition_Birdsong.html">
+<span class="p-cont_listImgWrap">
+<span class="p-cont_listImg"><img src="images/thumb_0512_1.png" class="list_img" alt="Translating Birdsong into Music: Temperament and Structural Choices"></span>
+</span>
+<span class="p-cont_listCont">
+<span class="p-cont_listDate">May 12, 2025</span>
+<span class="p-cont_listTtl">Translating Birdsong into Music: Temperament and Structural Choices</span>
+<span class="p-cont_listTxt">This composition explores the transformation of natural birdsong into music using the 24-tone equal temperament (24-TET) system. While Pythagorean or meantone temperaments face challenges in modulating to such irregular...</span>
+</span>
+        </a></li>
+
+        <li><a href="/tuning-and-structure/2025-05-08_01_theory_OvertoneGeometry.html">
+<span class="p-cont_listImgWrap">
+<span class="p-cont_listImg"><img src="images/thumb_0508_1.png" class="list_img" alt="Spatial Mapping of Just Intonation in Overtone Dimensions"></span>
+</span>
+<span class="p-cont_listCont">
+<span class="p-cont_listDate">May 8, 2025</span>
+<span class="p-cont_listTtl">Spatial Mapping of Just Intonation in Overtone Dimensions</span>
+<span class="p-cont_listTxt">This record explores a geometric approach to understanding pitch relationships in just intonation. It visualizes three overtone series—3rd (perfect fifths), 5th (major thirds), and 11th (undecimal intervals)—as spatial axes, representing...</span>
+</span>
+        </a></li>
+      </ul>
+    </section>
+
+    <section id="categories">
+      <h2 class="p-wide_ttl"><span>Categories</span></h2>
+      <p>
+        These categories reflect different facets of an ongoing exploration. Each one frames a way of listening, observing, or thinking—sometimes precise, sometimes intuitive.
+      </p>
+
+<ul class="p-cate_list_wrap">
+<li class="p-cate_list">
+<a href="tuning-and-structure/" class="p-cate_listLink">
+<span class="p-cate_list_imgWrap"><img src="images/thumb_1_sub.png" class="list_img" alt="Tuning and Structural Exploration"></span>
+<div class="p-cate_list_cont">
+<h3 class="p-cate_listTtl">Tuning and Structural Exploration</h3>
+<p class="p-cate_listTxt">Temperaments, tunings, notations, and ratios an attempt to touch the underlying architecture of sound through number and space. Between just intonation and equal temperament, new resonances are formed.</p>
+</div>
+</a>
+</li>
+
+<li class="p-cate_list">
+<a href="/performance/" class="p-cate_listLink">
+<span class="p-cate_list_imgWrap"><img src="images/thumb_2.png" class="list_img" alt="Performance and Interpretation"></span>
+<div class="p-cate_list_cont">
+<h3 class="p-cate_listTtl">Performance and Interpretation</h3>
+<p class="p-cate_listTxt">Performed music reinterpreted through harmonics, progressions, and form. Hearing the structure of the world within Bach’s compositions.</p>
+</div>
+</a>
+</li>
+
+<li class="p-cate_list">
+<a href="/math-physics/" class="p-cate_listLink">
+<span class="p-cate_list_imgWrap"><img src="images/thumb_3.png" class="list_img" alt="Mathematical and Physical Intuition"></span>
+<div class="p-cate_list_cont">
+<h3 class="p-cate_listTtl">Mathematical and Physical Intuition</h3>
+<p class="p-cate_listTxt">Limits, decay, waves, angles, and functions exploring the behavior of sound and presence as revealed through mathematics.</p>
+</div>
+</a>
+</li>
+</ul>
+
+<ul class="p-cate_list_wrap">
+<li class="p-cate_list">
+<a href="/composition/" class="p-cate_listLink">
+<span class="p-cate_list_imgWrap"><img src="images/thumb_4_sub.png" class="list_img" alt="Composition and Microtonality"></span>
+<div class="p-cate_list_cont">
+<h3 class="p-cate_listTtl">Composition and Microtonality</h3>
+<p class="p-cate_listTxt">Soundscapes woven from natural voices and irregular intervals. A record of creative work at the boundary between dissonance and harmony.</p>
+</div>
+</a>
+</li>
+
+<li class="p-cate_list">
+<a href="/conceptual-space/" class="p-cate_listLink">
+<span class="p-cate_list_imgWrap"><img src="images/thumb_5.png" class="list_img" alt="Conceptual and Spatial Inquiry"></span>
+<div class="p-cate_list_cont">
+<h3 class="p-cate_listTtl">Conceptual and Spatial Inquiry</h3>
+<p class="p-cate_listTxt">Infinity, zero, circles, dimensions a thought experiment beginning with arctangent, leading to a space named “Vita.” An attempt to sketch invisible structures in perceptible form.</p>
+</div>
+</a>
+</li>
+
+<li class="p-cate_list">
+<a href="/tools/" class="p-cate_listLink">
+<span class="p-cate_list_imgWrap"><img src="images/thumb_6.png" class="list_img" alt="Apps and Experimental Tools"></span>
+<div class="p-cate_list_cont">
+<h3 class="p-cate_listTtl">Apps and Experimental Tools</h3>
+<p class="p-cate_listTxt">Testing tuning by ear, visualizing structure. Self-built tools and environments as extensions of sonic exploration.</p>
+</div>
+</a>
+</li>
+</ul>
+    </section>
+
+
+
+    <section id="profile">
+<h2 class="p-wide_ttl"><span>Profile</span></h2>
+
+<div class="p-profile_wrap">
+<span class="p-profile_imgWrap"><span class="p-profile_img"><img src="images/profile.png" class="list_img" alt="Reiji"></span></span>
+<div class="p-profile_cont">
+<h3 class="p-profile_ttl">Reiji</h3>
+<p class="p-profile_txt">Born in 2016, Reiji has been deeply engaged in the intersection of music and mathematics, pursuing both through sustained self-directed study since 2023.<br>
+In 2024, he began studying piano under pianist Ichiro Higuchi.<br>
+Since 2025, he has also studied music and historical instruments under Yasuhiro Yamada at Bach Academy.<br>
+His investigations extend to tuning systems, resonance, mathematical structures, and the perceptual dimensions of sound, often developed through original experimentation.
+</p>
+
+<div class="p-profile_contact"><span class="p-profile_contactTtl">Contact</span><span class="p-profile_contactMil" id="email">
+<script>
+  document.getElementById("email").innerText = "reiji.lab" + "@" + "gmail.com";
+</script>
+</span></div>
+</div>
+</div>
+
+    </section>
+
+  </main>
+
+<footer>
+<div class="footer-categories_outer">
+  <dl class="footer-categories_wrap">
+    <dt>Categories</dt>
+    <dd>
+    <ul class="footer-categories">
+      <li><a href="/tuning-and-structure/">Tuning and Structural Exploration</a></li>
+      <li><a href="/performance/">Performance and Interpretation</a></li>
+      <li><a href="/math-physics/">Mathematical and Physical Intuition</a></li>
+      <li><a href="/composition/">Composition and Microtonality</a></li>
+      <li><a href="/conceptual-space/">Conceptual and Spatial Inquiry</a></li>
+      <li><a href="/tools/">Apps and Experimental Tools</a></li>
+    </ul>
+    </dd>
+  </dl>
+</div>
+
+  <p class="copy">&copy; 2025 Reiji. All rights reserved.</p>
+</footer>
+
+<script src="js/common.js" defer></script>
+
 </body>
 </html>
