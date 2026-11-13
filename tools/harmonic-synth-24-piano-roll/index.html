@@ -12,7 +12,7 @@
   <header class="head">
     <div><p class="eyebrow">REIJI-LAB / RATIO MUSIC WORKBENCH</p>
       <h1>Harmonic Synth <span>24</span></h1>
-      <p class="intro">任意の周波数比で作曲するピアノロール。24倍音の音色をそのまま自動演奏に使用します。</p>
+      <p class="intro">任意の周波数比で作曲するピアノロール。24倍音合成音、またはPCマイクで録音した音を選んで自動演奏できます。</p>
     </div>
     <div class="pill"><span id="powerDot" class="dot"></span><span id="powerLabel">停止中</span></div>
   </header>
@@ -24,6 +24,34 @@
       <label class="field">音色プリセット<select id="preset"><option value="custom">カスタム</option><option value="pure">基音のみ</option><option value="organ" selected>オルガン風</option><option value="string">弦楽器風</option><option value="odd">奇数倍音</option><option value="twentythree">第23倍音を確認</option></select></label>
       <button id="playButton" class="btn secondary">♪ 音色を試聴</button>
     </div>
+  </section>
+
+  <section class="panel sampler-panel" aria-label="サンプリング音源">
+    <div class="panel-title-row sampler-title">
+      <div><p class="eyebrow">MICROPHONE / AUDIO SAMPLER</p><h2>サンプリング音源 <span class="minor">/ PCマイク・音声ファイル</span></h2></div>
+      <span id="sampleBadge" class="hintchip">音源未登録</span>
+    </div>
+    <div class="sampler-grid">
+      <label class="field">ピアノロールの音源
+        <select id="soundSource"><option value="synth">24倍音ミキサー</option><option value="sample">録音した音（サンプラー）</option></select>
+      </label>
+      <label class="field">録音した音の基準周波数
+        <span class="inunit"><input id="sampleReferenceHz" type="number" min="20" max="5000" step="any" value="261.625565"><span>Hz</span></span>
+      </label>
+      <div class="sampler-buttons">
+        <button type="button" class="btn secondary" id="sampleRecordStart">● マイク録音</button>
+        <button type="button" class="btn ghost" id="sampleRecordStop" disabled>■ 録音終了</button>
+        <button type="button" class="btn secondary" id="samplePreview" disabled>▶ 録音音を試聴</button>
+      </div>
+      <div class="sampler-buttons">
+        <button type="button" class="btn ghost" id="sampleFileOpen">音声ファイルを読み込む</button>
+        <button type="button" class="btn ghost" id="sampleSaveWav" disabled>サンプルをWAV保存</button>
+        <input type="file" id="sampleFile" accept="audio/*,.wav,.mp3,.ogg,.webm,.m4a" hidden>
+      </div>
+    </div>
+    <p id="samplerStatus" class="sample-status" role="status" aria-live="polite">録音または音声ファイルを読み込むと、ピアノロールの全音程をその音色で鳴らせます。</p>
+    <canvas id="sampleWaveCanvas" class="sample-canvas" role="img" aria-label="取り込んだ音の波形"></canvas>
+    <p class="micro">単音を録音してください（最大10秒）。録音した音の実際の高さを「基準周波数」に入力すると、各音の周波数比に応じて音程を変えます。音高変更は再生速度変更方式です。<strong>録音した音そのものは曲JSONには含まれません</strong>。共有する場合はWAVも保存してください。マイクはHTTPSまたはlocalhost等の対応環境で利用できます。</p>
   </section>
 
   <section class="panel roll-panel" aria-labelledby="rollTitle">
@@ -68,7 +96,7 @@
     <div class="filebar"><button type="button" class="btn ghost" id="saveMix">ミキシング情報をダウンロード（JSON）</button><button type="button" class="btn ghost" id="loadMix">ミキシング情報を読み込む</button><input type="file" id="mixFile" accept=".json,application/json" hidden><span class="micro">24倍音の波形・音量・ミュート、マスター、各音程行と音符の音量を別ファイルで保存します。読み込みは同じ曲に対して適用します。</span></div>
     <p class="sequence-status" id="sequenceStatus" aria-live="polite" role="status">禮司の英国国歌（純正比率）：3/4拍子・14小節、28音程行・163音符。比率と音価は本人の保存データをそのまま使用しています。</p>
   </section>
-  <p id="status" class="status" role="status" aria-live="polite">音を鳴らすときは自動演奏または音色試聴を押してください。</p>
+  <p id="status" class="status" role="status" aria-live="polite">音源を選び、自動演奏または音色試聴を押してください。</p>
 
   <section class="visuals" aria-label="音色波形の可視化">
     <div class="panel vizpanel"><div class="panelhead"><h2>合成波形</h2><span id="waveLabel" class="minor">計算上の波形</span></div><canvas id="waveCanvas" role="img" aria-label="合成された波形"></canvas></div>
@@ -82,7 +110,7 @@
       <div id="mixer" class="mixer"></div>
     </div>
   </details>
-  <p class="caption">各音の周波数＝基準周波数 × 比率。12平均律への丸めは行いません。比率は <code>3/2</code> や <code>23/16</code> のように入力できます。波形の選択（正弦波以外）によって追加の高次成分が生じます。第24倍音までの加算合成と「23-limit」の音程理論は別の概念です。再生時は音量にご注意ください。</p>
+  <p class="caption">各音の周波数＝基準周波数 × 比率。12平均律への丸めは行いません。録音音源の場合は元の音の周波数と再生速度を基に移調します。比率は <code>3/2</code> や <code>23/16</code> のように入力できます。波形の選択（正弦波以外）によって追加の高次成分が生じます。第24倍音までの加算合成と「23-limit」の音程理論は別の概念です。再生時は音量にご注意ください。</p>
   <footer class="copyright"><a href="https://reiji-lab.org/" target="_blank" rel="noopener noreferrer">reiji-lab</a><span class="dev-credit">Developed with ChatGPT by OpenAI</span></footer>
 </main>
 <script defer src="default-data.js"></script>

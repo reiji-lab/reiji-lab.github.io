@@ -65,6 +65,10 @@
   let ctx=null, masterGain=null, analyser=null, previewBus=null, audition=false;
   let oscBank=[],gainBank=[], sequenceBus=null, sequenceNodes=new Set(),playing=false;
   let sequenceStart=0, sequenceEnd=0, seqCount=0, raf=0, timeArray=null;
+  // A recorded sample is intentionally NOT embedded in song JSON. Export its WAV separately.
+  let soundSource='synth', sampleBuffer=null, sampleReferenceHz=DEFAULT_SONG.baseHz;
+  let sampleFilename='', micRecorder=null, micStream=null, micChunks=[], micTimer=null;
+  let samplePreviewNodes=new Set();
 
   function makePartials(type='organ') {
     return Array.from({length:MAX_PARTIALS},(_,i)=>({level:type==='pure'?(i===0?100:0):type==='organ'?(i<12?Math.round(100/(i+1)**1.05):0):type==='string'?Math.max(0,Math.round(90/(i+1)**.75-(i>14?4:0))):type==='odd'?(i%2===0?Math.round(95/(i+1)**.72):0):type==='twentythree'?(i===0?75:i===22?48:0):i===0?100:0,wave:'sine',muted:false}));
@@ -73,7 +77,7 @@
     const active=audition||playing;
     $('powerDot').classList.toggle('on',active);
     $('powerLabel').textContent=playing?'自動演奏中':audition?'音色試聴中':'停止中';
-    $('playButton').textContent=audition?'■ 試聴を停止':'♪ 音色を試聴';
+    $('playButton').textContent=audition?'■ 試聴を停止':soundSource==='sample'?'♪ サンプルを試聴':'♪ 音色を試聴';
     $('sequencePlay').textContent=playing?'↻ 最初から再生':'▶ 自動演奏';
     $('sequenceStop').disabled=!playing;
     $('waveLabel').textContent=active?'実際の出力波形':'計算上の波形';
@@ -153,11 +157,36 @@
     osc.start(at);osc.stop(at+duration+.03);
     return node;
   }
+  function scheduleSampleNote(bus, at, duration, frequency, volume, headroom, nodes){
+    if(!sampleBuffer)throw Error('サンプリング音源が未登録です。マイクで録音するか、音声ファイルを読み込んでください。');
+    const playbackRate=frequency/sampleReferenceHz;
+    if(!Number.isFinite(playbackRate)||playbackRate<=0||playbackRate>16||playbackRate<0.0625)
+      throw Error('サンプリング音源と指定音高が離れすぎています。基準周波数を調整してください（移調は±4オクターブまで）。');
+    const src=ctx.createBufferSource(), env=ctx.createGain();
+    src.buffer=sampleBuffer;src.loop=true;src.loopStart=0;src.loopEnd=sampleBuffer.duration;
+    src.playbackRate.value=playbackRate;
+    const attack=Math.min(.018,duration*.20),release=Math.min(.07,duration*.23);
+    const level=volume*headroom*.75;
+    env.gain.setValueAtTime(0,at);
+    env.gain.linearRampToValueAtTime(level,at+attack);
+    env.gain.setValueAtTime(level,Math.max(at+attack,at+duration-release));
+    env.gain.linearRampToValueAtTime(0,at+duration);
+    src.connect(env);env.connect(bus);
+    const node={osc:src,env};nodes.add(node);
+    src.onended=()=>{try{src.disconnect();env.disconnect();}catch(_e){}nodes.delete(node);};
+    src.start(at);src.stop(at+duration+.03);
+    return node;
+  }
+  function scheduleActiveNote(bus,at,duration,frequency,volume,snapshot,cache,headroom,nodes){
+    return soundSource==='sample'
+      ? scheduleSampleNote(bus,at,duration,frequency,volume,headroom,nodes)
+      : scheduleNote(bus,at,duration,frequency,volume,snapshot,cache,headroom,nodes);
+  }
   async function previewLane(lane){
     const r=parseRatio(lane.ratio), freq=baseHz*r;
     await setupAudio();
     const cache=new Map(),nodes=new Set(),bus=ctx.createGain();bus.connect(masterGain);
-    scheduleNote(bus,ctx.currentTime+.02,.65,freq,lane.volume/100,partials.map(p=>({...p})),cache,.7,nodes);
+    scheduleActiveNote(bus,ctx.currentTime+.02,.65,freq,lane.volume/100,partials.map(p=>({...p})),cache,.7,nodes);
     setTimeout(()=>{try{bus.disconnect();}catch(_e){}},1250);
     status(`${lane.name||lane.ratio}：${fixedHz(freq)} Hz を試聴しました。`);
     animate();
@@ -188,17 +217,17 @@
     return events;
   }
   async function startSequence(){
-    const events=songEvents();await setupAudio();
+    const events=songEvents();if(soundSource==='sample'&&!sampleBuffer)throw Error('録音音源を読み込んでから再生してください。');await setupAudio();
     if(playing)stopSequence(false);
     if(audition){audition=false;refreshAudio();}
     const bus=ctx.createGain();bus.gain.value=1;bus.connect(masterGain);sequenceBus=bus;
     const snapShot=partials.map(p=>({...p})),cache=new Map(), start=ctx.currentTime+.12;
     const secs=60/tempo,headroom=0.8/Math.sqrt(Math.max(1,Math.min(40,lanes.filter(l=>l.notes.length).length)));
     try{
-      for(const event of events){scheduleNote(bus,start+event.start*secs,event.duration*secs,event.freq,event.volume,snapShot,cache,headroom,sequenceNodes);}
+      for(const event of events){scheduleActiveNote(bus,start+event.start*secs,event.duration*secs,event.freq,event.volume,snapShot,cache,headroom,sequenceNodes);}
     }catch(e){stopSequence(false);throw e;}
     sequenceStart=start;sequenceEnd=start+totalBeats()*secs;seqCount=events.length;playing=true;
-    syncPower();sequenceStatus(`再生中：${events.length}音 / ${lanes.length}音階行 / ${tempo} BPM。音色変更は次の再生から反映されます。`);
+    syncPower();sequenceStatus(`再生中：${events.length}音 / ${lanes.length}音階行 / ${tempo} BPM / ${soundSource==='sample'?'サンプリング音源':'24倍音合成音'}。音源変更は次の再生から反映されます。`);
     animate();
   }
 
@@ -231,7 +260,13 @@
     baseHz=value;refreshAudio();renderMixer();renderRoll();drawVisuals();
   });
   $('playButton').addEventListener('click',async()=>{
-    try{if(!audition){await setupAudio();if(playing)stopSequence(false);audition=true;}else audition=false;
+    try{
+      if(soundSource==='sample'){
+        if(!sampleBuffer)throw Error('録音した音か音声ファイルを用意してください。');
+        await playSamplePreview();
+        return;
+      }
+      if(!audition){await setupAudio();if(playing)stopSequence(false);audition=true;}else audition=false;
       refreshAudio();syncPower();animate();status(audition?'音色を試聴中です。':'音色の試聴を停止しました。');}
     catch(e){status(e.message,'err');}
   });
@@ -446,6 +481,7 @@
     beatPx=54;lanes=makeDefaultLanes();partials=DEFAULT_SONG.partials.map(p=>({...p}));selected=null;
     syncSongSettings();
     $('scrollTimeline').scrollLeft=0;$('scrollTimeline').scrollTop=0;
+    soundSource='synth';$('soundSource').value='synth';sampleReferenceHz=DEFAULT_SONG.baseHz;$('sampleReferenceHz').value=sampleReferenceHz;syncPower();
     refreshAudio();renderMixer();renderRoll();drawVisuals();
     sequenceStatus('禮司の初期データを復元しました：英国国歌（純正比率）、3/4拍子・14小節。音符とミキシング設定も復元しています。');
   });
@@ -458,7 +494,7 @@
     const a=document.createElement('a');a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),2000);
   }
   $('saveSong').addEventListener('click',()=>exportFile('reiji-lab-ratio-roll-song.json',{
-    format:'reiji-lab-ratio-piano-roll',version:1,baseHz,master,tempo,beatsPerBar,bars,snap,lanes:lanes.map(l=>({name:l.name,ratio:l.ratio,volume:l.volume,notes:l.notes.map(n=>({start:n.start,duration:n.duration,volume:n.volume}))})),partials
+    format:'reiji-lab-ratio-piano-roll',version:1,baseHz,master,tempo,beatsPerBar,bars,snap,sampler:{mode:soundSource,referenceHz:sampleReferenceHz,filename:sampleFilename},lanes:lanes.map(l=>({name:l.name,ratio:l.ratio,volume:l.volume,notes:l.notes.map(n=>({start:n.start,duration:n.duration,volume:n.volume}))})),partials
   }));
   // Full mixer export: independent from the score, including all gains and
   // partial waveform choices. Note positions and tuning ratios are metadata only
@@ -536,8 +572,16 @@
       // Old saves do not have snap; keep the old default in that case.
       snap=[1,.5,.25,2/3,1/3,1/6].find(v=>Math.abs((d.snap??.25)-v)<1e-10)??.25;
       $('snap').value=String(snap);
+      if(d.sampler && Number.isFinite(d.sampler.referenceHz) && d.sampler.referenceHz>=20 && d.sampler.referenceHz<=5000){
+        sampleReferenceHz=d.sampler.referenceHz;
+        $('sampleReferenceHz').value=sampleReferenceHz;
+      }
+      soundSource=d.sampler?.mode==='sample'?'sample':'synth';
+      $('soundSource').value=soundSource;
+      updateSamplerUi();syncPower();
       $('tempo').value=tempo;$('meter').value=beatsPerBar;$('bars').value=bars;$('baseHz').value=baseHz;$('master').value=master;$('masterValue').textContent=master+'%';$('preset').value='custom';
-      refreshAudio();renderMixer();renderRoll();drawVisuals();sequenceStatus(`読み込み完了：${lanes.length}音階行・${count}音符。`);
+      refreshAudio();renderMixer();renderRoll();drawVisuals();
+      sequenceStatus(`読み込み完了：${lanes.length}音階行・${count}音符。${soundSource==='sample'&&!sampleBuffer?' 音声はJSONに含まれません。WAVファイルを別途読み込んでください。':''}`);
     }catch(err){announceError(err);}finally{e.target.value='';}
   });
   $('saveTimbre').addEventListener('click',()=>exportFile('reiji-lab-harmonics-24.json',{format:'reiji-lab-harmonic-synth-24',version:1,baseHz,master,partials}));
@@ -554,6 +598,167 @@
     const scroll=$('scrollTimeline'),x=LABEL_WIDTH+beat*beatPx;
     if(x-scroll.scrollLeft>scroll.clientWidth-60 || x-scroll.scrollLeft<LABEL_WIDTH+20){scroll.scrollLeft=clamp(x-LABEL_WIDTH-80,0,scroll.scrollWidth-scroll.clientWidth);}
   }
+  function samplerStatus(message,kind=''){
+    $('samplerStatus').textContent=message;
+    $('samplerStatus').className='sample-status '+kind;
+  }
+  function updateSamplerUi(){
+    $('sampleBadge').textContent=sampleBuffer?`${sampleBuffer.duration.toFixed(2)}秒 / ${sampleFilename||'マイク録音'}`:'音源未登録';
+    $('samplePreview').disabled=!sampleBuffer;
+    $('sampleSaveWav').disabled=!sampleBuffer;
+    $('soundSource').value=soundSource;
+    syncPower();drawSampleWave();
+  }
+  async function playSamplePreview(){
+    if(!sampleBuffer)throw Error('録音した音か音声ファイルを用意してください。');
+    await setupAudio();
+    if(playing)stopSequence(false);
+    if(audition){audition=false;refreshAudio();}
+    const bus=ctx.createGain();bus.connect(masterGain);
+    const at=ctx.currentTime+.03,duration=Math.min(2.2,Math.max(.5,sampleBuffer.duration));
+    const note=scheduleSampleNote(bus,at,duration,baseHz,.75,.7,samplePreviewNodes);
+    note.osc.onended=()=>{try{note.osc.disconnect();note.env.disconnect();bus.disconnect();}catch(_e){}samplePreviewNodes.delete(note);};
+    animate();syncPower();
+    samplerStatus(`試聴中：サンプル基準 ${sampleReferenceHz.toFixed(2)} Hz → 出力 ${baseHz.toFixed(2)} Hz。`);
+  }
+  function endMicStream(){
+    if(micTimer){clearTimeout(micTimer);micTimer=null;}
+    if(micStream){micStream.getTracks().forEach(t=>t.stop());micStream=null;}
+  }
+  async function stopMicRecording(){
+    if(micRecorder&&micRecorder.state==='recording')micRecorder.stop();
+    $('sampleRecordStart').disabled=false;$('sampleRecordStop').disabled=true;
+    endMicStream();
+  }
+  async function installAudioSample(buffer,filename){
+    // Convert to mono and trim silence, keeping only at most ten seconds.
+    if(!buffer?.length||!buffer.numberOfChannels)throw Error('音声データが空です。');
+    const fs=buffer.sampleRate,len=Math.min(buffer.length,Math.round(fs*10));
+    const input=new Float32Array(len),count=Math.min(buffer.numberOfChannels,2);
+    for(let c=0;c<count;c++){
+      const channel=buffer.getChannelData(c);
+      for(let j=0;j<len;j++)input[j]+=channel[j]/count;
+    }
+    let peak=0;for(let j=0;j<len;j++)peak=Math.max(peak,Math.abs(input[j]));
+    if(peak<.004)throw Error('録音音量が小さすぎます。マイクを近づけて再録音してください。');
+    const threshold=Math.max(.003,peak*.015);
+    let first=0,last=len-1;
+    while(first<len&&Math.abs(input[first])<threshold)first++;
+    while(last>first&&Math.abs(input[last])<threshold)last--;
+    first=Math.max(0,first-Math.round(fs*.02));
+    last=Math.min(len-1,last+Math.round(fs*.10));
+    const length=last-first+1;
+    if(length<fs*.08)throw Error('録音された音が短すぎます。0.1秒以上の単音を録音してください。');
+    const out=ctx.createBuffer(1,length,fs),arr=out.getChannelData(0);
+    const fade=Math.max(1,Math.min(Math.round(fs*.01),Math.floor(length*.05)));
+    for(let i=0;i<length;i++){
+      const edge=Math.min(1,i/fade,(length-1-i)/fade);
+      arr[i]=Math.max(-1,Math.min(1,input[first+i]*.85/peak))*edge;
+    }
+    sampleBuffer=out;sampleFilename=filename;
+    soundSource='sample';
+    if(playing)stopSequence(false);
+    if(audition){audition=false;refreshAudio();}
+    updateSamplerUi();
+    samplerStatus(`音源を登録しました：${sampleFilename} / ${out.duration.toFixed(2)}秒。基準周波数を合わせてピアノロールを再生してください。`);
+  }
+  async function decodeAudioData(arrayBuffer){
+    await setupAudio();
+    try{return await ctx.decodeAudioData(arrayBuffer);}
+    catch(_e){throw Error('音声をデコードできません。WAVなどブラウザが対応する形式をお試しください。');}
+  }
+  $('soundSource').addEventListener('change',e=>{
+    soundSource=e.target.value==='sample'?'sample':'synth';
+    if(playing)stopSequence(false);
+    if(audition){audition=false;refreshAudio();}
+    updateSamplerUi();
+    if(soundSource==='sample'&&!sampleBuffer)samplerStatus('録音ボタンを押すか、既存の音声ファイルを読み込んでください。','err');
+    else samplerStatus(soundSource==='sample'?`サンプリング音源を使用します（${sampleFilename}）。`:'24倍音ミキサーの合成音を使用します。');
+  });
+  $('sampleReferenceHz').addEventListener('change',e=>{
+    const hz=Number(e.target.value);
+    if(!Number.isFinite(hz)||hz<20||hz>5000){e.target.value=sampleReferenceHz;samplerStatus('基準周波数は20〜5000 Hzにしてください。','err');return;}
+    sampleReferenceHz=hz;
+    samplerStatus(`サンプル基準周波数を${hz} Hzに変更しました。録音音の実際の音高に合わせてください。`);
+  });
+  $('sampleRecordStart').addEventListener('click',async()=>{
+    const button=$('sampleRecordStart');button.disabled=true;
+    try{
+      if(!navigator.mediaDevices?.getUserMedia||!window.MediaRecorder)
+        throw Error('このブラウザまたは接続方法では録音できません。HTTPSで公開してChrome / Edgeをお試しください。');
+      if(playing)stopSequence(false);
+      if(audition){audition=false;refreshAudio();syncPower();}
+      micStream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false},video:false});
+      const mime=['audio/webm;codecs=opus','audio/webm','audio/ogg;codecs=opus'].find(t=>MediaRecorder.isTypeSupported(t));
+      micRecorder=new MediaRecorder(micStream,mime?{mimeType:mime}:undefined);
+      micChunks=[];
+      micRecorder.addEventListener('dataavailable',e=>{if(e.data?.size)micChunks.push(e.data);});
+      micRecorder.addEventListener('stop',async()=>{
+        endMicStream();
+        try{
+          if(!micChunks.length)throw Error('録音データが取得できませんでした。');
+          const blob=new Blob(micChunks,{type:micRecorder.mimeType||'audio/webm'});
+          const decoded=await decodeAudioData(await blob.arrayBuffer());
+          await installAudioSample(decoded,'microphone-sample.wav');
+        }catch(err){samplerStatus(err.message,'err');}
+        finally{micChunks=[];micRecorder=null;}
+      },{once:true});
+      micRecorder.start();
+      $('sampleRecordStop').disabled=false;
+      samplerStatus('● 録音中です。できるだけ単音を鳴らし、録音終了を押してください（最大10秒）。','recording');
+      micTimer=setTimeout(()=>stopMicRecording(),10000);
+    }catch(err){endMicStream();button.disabled=false;$('sampleRecordStop').disabled=true;samplerStatus(err.message,'err');}
+  });
+  $('sampleRecordStop').addEventListener('click',stopMicRecording);
+  $('samplePreview').addEventListener('click',async()=>{try{await playSamplePreview();}catch(err){samplerStatus(err.message,'err');}});
+  $('sampleFileOpen').addEventListener('click',()=>$('sampleFile').click());
+  $('sampleFile').addEventListener('change',async e=>{
+    const f=e.target.files?.[0];if(!f)return;
+    try{
+      if(f.size>24e6)throw Error('音声ファイルは24MB以下にしてください。');
+      const decoded=await decodeAudioData(await f.arrayBuffer());
+      await installAudioSample(decoded,f.name);
+    }catch(err){samplerStatus(err.message,'err');}
+    finally{e.target.value='';}
+  });
+  function sampleToWav(buf){
+    const samples=buf.getChannelData(0),size=44+samples.length*2;
+    const out=new ArrayBuffer(size),view=new DataView(out),fs=buf.sampleRate;
+    const write=(offset,value)=>{for(let i=0;i<value.length;i++)view.setUint8(offset+i,value.charCodeAt(i));};
+    write(0,'RIFF');view.setUint32(4,size-8,true);write(8,'WAVE');write(12,'fmt ');
+    view.setUint32(16,16,true);view.setUint16(20,1,true);view.setUint16(22,1,true);
+    view.setUint32(24,fs,true);view.setUint32(28,fs*2,true);
+    view.setUint16(32,2,true);view.setUint16(34,16,true);
+    write(36,'data');view.setUint32(40,samples.length*2,true);
+    for(let i=0;i<samples.length;i++){
+      const v=Math.max(-1,Math.min(1,samples[i]));
+      view.setInt16(44+i*2,v<0?v*32768:v*32767,true);
+    }
+    return new Blob([out],{type:'audio/wav'});
+  }
+  $('sampleSaveWav').addEventListener('click',()=>{
+    if(!sampleBuffer)return;
+    const blob=sampleToWav(sampleBuffer),url=URL.createObjectURL(blob);
+    const a=document.createElement('a');a.href=url;a.download='reiji-lab-sampled-instrument.wav';a.click();
+    setTimeout(()=>URL.revokeObjectURL(url),3000);
+    samplerStatus('録音音源をWAVで保存しました。曲JSONとWAVをセットで保管してください。');
+  });
+  function drawSampleWave(){
+    const canvas=$('sampleWaveCanvas');if(!canvas)return;
+    const {c,w,h}=fitCanvas(canvas);c.clearRect(0,0,w,h);
+    const mid=h/2;c.strokeStyle='#314d60';c.beginPath();c.moveTo(0,mid);c.lineTo(w,mid);c.stroke();
+    if(!sampleBuffer){c.fillStyle='#8292aa';c.font='12px system-ui';c.fillText('No sample loaded',12,mid-10);return;}
+    const samples=sampleBuffer.getChannelData(0),step=Math.max(1,Math.floor(samples.length/Math.max(1,w)));
+    c.strokeStyle='#77d8d2';c.lineWidth=1;c.beginPath();
+    for(let x=0;x<w;x++){
+      const start=Math.floor(x*step),end=Math.min(samples.length,start+step);
+      if(start>=samples.length)break;
+      let low=1,high=-1;
+      for(let i=start;i<end;i++){low=Math.min(low,samples[i]);high=Math.max(high,samples[i]);}
+      c.moveTo(x,mid-high*(h*.44));c.lineTo(x,mid-low*(h*.44));
+    }
+    c.stroke();
+  }
   function fitCanvas(canvas){
     const rect=canvas.getBoundingClientRect(),dpr=Math.min(window.devicePixelRatio||1,2),w=rect.width,h=rect.height;
     canvas.width=Math.max(1,Math.floor(w*dpr));canvas.height=Math.max(1,Math.floor(h*dpr));
@@ -563,6 +768,7 @@
   function rawWave(type,p){switch(type){case 'triangle':return (2/Math.PI)*Math.asin(Math.sin(p));case 'square':return Math.sin(p)>=0?1:-1;case 'sawtooth':return 2*(p/(2*Math.PI)-Math.floor(p/(2*Math.PI)+.5));default:return Math.sin(p);}}
   function drawWave(){const {c,w,h}=fitCanvas($('waveCanvas'));grid(c,w,h);const values=[],count=Math.max(150,Math.round(w*2));
     if((audition||playing)&&analyser&&timeArray){analyser.getByteTimeDomainData(timeArray);const span=Math.min(timeArray.length,Math.max(10,Math.round(ctx.sampleRate/baseHz*3)));for(let k=0;k<count;k++){const t=timeArray.length-span+Math.round(k/(count-1)*(span-1));values.push((timeArray[t]-128)/128);}}
+    else if(soundSource==='sample'&&sampleBuffer){const data=sampleBuffer.getChannelData(0);for(let k=0;k<count;k++)values.push(data[Math.min(data.length-1,Math.floor(k/(count-1)*(data.length-1)))]);}
     else{for(let k=0;k<count;k++){const p=k/(count-1)*Math.PI*6;let value=0;partials.forEach((t,i)=>{if(!t.muted)value+=t.level/100*rawWave(t.wave,p*(i+1));});values.push(value);}const peak=Math.max(1,...values.map(Math.abs));values.forEach((v,i)=>values[i]=v/peak*.9);}
     c.strokeStyle='#6cdad3';c.lineWidth=2;c.beginPath();values.forEach((v,i)=>{const x=i/(count-1)*w,y=h/2-v*h*.43;if(!i)c.moveTo(x,y);else c.lineTo(x,y);});c.stroke();}
   function drawSpectrum(){const {c,w,h}=fitCanvas($('spectrumCanvas'));grid(c,w,h);const gap=3,pad=10,bw=(w-2*pad-(MAX_PARTIALS-1)*gap)/MAX_PARTIALS;
@@ -579,5 +785,5 @@
   }
   window.addEventListener('resize',()=>{drawVisuals();updateNavigator();},{passive:true});
   document.addEventListener('visibilitychange',()=>{if(!document.hidden)drawVisuals();});
-  syncSongSettings();renderMixer();renderRoll();syncPower();drawVisuals();
+  syncSongSettings();$('sampleReferenceHz').value=sampleReferenceHz;renderMixer();renderRoll();syncPower();drawVisuals();updateSamplerUi();
 })();
