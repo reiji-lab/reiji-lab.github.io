@@ -4,7 +4,32 @@
   const MAX_LANES = 40, MAX_PARTIALS = 24, MAX_NOTES = 512, LABEL_WIDTH = 282;
   const waves = [['sine','正弦波'],['triangle','三角波'],['sawtooth','ノコギリ波'],['square','矩形波']];
   const clamp = (n,lo,hi) => Math.min(hi,Math.max(lo,n));
-  const fmt = x => Number(x.toFixed(4)).toString();
+  const fmt = x => Number(x.toFixed(6)).toString();
+  // A beat is a quarter note. Retain rational triplet positions internally
+  // instead of converting 1/3 into a rounded four-decimal decimal.
+  const beatString = value => {
+    const x = Number(value);
+    for (const denominator of [1, 2, 3, 4, 6, 8, 12, 16, 24, 48]) {
+      const numerator = Math.round(x * denominator);
+      if (Math.abs(x - numerator / denominator) < 1e-8) {
+        let a = numerator, b = denominator;
+        const gcd = (m,n) => n ? gcd(n,m%n) : m;
+        const g = gcd(Math.abs(a),b);
+        a /= g; b /= g;
+        return b===1 ? String(a) : `${a}/${b}`;
+      }
+    }
+    return fmt(x);
+  };
+  const parseBeat = raw => {
+    const s = String(raw).trim();
+    if (!/^(?:\d+(?:\.\d+)?|\.\d+)(?:\s*\/\s*(?:\d+(?:\.\d+)?|\.\d+))?$/.test(s))
+      throw Error('拍数は 1/3、2/3、0.5、1 のように入力してください。');
+    const [num,den='1'] = s.split('/').map(Number);
+    const n = num/den;
+    if (!Number.isFinite(n) || n < 0) throw Error('拍数は0以上で、分母は0以外にしてください。');
+    return n;
+  };
   const fixedHz = x => x >= 1000 ? x.toLocaleString('ja-JP',{maximumFractionDigits:1}) : x.toFixed(2);
   const status = (msg, cls='') => { $('status').textContent=msg; $('status').className='status '+cls; };
   const sequenceStatus = (msg,cls='') => {$('sequenceStatus').textContent=msg; $('sequenceStatus').className='sequence-status '+cls;};
@@ -209,6 +234,11 @@
 
   const totalBeats=()=>beatsPerBar*bars;
   const snapTo=(v)=>Math.round(v/snap)*snap;
+  const isTripletGrid=()=>[2/3,1/3,1/6].some(v=>Math.abs(snap-v)<1e-10);
+  // On a triplet grid, one click creates a single triplet note.
+  // Otherwise preserve the previous default of one quarter note.
+  const newNoteDuration=()=>isTripletGrid()?snap:1;
+  const currentGridText=()=>isTripletGrid()?`3連符（${beatString(snap)}拍刻み）`:`${beatString(snap)}拍刻み`;
   const allNotes=()=>lanes.reduce((sum,lane)=>sum+lane.notes.length,0);
   const getSelected=()=>{if(!selected)return null;const lane=lanes.find(l=>l.id===selected.laneId);const note=lane?.notes.find(n=>n.id===selected.noteId);return lane&&note?{lane,note}:null;};
   function renderInspector(){
@@ -216,8 +246,8 @@
     ['noteStart','noteDuration','noteVolume','deleteNote'].forEach(key=>{$(key).disabled=!enabled;});
     $('selectionName').textContent=s?`${s.lane.name||s.lane.ratio}（${s.lane.ratio}）`:'音符を選択してください';
     if(s){
-      $('noteStart').value=fmt(s.note.start);$('noteDuration').value=fmt(s.note.duration);$('noteVolume').value=s.note.volume;
-      $('positionLabel').textContent=`第${Math.floor(s.note.start/beatsPerBar)+1}小節 / ${fmt(s.note.start%beatsPerBar+1)}拍目 → 長さ ${fmt(s.note.duration)}拍。1拍は4分音符です。`;
+      $('noteStart').value=beatString(s.note.start);$('noteDuration').value=beatString(s.note.duration);$('noteVolume').value=s.note.volume;
+      $('positionLabel').textContent=`第${Math.floor((s.note.start+1e-9)/beatsPerBar)+1}小節 / ${beatString(s.note.start%beatsPerBar+1)}拍目 → 長さ ${beatString(s.note.duration)}拍。1拍は4分音符です。`;
     }else{$('noteStart').value='';$('noteDuration').value='';$('noteVolume').value='';$('positionLabel').textContent='空白をクリックすると、その行の音程比で音符が追加されます。空白の区間が休符です。';}
   }
   function selectNote(laneId,noteId){selected={laneId,noteId};
@@ -232,9 +262,12 @@
   for(const [element,key] of [['noteStart','start'],['noteDuration','duration'],['noteVolume','volume']]){
     $(element).addEventListener('change',e=>{
       const s=getSelected();if(!s)return;
-      const v=Number(e.target.value),end=totalBeats();
-      if(!Number.isFinite(v)|| (key==='volume'?(v<0||v>100):key==='start'?(v<0||v+s.note.duration>end):(v<snap||s.note.start+v>end))){
-        sequenceStatus('音符の開始位置・長さは小節内の範囲で指定してください。','err');renderInspector();return;
+      let v;
+      try { v=key==='volume'?Number(e.target.value):parseBeat(e.target.value); }
+      catch(err) { sequenceStatus(err.message,'err');renderInspector();return; }
+      const end=totalBeats();
+      if(!Number.isFinite(v)|| (key==='volume'?(v<0||v>100):key==='start'?(v<0||v+s.note.duration>end+1e-8):(v<=0||s.note.start+v>end+1e-8))){
+        sequenceStatus('開始位置は0以上、音符の長さは0より大きく、曲の終わりを超えないようにしてください。','err');renderInspector();return;
       }
       s.note[key]=key==='volume'?Math.round(v):v;renderRoll();
     });
@@ -250,6 +283,16 @@
       const label=document.createElement('div');label.className='bar-label';label.style.left=bar*barWidth+'px';label.style.width=barWidth+'px';label.textContent=`${bar+1} 小節`;rulerTrack.append(label);
     }
     for(let beat=1;beat<total;beat++)if(beat%beatsPerBar){const tick=document.createElement('div');tick.className='beat-tick';tick.style.left=(beat*beatPx)+'px';rulerTrack.append(tick);}
+    // Draw subdivision marks: 1/3 beat for eighth-note triplets, etc.
+    if(snap<1){
+      for(let i=1, ticks=Math.ceil(total/snap);i<ticks;i++){
+        const beat=i*snap;
+        if(beat>=total-1e-8||Math.abs(beat-Math.round(beat))<1e-8)continue;
+        const mark=document.createElement('div');mark.className='subdivision-tick';
+        if(isTripletGrid())mark.classList.add('triplet-tick');
+        mark.style.left=(beat*beatPx)+'px';rulerTrack.append(mark);
+      }
+    }
     ruler.append(corner,rulerTrack);container.append(ruler);
     lanes.forEach((lane,laneIndex)=>{
       const row=document.createElement('div');row.className='note-row';
@@ -273,22 +316,22 @@
       });
       info.append(index,ratio,hz,vol,hear,del);
       const track=document.createElement('div');track.className='lane-track';track.style.width=width+'px';
-      track.style.backgroundImage='linear-gradient(to right, #455770 1px, transparent 1px), linear-gradient(to right, #293e55 1px, transparent 1px)';
-      track.style.backgroundSize=`${barWidth}px 100%, ${beatPx}px 100%`;
+      track.style.backgroundImage='linear-gradient(to right, #455770 1px, transparent 1px), linear-gradient(to right, #354962 1px, transparent 1px), linear-gradient(to right, #29445688 1px, transparent 1px)';
+      track.style.backgroundSize=`${barWidth}px 100%, ${beatPx}px 100%, ${snap*beatPx}px 100%`;
       track.setAttribute('aria-label',`${lane.ratio} のタイムライン。空白をクリックして音符を配置`);
       track.addEventListener('click',ev=>{
         if(ev.target.closest('.note-block'))return;
         if(allNotes()>=MAX_NOTES){sequenceStatus('音符は最大512個です。','warn');return;}
         const x=ev.clientX-track.getBoundingClientRect().left;
-        const start=clamp(Math.floor((x/beatPx)/snap)*snap,0,Math.max(0,total-snap));
-        const duration=Math.min(1,total-start),note=newNote(start,duration);
+        const start=clamp(Math.floor((x/beatPx+1e-8)/snap)*snap,0,Math.max(0,total-snap));
+        const duration=Math.min(newNoteDuration(),total-start),note=newNote(start,duration);
         lane.notes.push(note);selected={laneId:lane.id,noteId:note.id};renderRoll();
-        sequenceStatus(`音符を追加：${lane.ratio}、開始 ${fmt(start)}拍、長さ ${fmt(duration)}拍。`);
+        sequenceStatus(`音符を追加：${lane.ratio}、開始 ${beatString(start)}拍、長さ ${beatString(duration)}拍（${currentGridText()}）。`);
       });
       lane.notes.forEach(note=>{
         const el=document.createElement('div');el.className='note-block';el.tabIndex=0;el.setAttribute('role','button');el.dataset.noteId=note.id;
         const w=note.duration*beatPx;el.style.left=(note.start*beatPx+1)+'px';el.style.width=Math.max(7,w-2)+'px';
-        if(w<36)el.classList.add('too-small');if(selected?.noteId===note.id)el.classList.add('selected');
+        if(w<36)el.classList.add('too-small');if(w<18)el.classList.add('tiny-note');if(selected?.noteId===note.id)el.classList.add('selected');
         const text=document.createElement('span');text.className='note-text';text.textContent=lane.ratio;
         const handle=document.createElement('span');handle.className='resize-handle';handle.title='音符の長さを変更';
         el.append(text,handle);
@@ -298,7 +341,7 @@
           if(e.button!==0)return;
           e.preventDefault();e.stopPropagation();
           selectNote(lane.id,note.id);
-          const resize=e.target===handle||e.offsetX>el.clientWidth-13;
+          const resize=e.target===handle||(el.clientWidth>18 && e.offsetX>el.clientWidth-13);
           const origin=e.clientX,initialStart=note.start,initialDuration=note.duration;
           let moved=false;
           el.setPointerCapture(e.pointerId);
@@ -371,14 +414,19 @@
     if(!Number.isInteger(b)||b<1||b>64||lanes.some(l=>l.notes.some(n=>n.start+n.duration>b*beatsPerBar+1e-6))){e.target.value=bars;sequenceStatus('小節数は1〜64。配置済みの音符を切り捨てる変更はできません。','warn');return;}
     bars=b;renderRoll();
   });
-  $('snap').addEventListener('change',e=>{snap=Number(e.target.value);});
+  $('snap').addEventListener('change',e=>{
+    snap=Number(e.target.value);
+    if(!(snap>0)) {snap=.25;e.target.value=String(snap);}
+    renderRoll();
+    sequenceStatus(`グリッド：${currentGridText()}。3連符のグリッドでは空白クリックで1個分の3連音符を追加します。`);
+  });
   $('zoom').addEventListener('input',e=>{beatPx=Number(e.target.value);$('zoomLabel').textContent=beatPx+'px/拍';renderRoll();});
   $('sequencePlay').addEventListener('click',async()=>{const b=$('sequencePlay');b.disabled=true;try{await startSequence();}catch(e){announceError(e);}finally{b.disabled=false;}});
   $('sequenceStop').addEventListener('click',()=>stopSequence());
   $('resetScore').addEventListener('click',()=>{
     if(playing)stopSequence(false);
     tempo=72;beatsPerBar=4;bars=4;snap=.25;beatPx=54;lanes=makeDemo();selected=null;
-    $('tempo').value=tempo;$('meter').value=beatsPerBar;$('bars').value=bars;$('snap').value=snap;$('zoom').value=beatPx;$('zoomLabel').textContent=beatPx+'px/拍';
+    $('tempo').value=tempo;$('meter').value=beatsPerBar;$('bars').value=bars;$('snap').value=String(snap);$('zoom').value=beatPx;$('zoomLabel').textContent=beatPx+'px/拍';
     $('scrollTimeline').scrollLeft=0;$('scrollTimeline').scrollTop=0;renderRoll();sequenceStatus('サンプルを復元しました：4/4拍子・4小節、C → F → G → C。');
   });
   function validTimbre(data){
@@ -390,7 +438,7 @@
     const a=document.createElement('a');a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),2000);
   }
   $('saveSong').addEventListener('click',()=>exportFile('reiji-lab-ratio-roll-song.json',{
-    format:'reiji-lab-ratio-piano-roll',version:1,baseHz,master,tempo,beatsPerBar,bars,lanes:lanes.map(l=>({name:l.name,ratio:l.ratio,volume:l.volume,notes:l.notes.map(n=>({start:n.start,duration:n.duration,volume:n.volume}))})),partials
+    format:'reiji-lab-ratio-piano-roll',version:1,baseHz,master,tempo,beatsPerBar,bars,snap,lanes:lanes.map(l=>({name:l.name,ratio:l.ratio,volume:l.volume,notes:l.notes.map(n=>({start:n.start,duration:n.duration,volume:n.volume}))})),partials
   }));
   $('loadSong').addEventListener('click',()=>$('songFile').click());
   $('songFile').addEventListener('change',async e=>{
@@ -413,6 +461,9 @@
       const importedPartials=d.partials?validTimbre(d.partials):partials;
       if(playing)stopSequence(false);
       lanes=clean;partials=importedPartials;tempo=d.tempo;beatsPerBar=d.beatsPerBar;bars=d.bars;baseHz=d.baseHz;master=d.master;selected=null;
+      // Old saves do not have snap; keep the old default in that case.
+      snap=[1,.5,.25,2/3,1/3,1/6].find(v=>Math.abs((d.snap??.25)-v)<1e-10)??.25;
+      $('snap').value=String(snap);
       $('tempo').value=tempo;$('meter').value=beatsPerBar;$('bars').value=bars;$('baseHz').value=baseHz;$('master').value=master;$('masterValue').textContent=master+'%';$('preset').value='custom';
       refreshAudio();renderMixer();renderRoll();drawVisuals();sequenceStatus(`読み込み完了：${lanes.length}音階行・${count}音符。`);
     }catch(err){announceError(err);}finally{e.target.value='';}

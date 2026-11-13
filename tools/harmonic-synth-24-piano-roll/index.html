@@ -35,7 +35,7 @@
       <label class="field">テンポ（BPM）<input id="tempo" type="number" min="20" max="300" value="72"></label>
       <label class="field">拍子<select id="meter"><option value="2">2/4</option><option value="3">3/4</option><option value="4" selected>4/4</option><option value="6">6/4</option></select></label>
       <label class="field">小節数<input id="bars" type="number" min="1" max="64" value="4"></label>
-      <label class="field">グリッド<select id="snap"><option value="1">4分音符</option><option value="0.5">8分音符</option><option value="0.25" selected>16分音符</option></select></label>
+      <label class="field">グリッド<select id="snap"><option value="1">4分音符</option><option value="0.5">8分音符</option><option value="0.25" selected>16分音符</option><option value="0.6666666666666666">4分3連符（2/3拍）</option><option value="0.3333333333333333">8分3連符（1/3拍）</option><option value="0.16666666666666666">16分3連符（1/6拍）</option></select></label>
       <label class="field">横軸の拡大率<span class="rangeflex"><input id="zoom" type="range" min="36" max="90" step="6" value="54"><output id="zoomLabel">54px/拍</output></span></label>
     </div>
     <div class="roll-toolbar">
@@ -45,7 +45,7 @@
       <button type="button" id="resetScore" class="btn ghost">サンプルに戻す</button>
       <span id="measureText" class="small-metric">4小節 · 16拍</span>
     </div>
-    <p class="guide">空白をクリック：音符を追加 ／ 音符をドラッグ：発音位置を移動 ／ 音符の右端をドラッグ：長さを調整 ／ 空白の区間：休符</p>
+    <p class="guide">空白をクリック：音符を追加 ／ 音符をドラッグ：発音位置を移動 ／ 音符の右端をドラッグ：長さを調整 ／ 空白の区間：休符。<strong>3連符は「グリッド」で選択すると、3等分で配置・伸縮できます。</strong></p>
     <div class="scroll-timeline" id="scrollTimeline" aria-label="横スクロール可能なピアノロール">
       <div id="rollContent" class="roll-content"></div>
     </div>
@@ -57,12 +57,12 @@
     <div class="inspector" id="inspector" aria-label="選択した音符の編集">
       <div class="inspect-title"><strong>音符の詳細</strong><span id="selectionName">音符を選択してください</span></div>
       <div class="inspect-fields">
-        <label class="field">開始位置（拍）<input type="number" id="noteStart" min="0" step="0.25" disabled></label>
-        <label class="field">長さ（拍）<input type="number" id="noteDuration" min="0.25" step="0.25" disabled></label>
+        <label class="field">開始位置（拍）<input type="text" id="noteStart" inputmode="decimal" placeholder="例：1/3" disabled></label>
+        <label class="field">長さ（拍）<input type="text" id="noteDuration" inputmode="decimal" placeholder="例：1/3" disabled></label>
         <label class="field">音符の音量（%）<input type="number" id="noteVolume" min="0" max="100" step="1" disabled></label>
         <button type="button" id="deleteNote" class="btn danger" disabled>選択音符を削除</button>
       </div>
-      <p id="positionLabel" class="micro">開始と長さは、4分音符を1拍として数えます。各行の音程比は左側で編集できます。</p>
+      <p id="positionLabel" class="micro">開始と長さは4分音符を1拍として数えます。3連符は 1/3、2/3、1/6 のように分数で指定できます。各行の音程比は左側で編集できます。</p>
     </div>
     <div class="filebar"><button type="button" class="btn ghost" id="saveSong">曲を保存（JSON）</button><button type="button" class="btn ghost" id="loadSong">保存した曲を読み込む</button><input type="file" id="songFile" accept=".json,application/json" hidden><span class="micro">JSONを手で書く必要はありません。曲の保存形式としてのみ使用します。</span></div>
     <p class="sequence-status" id="sequenceStatus" aria-live="polite" role="status">サンプル：4/4拍子・4小節、C → F → G → C（音程比の編集用）</p>
