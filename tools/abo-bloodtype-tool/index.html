@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#10243b">
+  <meta name="description" content="reiji-lab のABO血液型遺伝シミュレーター。親の血液型や遺伝子型を選んで、子どもの血液型の可能性と確率を調べられます。">
+  <title>ABO血液型 遺伝シミュレーター | reiji-lab</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">本文へスキップ</a>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="https://reiji-lab.org/" aria-label="reiji-lab ホームページ">
+        <span class="brand-mark" aria-hidden="true">r<span>.</span></span>
+        <span class="brand-name">reiji-lab</span>
+      </a>
+      <nav class="header-nav" aria-label="ページ内メニュー">
+        <a href="#simulator">シミュレーター</a>
+        <a href="#patterns">全パターン</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="hero">
+      <div class="container hero-layout">
+        <div class="hero-copy">
+          <p class="eyebrow"><span class="eyebrow-line" aria-hidden="true"></span>MATH × BIOLOGY / INTERACTIVE LAB</p>
+          <h1>ABO血液型<br><span>遺伝シミュレーター</span></h1>
+          <p class="hero-lead">親から子へ、血液型はどう受け継がれる？<br>組み合わせを変えながら、遺伝のしくみを探ってみよう。</p>
+          <div class="hero-stats" aria-label="このツールの内容">
+            <div><strong>4</strong><span>血液型</span></div>
+            <div><strong>10</strong><span>親の血液型の組み合わせ</span></div>
+            <div><strong>21</strong><span>遺伝子型の組み合わせ</span></div>
+          </div>
+        </div>
+        <div class="hero-visual" aria-hidden="true">
+          <div class="orbit orbit-outer"></div>
+          <div class="orbit orbit-inner"></div>
+          <span class="hero-tile tile-a">A</span>
+          <span class="hero-tile tile-b">B</span>
+          <span class="hero-tile tile-ab">AB</span>
+          <span class="hero-tile tile-o">O</span>
+          <div class="hero-center"><span>GENETICS</span><strong>A · B · O</strong><small>One allele from each parent</small></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="simulator" class="section container" aria-labelledby="sim-heading">
+      <div class="section-heading">
+        <div class="section-num">01 <span>/ EXPLORE</span></div>
+        <h2 id="sim-heading">組み合わせを試す</h2>
+        <p>まず親の血液型を選び、必要に応じて遺伝子型を指定してください。</p>
+      </div>
+      <div class="simulator-shell">
+        <div class="controls-area">
+          <div class="control-header">
+            <h3>親の血液型を選択</h3>
+            <button type="button" class="text-button" id="reset-button">初期状態に戻す <span aria-hidden="true">↺</span></button>
+          </div>
+          <div class="parents-grid" id="parents-grid">
+            <section class="parent-panel" data-parent-panel="0" aria-label="親1">
+              <div class="parent-number"><span class="number-pill">01</span> 親 1</div>
+              <fieldset class="choice-fieldset">
+                <legend>血液型</legend>
+                <div class="type-choices" data-type-choices="0"></div>
+              </fieldset>
+              <fieldset class="choice-fieldset genotype-fieldset">
+                <legend>遺伝子型 <span class="subtle-text">（分かる場合）</span></legend>
+                <div class="genotype-choices" data-genotype-choices="0"></div>
+              </fieldset>
+            </section>
+            <section class="parent-panel" data-parent-panel="1" aria-label="親2">
+              <div class="parent-number"><span class="number-pill">02</span> 親 2</div>
+              <fieldset class="choice-fieldset">
+                <legend>血液型</legend>
+                <div class="type-choices" data-type-choices="1"></div>
+              </fieldset>
+              <fieldset class="choice-fieldset genotype-fieldset">
+                <legend>遺伝子型 <span class="subtle-text">（分かる場合）</span></legend>
+                <div class="genotype-choices" data-genotype-choices="1"></div>
+              </fieldset>
+            </section>
+          </div>
+          <p class="input-help">A型は AA / AO、B型は BB / BO の2通り。AB型とO型の遺伝子型はそれぞれ1通りです。</p>
+          <div class="preset-row">
+            <span>例を試す</span>
+            <button type="button" class="preset-button" data-preset="quarter">AO × BO <small>各25%</small></button>
+            <button type="button" class="preset-button" data-preset="ab">AA × BB <small>AB型100%</small></button>
+          </div>
+        </div>
+        <div class="result-area" aria-labelledby="result-heading">
+          <div class="result-label">RESULT / 子どもの血液型</div>
+          <h3 id="result-heading">計算結果</h3>
+          <div id="result-content" aria-live="polite" aria-atomic="true"></div>
+        </div>
+      </div>
+      <div class="punnett-panel" id="punnett-panel" hidden>
+        <div class="punnett-heading">
+          <div><h3>遺伝子の組み合わせ表</h3><p>両親が渡す遺伝子を1個ずつ組み合わせます。</p></div>
+          <span class="detail-kicker">PUNNETT SQUARE</span>
+        </div>
+        <div id="punnett-content"></div>
+      </div>
+    </section>
+
+    <section id="patterns" class="section section-light" aria-labelledby="patterns-heading">
+      <div class="container">
+        <div class="section-heading">
+          <div class="section-num">02 <span>/ ALL PATTERNS</span></div>
+          <h2 id="patterns-heading">全パターン一覧</h2>
+          <p>親の血液型だけで分かることと、遺伝子型まで分かる場合の確率を比べられます。</p>
+        </div>
+        <div class="table-card">
+          <div class="table-heading"><div><span class="table-step">TABLE A</span><h3>血液型による10パターン</h3></div><span class="table-caption">○ = 可能性あり</span></div>
+          <div class="table-scroll" role="region" aria-label="親の血液型による10パターン" tabindex="0">
+            <table id="phenotype-table"><thead><tr><th scope="col">親の血液型</th><th scope="col">A型</th><th scope="col">B型</th><th scope="col">AB型</th><th scope="col">O型</th></tr></thead><tbody></tbody></table>
+          </div>
+        </div>
+        <div class="table-card">
+          <div class="table-heading table-heading-wrap">
+            <div><span class="table-step">TABLE B</span><h3>遺伝子型による21パターン</h3></div>
+            <label class="filter-toggle"><input type="checkbox" id="filter-current"><span>上で選んだ血液型だけ表示</span></label>
+          </div>
+          <p class="table-instructions">確率は両親の遺伝子型が確定している場合の値です。「試す」を押すとシミュレーターへ反映されます。</p>
+          <div class="table-scroll" role="region" aria-label="親の遺伝子型による全21パターン" tabindex="0">
+            <table id="genotype-table">
+              <thead><tr><th scope="col">親の遺伝子型</th><th scope="col">A型</th><th scope="col">B型</th><th scope="col">AB型</th><th scope="col">O型</th><th scope="col" class="action-head">操作</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <p class="table-footnote" id="pattern-count" aria-live="polite"></p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section container" aria-labelledby="learn-heading">
+      <div class="section-heading">
+        <div class="section-num">03 <span>/ THE RULE</span></div>
+        <h2 id="learn-heading">しくみを理解する</h2>
+      </div>
+      <div class="learn-grid">
+        <article class="learn-card"><div class="learn-icon">01</div><h3>親から1個ずつ</h3><p>ABO遺伝子は、両親から1個ずつ受け継ぎます。2個の組み合わせによって血液型が決まります。</p></article>
+        <article class="learn-card"><div class="learn-icon">02</div><h3>AとBは両方現れる</h3><p>AとBが組み合わさるとAB型になります。これは「共優性」と呼ばれます。</p></article>
+        <article class="learn-card"><div class="learn-icon">03</div><h3>Oは隠れることがある</h3><p>AOならA型、BOならB型になります。OOの組み合わせではO型になります。</p></article>
+      </div>
+      <aside class="notice"><strong>このシミュレーターについて</strong><p>一般的なABO式血液型の単純な遺伝モデルを使っています。まれな遺伝子変異や特殊な血液型（cis-AB型、ボンベイ型など）は扱いません。血液型だけで親子関係を判断することはできません。また、A型・B型という血液型だけではAA/AO、BB/BOの区別がつかないため、確率を1つに決めることはできません。</p></aside>
+    </section>
+  </main>
+
+  <footer class="site-footer"><div class="container footer-inner"><div><a class="footer-brand" href="https://reiji-lab.org/">reiji-lab</a><p>Curiosity, explored.</p></div><span>ABO Inheritance Explorer · Interactive Learning Tool</span></div></footer>
+</body>
+</html>
