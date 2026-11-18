@@ -113,6 +113,14 @@ button,input,select{font:inherit}button{cursor:pointer}button:disabled{cursor:no
 .language-choice.active,.language-choice[aria-pressed="true"]{background:#2c5862;border-color:#76d5cb80;color:#e5fffc}
 .language-choice:focus-visible{outline:2px solid #80ded7;outline-offset:2px}
 @media(max-width:710px){.head{align-items:flex-start;flex-wrap:wrap}.head-actions{margin-left:auto}.language-choice{padding:6px 12px}}
+
+/* App terms: follow the existing 日本語 / English control through <html lang>. */
+.usage-terms{margin:26px 4px 20px;padding:17px 20px;border:1px solid var(--edge);border-radius:12px;background:#101b2b;color:var(--muted);font-size:12px;line-height:1.85}
+.usage-terms h2{font-size:14px;line-height:1.5;margin:0 0 9px;color:#d9eee9}
+.usage-terms p{margin:0 0 8px}.usage-terms p:last-child{margin-bottom:0}
+.usage-terms .terms-copyright{font-size:11px;color:#a9b8cd;margin-top:11px}
+html[lang="ja"] .usage-terms [lang="en"],html[lang="en"] .usage-terms [lang="ja"]{display:none}
+@media(max-width:710px){.usage-terms{padding:14px 15px}}
 </style>
 </head>
 <body>
@@ -273,6 +281,20 @@ button,input,select{font:inherit}button{cursor:pointer}button:disabled{cursor:no
     </div>
   </details>
   <p class="caption"><span id="rollPitchInfo">基準周波数 × 入力した比率。音程は12平均律に丸めません。</span> 録音音源の場合は元の音の周波数と再生速度を基に移調します。比率は <code>3/2</code> や <code>23/16</code> のように入力できます。波形の選択（正弦波以外）によって追加の高次成分が生じます。第24倍音までの加算合成と「23-limit」の音程理論は別の概念です。再生時は音量にご注意ください。</p>
+  <section class="usage-terms" id="terms" aria-label="Harmonic Synth 24 terms of use" data-i18n-skip>
+    <div lang="ja">
+      <h2>利用条件 / Terms of Use</h2>
+      <p>Harmonic Synth 24は、音響・音律の実験や学習のために自由に利用できます。公式URLの共有も歓迎します。</p>
+      <p>ただし、法令で認められる場合を除き、プログラムや掲載コンテンツの無断複製・再配布・改変版の公開、および制作者を偽る行為は認めていません。これらの利用を希望する場合は、事前にお問い合わせください。</p>
+      <p class="terms-copyright">© 2026 Reiji / reiji-lab. All rights reserved.</p>
+    </div>
+    <div lang="en">
+      <h2>Terms of Use</h2>
+      <p>Harmonic Synth 24 is freely available for experimentation, learning, and research. Sharing the official URL is welcome.</p>
+      <p>Unauthorized reproduction, redistribution, or publication of modified versions of the application or its content, and misrepresentation of authorship, are not permitted, except as allowed by law. Please contact us for permission.</p>
+      <p class="terms-copyright">© 2026 Reiji / reiji-lab. All rights reserved.</p>
+    </div>
+  </section>
   <footer class="copyright"><a href="https://reiji-lab.org/" target="_blank" rel="noopener noreferrer">reiji-lab</a><span class="dev-credit">Developed with ChatGPT by OpenAI</span></footer>
 </main>
 <script>
