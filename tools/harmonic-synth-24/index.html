@@ -4344,7 +4344,7 @@ window.REIJI_DEFAULT_SONG = {
     mixer.append(el);
     el.querySelector('select').addEventListener('change',e=>{
       if(e.target.value==='custom'){cwOpen(i);renderMixer();return;}
-      partials[i].wave=e.target.value;refreshAudio();drawVisuals();$('preset').value='custom';
+      partials[i].wave=e.target.value;renderMixer();refreshAudio();drawVisuals();$('preset').value='custom';
     });
     el.querySelector('.custom-edit').addEventListener('click',()=>cwOpen(i));
     el.querySelector('input').addEventListener('input',e=>{partials[i].level=Number(e.target.value);el.querySelector('output').textContent=partials[i].level+'%';refreshAudio();drawVisuals();$('preset').value='custom';});
