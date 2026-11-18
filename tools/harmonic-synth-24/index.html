@@ -180,6 +180,42 @@ html[lang="ja"] .usage-terms [lang="en"],html[lang="en"] .usage-terms [lang="ja"
   .tet-row .lane-info .lane-vol { grid-column: 2; grid-row: 1; margin-left: 0; }
   .tet-row .lane-info .lane-play { grid-column: 3; grid-row: 1; }
 }
+
+/* Custom waveform editor. Inherits the existing dark UI. */
+.harmonic-top .custom-edit{margin-right:3px;min-width:58px;height:29px;padding:3px 7px;background:#233e50;color:#9ce9de;border:1px solid #41788a;border-radius:7px;cursor:pointer;white-space:nowrap;font-size:11px}
+html[lang="ja"] .custom-edit [lang="en"],html[lang="en"] .custom-edit [lang="ja"]{display:none}
+.harmonic-bottom select{flex:0 0 120px}
+.cw-dialog{position:fixed;inset:0;width:min(760px,calc(100vw - 28px));max-width:760px;max-height:min(90dvh,900px);margin:auto;padding:0;background:#122035;color:#e9f3ff;border:1px solid #48617d;border-radius:17px;box-shadow:0 28px 75px #000a;overflow-y:auto}
+.cw-dialog::backdrop{background:#000b;backdrop-filter:blur(3px)}
+.cw-inner{padding:20px 22px 23px;display:grid;gap:14px}
+.cw-header{display:flex;justify-content:space-between;align-items:start;gap:12px}
+.cw-header h2{font-size:20px;line-height:1.3;margin:3px 0 0}
+.cw-kicker{font-size:11px;color:#a0c5cb;font-weight:800;letter-spacing:.07em}
+.cw-close{border:1px solid #445c74;border-radius:9px;background:#23384e;color:#ecf7ff;padding:6px 11px;cursor:pointer}
+.cw-text{font-size:12px;line-height:1.65;color:#b3c6d8;margin:0}
+.cw-label{font-size:12px;color:#9abfd0;font-weight:700}
+.cw-input{width:100%;min-height:69px;padding:11px 12px;border-radius:9px;background:#0a1727;color:#e4f5ff;font:14px/1.55 ui-monospace,SFMono-Regular,Consolas,monospace;border:1px solid #44617b;resize:vertical}
+.cw-modebar,.cw-actions{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.cw-modebar button,.cw-actions button{background:#213a50;border:1px solid #486b80;border-radius:9px;color:#dbeef9;padding:9px 13px;font:inherit;font-size:12px;cursor:pointer;min-height:39px}
+.cw-modebar button[aria-pressed="true"]{background:#226d6e;color:#fff;border-color:#66b7b3}
+.cw-actions{justify-content:flex-end;margin-top:3px}
+.cw-actions #cwApply{background:#3a9992;color:#071c23;font-weight:800;border-color:#75d9c9}
+.cw-canvas{width:100%;height:220px;display:block;touch-action:none;background:#0a1829;border:1px solid #456078;border-radius:10px}
+.cw-canvas:not(.drawing){cursor:default}.cw-canvas.drawing{cursor:crosshair}
+.cw-message{font-size:12px;color:#9edacf;line-height:1.5;min-height:18px;margin:0}
+.cw-message.err{color:#ffb9a9}
+.cw-details{border:1px solid #344a61;border-radius:10px;background:#0d1b2b;padding:10px 12px}
+.cw-details summary{cursor:pointer;font-size:12px;color:#abc7d5}
+.cw-output{font:12px/1.55 ui-monospace,Consolas,monospace;white-space:pre-wrap;overflow-wrap:anywhere;max-height:190px;overflow-y:auto;color:#b5efea;margin:11px 0 0}
+/* Notes for the Custom Waveform editor: concise reminder + optional technical context. */
+.cw-notice{margin:0;padding:9px 12px;border-left:2px solid #6baca9;background:#152b3b;border-radius:0 8px 8px 0;color:#c4dce4;font-size:12px;line-height:1.65}
+.cw-notes{background:#101e30}
+.cw-notes p{margin:9px 0 0;color:#b2c9d9;font-size:12px;line-height:1.7}
+.cw-notes p:first-of-type{margin-top:12px}
+
+html[lang="ja"] .cw-dialog [lang="en"],html[lang="en"] .cw-dialog [lang="ja"]{display:none}
+@media(max-width:640px){.cw-dialog{width:100vw;height:100dvh;max-width:none;max-height:100dvh;border:0;border-radius:0}.cw-inner{padding:17px 14px 28px}.cw-canvas{height:35dvh;min-height:180px}.cw-actions button{flex:1}}
+
 </style>
 </head>
 <body>
@@ -328,6 +364,7 @@ html[lang="ja"] .usage-terms [lang="en"],html[lang="en"] .usage-terms [lang="ja"
         <div>ノコギリ波：W(θ) = (2/π) Σ<sub>k=1…∞</sub> (−1)<sup>k+1</sup>sin(kθ)/k</div>
         <div>t は秒、f₀ は現在の音の基準周波数、n は倍音番号です。音量スライダーを動かすと aₙ、波形を変えると Wₙ、音程を変えると f₀ が更新されます。</div>
         <div>※上記は理想波形の級数表示です。実際の音声合成ではサンプリング周波数による上限、音量補正、デバイスの特性が関わります。</div>
+        <div id="cwMathDefinitions" style="white-space:pre-wrap;overflow-wrap:anywhere;color:#9ce4dc" hidden></div>
       </div>
     </details>
   </section>
@@ -335,7 +372,7 @@ html[lang="ja"] .usage-terms [lang="en"],html[lang="en"] .usage-terms [lang="ja"
   <details id="harmonicDetails" class="panel harmonics-panel" open>
     <summary>24倍音ミキサー <span class="minor">／各倍音の波形・音量・ミュートを調整</span></summary>
     <div class="detail-body">
-      <div class="harmonic-tools"><button id="resetTimbre" class="btn ghost" type="button">音色のみ初期化</button><button id="saveTimbre" class="btn ghost" type="button">音色だけをJSON保存</button><button id="loadTimbre" class="btn ghost" type="button">音色を読み込み</button><input type="file" id="timbreFile" accept=".json,application/json" hidden></div>
+      <div class="harmonic-tools"><button id="mixerSynthPreview" class="btn secondary" type="button" aria-pressed="false">♪ 音色を試聴</button><button id="resetTimbre" class="btn ghost" type="button">音色のみ初期化</button><button id="saveTimbre" class="btn ghost" type="button">音色だけをJSON保存</button><button id="loadTimbre" class="btn ghost" type="button">音色を読み込み</button><input type="file" id="timbreFile" accept=".json,application/json" hidden></div>
       <div id="mixer" class="mixer"></div>
     </div>
   </details>
@@ -356,6 +393,36 @@ html[lang="ja"] .usage-terms [lang="en"],html[lang="en"] .usage-terms [lang="ja"
   </section>
   <footer class="copyright"><a href="https://reiji-lab.org/" target="_blank" rel="noopener noreferrer">reiji-lab</a><span class="dev-credit">Developed with ChatGPT by OpenAI</span></footer>
 </main>
+
+<dialog id="cwDialog" class="cw-dialog" aria-labelledby="cwTitle">
+  <div class="cw-inner" data-i18n-skip>
+    <div class="cw-header"><div><div class="cw-kicker">HARMONIC SYNTH 24 / CUSTOM</div><h2 id="cwTitle">Custom Waveform Editor · <span id="cwPartialNo">01</span></h2></div><button type="button" id="cwClose" class="cw-close" aria-label="Close">✕</button></div>
+    <p class="cw-text"><span lang="ja">数式（θ＝0〜2π）または手描きで、選択した成分の1周期の波形を編集します。編集結果は試聴・演奏・保存に反映されます。</span><span lang="en">Edit one cycle (θ = 0–2π) of the selected component using an equation or freehand drawing. Changes apply to preview, playback, and saved data.</span></p>
+    <label for="cwEquation" class="cw-label"><span lang="ja">波形の式（LaTeX風の入力に対応）</span><span lang="en">Waveform equation (LaTeX-like input)</span></label>
+    <textarea id="cwEquation" class="cw-input" spellcheck="false">\sin(\theta)+0.3\sin(3\theta)</textarea>
+    <p class="cw-text">sin(θ), cos(θ), + − × ÷, ^, π, abs(), sqrt(), \frac{1}{2} · <span lang="ja">直流成分を除去し振幅を正規化します。</span><span lang="en">DC is removed and amplitude normalized.</span></p>
+    <div class="cw-modebar"><button id="cwFormulaMode" type="button" aria-pressed="true"><span lang="ja">数式から波形</span><span lang="en">Equation → wave</span></button><button id="cwDrawMode" type="button" aria-pressed="false"><span lang="ja">波形を手描き</span><span lang="en">Draw → equation</span></button><button id="cwReset" type="button"><span lang="ja">正弦波に戻す</span><span lang="en">Reset to sine</span></button></div>
+    <canvas id="cwCanvas" class="cw-canvas" aria-label="Custom periodic waveform, one cycle"></canvas>
+    <p id="cwMessage" class="cw-message" aria-live="polite"></p>
+    <details class="cw-details"><summary><span lang="ja">フーリエ級数による近似式と係数を表示</span><span lang="en">Show Fourier approximation and coefficients</span></summary><pre id="cwFourier" class="cw-output"></pre></details>
+    <p class="cw-notice" role="note"><span lang="ja">※ 表示波形は24次までのフーリエ近似です。元の数式や手描き形状と完全には一致しない場合があります。</span><span lang="en">Note: The displayed waveform uses a Fourier approximation up to order 24 and may not exactly reproduce the original equation or drawing.</span></p>
+    <details class="cw-details cw-notes">
+      <summary><span lang="ja">計算・再生についての注意</span><span lang="en">Notes on calculation and playback</span></summary>
+      <div lang="ja">
+        <p>数式入力は一部のLaTeX風表記に対応しますが、すべてのLaTeX式を解釈するものではありません。1周期を256点で計算し、直流成分を除去してピーク振幅を正規化します。そのため、入力した式の振幅や波形がそのまま保存されるとは限りません。</p>
+        <p>「24成分」はミキサーの成分数です。各成分のCustom波形には、その成分の周波数を整数倍した高次成分も含まれます。したがって、出力が第24倍音までに限られるという意味ではありません。</p>
+        <p>高音域では再生時に高次成分が省かれる場合があります。波形と数式は音声合成のモデルであり、24本のレベル表示はミキサー設定値です。実際のスピーカー出力の測定値やFFTスペクトルではありません。</p>
+      </div>
+      <div lang="en">
+        <p>Equation input supports a limited subset of LaTeX-like notation, not arbitrary LaTeX. Each cycle is sampled at 256 points, the DC component is removed, and peak amplitude is normalized. The saved waveform and amplitude may therefore differ from the entered equation.</p>
+        <p>“24 components” refers to the mixer controls. A Custom waveform within any component can itself contain higher harmonics at integer multiples of that component's frequency; output is not limited to the 24th harmonic.</p>
+        <p>Some high harmonics may be omitted during high-pitched playback. The waveform and equations are synthesis models, and the 24 level bars show mixer settings—not measured speaker output or an FFT spectrum.</p>
+      </div>
+    </details>
+    <div class="cw-actions"><button id="cwPreview" type="button"><span lang="ja">♪ 試聴</span><span lang="en">♪ Preview</span></button><button id="cwCancel" type="button"><span lang="ja">キャンセル</span><span lang="en">Cancel</span></button><button id="cwApply" type="button"><span lang="ja">この倍音に適用</span><span lang="en">Apply to partial</span></button></div>
+  </div>
+</dialog>
+
 <script>
 /* 禮司による英国国歌：純正比率・12平均律の両方を収録（修正版）。
    データの音高、音符位置、長さ、音色は変更せず埋め込み。 */
@@ -3741,7 +3808,7 @@ window.REIJI_DEFAULT_SONG = {
   const isBlackKey = midi => [1,3,6,8,10].includes(midi%12);
   const newTetLane = midi => ({id:id('lane-'),midi,volume:85,name:noteName(midi),notes:[]});
   const makeTetLanes = () => Array.from({length:TET_MAX_MIDI-TET_MIN_MIDI+1}, (_,i)=>newTetLane(TET_MAX_MIDI-i));
-  const waves = [['sine','正弦波'],['triangle','三角波'],['sawtooth','ノコギリ波'],['square','矩形波']];
+  const waves = [['sine','正弦波'],['triangle','三角波'],['sawtooth','ノコギリ波'],['square','矩形波'],['custom','Custom']];
   const clamp = (n,lo,hi) => Math.min(hi,Math.max(lo,n));
   const fmt = x => Number(x.toFixed(6)).toString();
   // A beat is a quarter note. Retain rational triplet positions internally
@@ -3841,6 +3908,8 @@ window.REIJI_DEFAULT_SONG = {
     $('sequenceStop').disabled=!playing;
     $('mathSequencePlay').textContent=playing?'↻ 曲を最初から再生':'▶ 曲を再生';
     $('mathSequenceStop').disabled=!playing;
+    $('mixerSynthPreview').textContent=audition?'■ 試聴を停止':'♪ 音色を試聴';
+    $('mixerSynthPreview').setAttribute('aria-pressed',String(audition));
     $('mathSynthPreview').textContent=audition?'■ 合成音の試聴停止':'♪ 合成音を試聴';
     $('mathSamplePreview').textContent=samplePreviewActive?'■ サンプル試聴停止':'♪ サンプルを試聴';
     $('mathSamplePreview').disabled=!sampleBuffer&&!samplePreviewActive;
@@ -3869,6 +3938,253 @@ window.REIJI_DEFAULT_SONG = {
     }
     await ctx.resume();
   }
+  // Safe, bounded mathematical waveform evaluator: no eval, Function, or arbitrary JS.
+  // The audio engine and the drawing canvas both consume the same Fourier coefficients.
+  const CW_N=256, CW_K=24;
+  // A 24th-order Fourier expansion can contain 48 sine/cosine terms.
+  // Allow the editor to parse its own generated formulas without truncation.
+  const CW_MAX_EXPR=8192, CW_MAX_TOKENS=2048;
+  const defaultCustomExpression='\\sin(\\theta)';
+  const sampleFromCoeffs=c=>Array.from({length:CW_N},(_,i)=>{
+    const theta=2*Math.PI*i/CW_N;
+    let y=0;for(let k=1;k<=CW_K;k++)y+=(c.real[k]||0)*Math.cos(k*theta)+(c.imag[k]||0)*Math.sin(k*theta);
+    return y;
+  });
+  const coeffsFromSamples=arr=>{
+    if(!arr||arr.length!==CW_N)throw Error('256 samples required.');
+    const mean=arr.reduce((a,b)=>a+b,0)/CW_N;
+    const raw=arr.map(x=>x-mean),peak=Math.max(...raw.map(Math.abs));
+    if(!(peak>1e-8))throw Error('波形の振幅がゼロです。');
+    const v=raw.map(x=>x/peak),real=Array(CW_K+1).fill(0),imag=Array(CW_K+1).fill(0);
+    for(let k=1;k<=CW_K;k++)for(let i=0;i<CW_N;i++){
+      const phase=2*Math.PI*k*i/CW_N;
+      real[k]+=2/CW_N*v[i]*Math.cos(phase);
+      imag[k]+=2/CW_N*v[i]*Math.sin(phase);
+    }
+    return {real,imag};
+  };
+  function normalizeCustomData(obj){
+    if(!obj||!Array.isArray(obj.real)||!Array.isArray(obj.imag)||obj.real.length!==CW_K+1||obj.imag.length!==CW_K+1)throw Error('カスタム波形の係数が不正です。');
+    const real=obj.real.map(Number),imag=obj.imag.map(Number);
+    if([...real,...imag].some(v=>!Number.isFinite(v)||Math.abs(v)>10))throw Error('カスタム波形の係数が範囲外です。');
+    real[0]=0;imag[0]=0;
+    const expr=typeof obj.expr==='string'&&obj.expr.length<=CW_MAX_EXPR?obj.expr:customEquationFromCoeffs({real,imag});
+    return {real,imag,expr};
+  }
+  function normalizeLatex(source){
+    let s=String(source).trim();
+    if(s.length>CW_MAX_EXPR)throw Error('数式は8192文字以内にしてください。');
+    s=s.replace(/^\s*(?:w\s*\(\s*(?:\\theta|θ|theta)\s*\)|y)\s*=\s*/i,'');
+    s=s.replace(/\\(?:left|right)\b/g,'').replace(/\\(?:cdot|times)\b/g,'*');
+    for(let i=0;i<10&&s.includes('\\frac');i++){
+      const next=s.replace(/\\frac\s*\{([^{}]+)\}\s*\{([^{}]+)\}/g,'(($1)/($2))');
+      if(next===s)break;s=next;
+    }
+    s=s.replace(/\\/g,'').replace(/[{}]/g,c=>c==='{'?'(':')')
+      .replace(/θ/g,'theta').replace(/π/g,'pi').replace(/×/g,'*').replace(/[÷]/g,'/').replace(/[−–]/g,'-');
+    return s;
+  }
+  function compileWaveEquation(source){
+    const s=normalizeLatex(source);
+    if(!s)throw Error('波形の数式を入力してください。');
+    const lex=s.match(/(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?|[A-Za-z]+|[()+*/^\-]/g)||[];
+    if(lex.join('')!==s.replace(/\s+/g,''))throw Error('対応していない数式記号があります。');
+    const funcs=new Set(['sin','cos','abs','sqrt']);
+    const tokens=[];
+    for(const raw of lex){
+      const value=raw.toLowerCase(),type=/^(?:\d|\.)/.test(value)?'number':/^[a-z]+$/.test(value)?'name':value==='('? 'open':value===')'?'close':'op';
+      const prev=tokens.at(-1);
+      if(prev && ['number','name','close'].includes(prev.type) && ['number','name','open'].includes(type) && !(prev.type==='name'&&funcs.has(prev.value)&&type==='open'))tokens.push({type:'op',value:'*'});
+      tokens.push({type,value});
+    }
+    if(tokens.length>CW_MAX_TOKENS)throw Error('数式が長すぎます。');
+    let pos=0, depth=0;
+    function primary(){
+      if(++depth>48)throw Error('括弧の入れ子が深すぎます。');
+      const t=tokens[pos++];if(!t)throw Error('式が途中で終わっています。');
+      let node;
+      if(t.type==='number')node={kind:'num',v:Number(t.value)};
+      else if(t.type==='name'&&['theta','pi'].includes(t.value))node={kind:'var',v:t.value};
+      else if(t.type==='name'&&funcs.has(t.value)){
+        if(tokens[pos]?.value!=='(')throw Error('関数には括弧を付けてください。例：sin(theta)');
+        pos++;const arg=expression(0);if(tokens[pos++]?.value!==')')throw Error('関数の括弧を閉じてください。');
+        node={kind:'fn',v:t.value,arg};
+      }else if(t.value==='('){node=expression(0);if(tokens[pos++]?.value!==')')throw Error('括弧を閉じてください。');}
+      else if(t.value==='+'||t.value==='-')node={kind:'un',v:t.value,arg:expression(3)};
+      else throw Error('数式を確認してください：'+t.value);
+      depth--;return node;
+    }
+    const prec={'+':1,'-':1,'*':2,'/':2,'^':4};
+    function expression(min){
+      let left=primary();
+      while(pos<tokens.length){const op=tokens[pos]?.value,p=prec[op];if(!p||p<min)break;pos++;
+        const right=expression(op==='^'?p:p+1);left={kind:'bin',v:op,l:left,r:right};
+      }
+      return left;
+    }
+    const tree=expression(0);
+    if(pos!==tokens.length)throw Error('数式の後半を解析できませんでした。');
+    function calc(node,theta){
+      switch(node.kind){
+        case 'num':return node.v;
+        case 'var':return node.v==='theta'?theta:Math.PI;
+        case 'un':return node.v==='-'?-calc(node.arg,theta):calc(node.arg,theta);
+        case 'fn':{
+          const x=calc(node.arg,theta);return {sin:Math.sin,cos:Math.cos,abs:Math.abs,sqrt:Math.sqrt}[node.v](x);
+        }
+        case 'bin':{
+          const a=calc(node.l,theta),b=calc(node.r,theta);
+          if(node.v==='^'&&Math.abs(b)>32)throw Error('指数が大きすぎます。');
+          return {'+':()=>a+b,'-':()=>a-b,'*':()=>a*b,'/':()=>a/b,'^':()=>Math.pow(a,b)}[node.v]();
+        }
+      }
+    }
+    return theta=>{
+      const y=calc(tree,theta);
+      if(!Number.isFinite(y)||Math.abs(y)>1e7)throw Error('式の値が発散しています。');
+      return y;
+    };
+  }
+  const customCoeffsFromEquation=src=>{
+    const fn=compileWaveEquation(src);
+    return coeffsFromSamples(Array.from({length:CW_N},(_,i)=>fn(2*Math.PI*i/CW_N)));
+  };
+  function customEquationFromCoeffs(coeff){
+    const terms=[];
+    for(let k=1;k<=CW_K;k++)for(const [key,func] of [['real','cos'],['imag','sin']]){
+      const c=coeff[key][k];if(Math.abs(c)<.00001)continue;
+      const num=Number(Math.abs(c).toFixed(5));
+      const arg=k===1?'theta':`${k}*theta`;
+      terms.push(`${terms.length?(c<0?' - ':' + '):(c<0?'-':'')}${num}*${func}(${arg})`);
+    }
+    return terms.join('')||'0';
+  }
+  // Normalize only for audio safety; sampled coefficients are kept intact for save/load.
+  function customPeriodicWave(ctx,custom,limit){
+    const c=normalizeCustomData(custom),real=new Float32Array(limit+1),imag=new Float32Array(limit+1);
+    for(let k=1;k<=Math.min(CW_K,limit);k++){real[k]=c.real[k];imag[k]=c.imag[k];}
+    return ctx.createPeriodicWave(real,imag,{disableNormalization:true});
+  }
+  function updateCustomMath(){if($('mathExpanded'))updateLiveMath();}
+
+  // Modal editor is deliberately independent of the score and its timestamps.
+  let cwIndex=-1,cwData=null,cwSamples=[],cwMode='formula',cwPointer=null,cwPreviewNode=null,cwFormulaTimer=null;
+  const cwStatus=(ja,en,isError=false)=>{
+    const el=$('cwMessage');el.textContent=document.documentElement.lang==='en'?en:ja;
+    el.classList.toggle('err',isError);
+  };
+  function cwPaint(){
+    const canvas=$('cwCanvas');if(!$('cwDialog').open)return;
+    const {c,w,h}=fitCanvas(canvas);c.clearRect(0,0,w,h);c.strokeStyle='#27445a';c.lineWidth=1;
+    for(let i=0;i<=8;i++){let x=w*i/8;c.beginPath();c.moveTo(x,0);c.lineTo(x,h);c.stroke();}
+    for(let i=0;i<=4;i++){let y=h*i/4;c.beginPath();c.moveTo(0,y);c.lineTo(w,y);c.stroke();}
+    c.strokeStyle='#557f97';c.beginPath();c.moveTo(0,h/2);c.lineTo(w,h/2);c.stroke();
+    c.strokeStyle='#76e1d3';c.lineWidth=2.3;c.beginPath();
+    for(let j=0;j<=CW_N;j++){
+      const value=cwSamples[j%CW_N]||0,x=j/CW_N*w,y=h/2-value*h*.44;
+      if(j===0)c.moveTo(x,y);else c.lineTo(x,y);
+    }
+    c.stroke();
+    c.fillStyle='#97acc4';c.font='11px system-ui';c.textAlign='left';c.fillText('0',8,h-9);c.textAlign='center';c.fillText('π',w/2,h-9);c.textAlign='right';c.fillText('2π',w-8,h-9);
+  }
+  function cwRenderCoeffs(){
+    $('cwFourier').textContent='w(θ) ≈ '+customEquationFromCoeffs(cwData);
+    cwPaint();
+  }
+  function cwApplyEquation(){
+    const expr=$('cwEquation').value;
+    try{
+      // Reuse the exact saved coefficients if the expression has not changed.
+      // This prevents repeated normalization of a drawing's Fourier approximation.
+      if(cwData&&expr===cwData.expr){
+        cwSamples=sampleFromCoeffs(cwData);cwRenderCoeffs();
+        cwStatus('波形を保持しています。','Waveform preserved.');return true;
+      }
+      const coeffs=customCoeffsFromEquation(expr);
+      cwData={...coeffs,expr};cwSamples=sampleFromCoeffs(cwData);
+      cwRenderCoeffs();cwStatus('数式を波形に反映しました。','Equation applied to the waveform.');return true;
+    }catch(error){cwStatus(error.message,'Please check the waveform equation: '+error.message,true);return false;}
+  }
+  function cwSetMode(mode){
+    cwMode=mode;
+    $('cwDrawMode').setAttribute('aria-pressed',String(mode==='draw'));
+    $('cwFormulaMode').setAttribute('aria-pressed',String(mode==='formula'));
+    $('cwCanvas').classList.toggle('drawing',mode==='draw');
+    cwStatus(mode==='draw'?'指で1周期を描いてください。離すと24次までで近似します。':'式を変更すると波形が更新されます。',mode==='draw'?'Draw on the canvas; release to calculate a 24th-order Fourier approximation.':'Edit the equation to update the waveform.');
+  }
+  function cwOpen(index){
+    cwIndex=index;
+    const p=partials[index];
+    // Reopen the last edited waveform even if another preset was selected in between.
+    cwData=p.custom?normalizeCustomData(p.custom):{...customCoeffsFromEquation(defaultCustomExpression),expr:defaultCustomExpression};
+    cwSamples=sampleFromCoeffs(cwData);
+    $('cwPartialNo').textContent=String(index+1).padStart(2,'0');
+    $('cwEquation').value=cwData.expr;
+    $('cwDialog').showModal();cwSetMode('formula');cwRenderCoeffs();
+  }
+  function cwClose(){
+    clearTimeout(cwFormulaTimer);
+    $('cwDialog').close();cwIndex=-1;cwData=null;cwSamples=[];cwPointer=null;
+    renderMixer();
+  }
+  $('cwClose').addEventListener('click',cwClose);$('cwCancel').addEventListener('click',cwClose);
+  $('cwDialog').addEventListener('cancel',e=>{e.preventDefault();cwClose();});
+  $('cwDrawMode').addEventListener('click',()=>cwSetMode('draw'));
+  $('cwFormulaMode').addEventListener('click',()=>{cwSetMode('formula');cwApplyEquation();});
+  $('cwEquation').addEventListener('input',()=>{
+    clearTimeout(cwFormulaTimer);cwFormulaTimer=setTimeout(()=>{if(cwIndex>=0){cwSetMode('formula');cwApplyEquation();}},240);
+  });
+  $('cwReset').addEventListener('click',()=>{$('cwEquation').value=defaultCustomExpression;cwSetMode('formula');cwApplyEquation();});
+  const cwCanvas=$('cwCanvas');
+  function cwDrawAt(ev){
+    const rect=cwCanvas.getBoundingClientRect();if(!rect.width||!rect.height)return;
+    const x=clamp((ev.clientX-rect.left)/rect.width,0,.999999),y=clamp((.5-(ev.clientY-rect.top)/rect.height)/.44,-1,1);
+    const index=Math.floor(x*CW_N);
+    if(cwPointer){const old=cwPointer,span=Math.abs(index-old.index);for(let step=0;step<=span;step++){
+      const j=span?Math.round(old.index+(index-old.index)*step/span):index;
+      cwSamples[j]=span?old.y+(y-old.y)*step/span:y;
+    }}else cwSamples[index]=y;
+    cwPointer={index,y};cwPaint();
+  }
+  cwCanvas.addEventListener('pointerdown',ev=>{
+    if(cwMode!=='draw')return;
+    ev.preventDefault();cwPointer=null;cwCanvas.setPointerCapture(ev.pointerId);cwDrawAt(ev);
+  });
+  cwCanvas.addEventListener('pointermove',ev=>{if(cwMode==='draw'&&cwCanvas.hasPointerCapture(ev.pointerId)){ev.preventDefault();cwDrawAt(ev);}});
+  function cwFinishDraw(ev){
+    if(!cwCanvas.hasPointerCapture(ev.pointerId))return;
+    cwCanvas.releasePointerCapture(ev.pointerId);cwPointer=null;
+    try{
+      const c=coeffsFromSamples(cwSamples);cwData={...c,expr:customEquationFromCoeffs(c)};
+      cwSamples=sampleFromCoeffs(c);$('cwEquation').value=cwData.expr;
+      cwRenderCoeffs();cwStatus('手描きを24次フーリエ級数で近似し、式を更新しました。','Drawing approximated by a 24th-order Fourier series; equation updated.');
+    }catch(error){cwStatus(error.message,error.message,true);}
+  }
+  cwCanvas.addEventListener('pointerup',cwFinishDraw);cwCanvas.addEventListener('pointercancel',cwFinishDraw);
+  $('cwPreview').addEventListener('click',async()=>{
+    try{
+      await setupAudio();if(!cwData||cwIndex<0)return;
+      if(cwPreviewNode){try{cwPreviewNode.stop();}catch(_e){}cwPreviewNode=null;}
+      const freq=baseHz*(cwIndex+1);
+      if(freq>=ctx.sampleRate/2)throw Error('試聴周波数がナイキスト周波数を超えています。');
+      const limit=Math.min(1024,Math.floor((ctx.sampleRate/2-.1)/freq));
+      const osc=ctx.createOscillator(),gain=ctx.createGain();osc.setPeriodicWave(customPeriodicWave(ctx,cwData,limit));osc.frequency.value=freq;
+      const now=ctx.currentTime;gain.gain.setValueAtTime(0,now);gain.gain.linearRampToValueAtTime(.22,now+.02);gain.gain.setValueAtTime(.22,now+.45);gain.gain.linearRampToValueAtTime(0,now+.57);
+      osc.connect(gain);gain.connect(masterGain);osc.onended=()=>{osc.disconnect();gain.disconnect();if(cwPreviewNode===osc)cwPreviewNode=null;};
+      cwPreviewNode=osc;osc.start(now);osc.stop(now+.59);
+      cwStatus('選択中の成分の音を試聴しました。','Previewed the selected partial.');
+    }catch(error){cwStatus(error.message,error.message,true);}
+  });
+  $('cwApply').addEventListener('click',()=>{
+    if(cwIndex<0||!cwData)return;
+    // In formula mode do not silently apply an invalid or not-yet-evaluated edit.
+    if(cwMode==='formula'&&!cwApplyEquation())return;
+    partials[cwIndex]={...partials[cwIndex],wave:'custom',custom:normalizeCustomData(cwData)};
+    $('preset').value='custom';cwClose();refreshAudio();renderMixer();drawVisuals();updateCustomMath();
+    status('Custom波形を倍音ミキサーに適用しました。');
+  });
+  window.addEventListener('resize',()=>{if($('cwDialog').open)cwPaint();});
+
   function refreshAudio(){
     if(!ctx)return;
     const now=ctx.currentTime;
@@ -3877,7 +4193,10 @@ window.REIJI_DEFAULT_SONG = {
     previewBus.gain.setTargetAtTime(audition ? .55/Math.max(1,power):0,now,.012);
     masterGain.gain.setTargetAtTime(master/100,now,.02);
     partials.forEach((p,i)=>{
-      oscBank[i].type=p.wave;
+      if(p.wave==='custom'&&p.custom){
+        const limit=Math.min(1024,Math.max(1,Math.floor((ctx.sampleRate/2-.1)/(baseHz*(i+1)))));
+        oscBank[i].setPeriodicWave(customPeriodicWave(ctx,p.custom,limit));
+      }else oscBank[i].type=p.wave;
       oscBank[i].frequency.setTargetAtTime(baseHz*(i+1),now,.01);
       gainBank[i].gain.setTargetAtTime(levels[i],now,.012);
     });
@@ -3892,6 +4211,13 @@ window.REIJI_DEFAULT_SONG = {
     snapshot.forEach((p,i)=>{
       const n=i+1;if(p.muted||p.level===0||n>limit)return;
       const level=p.level/100;
+      if(p.wave==='custom'&&p.custom){
+        const custom=normalizeCustomData(p.custom);
+        for(let k=1;k<=CW_K&&k*n<=limit;k++){
+          real[k*n]+=level*custom.real[k];imag[k*n]+=level*custom.imag[k];
+        }
+        return;
+      }
       for(let harmonic=1;harmonic*n<=limit;harmonic++){
         let factor=0;
         switch(p.wave){
@@ -4014,15 +4340,20 @@ window.REIJI_DEFAULT_SONG = {
   const mixer=$('mixer');
   for(let i=0;i<MAX_PARTIALS;i++){
     const n=i+1,el=document.createElement('div');el.className='harmonic';
-    el.innerHTML=`<div class="harmonic-top"><div class="harmonic-num">${String(n).padStart(2,'0')}</div><div class="harmonic-name"><strong>第${n}倍音</strong><small class="hfreq">${fixedHz(baseHz*n)} Hz</small></div><button class="mute" type="button" aria-pressed="false">ミュート</button></div><div class="harmonic-bottom"><select aria-label="第${n}倍音の波形">${waves.map(([v,label])=>`<option value="${v}">${label}</option>`).join('')}</select><input type="range" min="0" max="100" step="1" aria-label="第${n}倍音の音量"><output></output></div>`;
+    el.innerHTML=`<div class="harmonic-top"><div class="harmonic-num">${String(n).padStart(2,'0')}</div><div class="harmonic-name"><strong>第${n}倍音</strong><small class="hfreq">${fixedHz(baseHz*n)} Hz</small></div><button class="custom-edit" type="button" hidden title="Edit Custom waveform" aria-label="Edit Custom waveform">✎ <span lang="ja">編集</span><span lang="en">Edit</span></button><button class="mute" type="button" aria-pressed="false">ミュート</button></div><div class="harmonic-bottom"><select aria-label="第${n}倍音の波形">${waves.map(([v,label])=>`<option value="${v}">${label}</option>`).join('')}</select><input type="range" min="0" max="100" step="1" aria-label="第${n}倍音の音量"><output></output></div>`;
     mixer.append(el);
-    el.querySelector('select').addEventListener('change',e=>{partials[i].wave=e.target.value;refreshAudio();drawVisuals();$('preset').value='custom';});
+    el.querySelector('select').addEventListener('change',e=>{
+      if(e.target.value==='custom'){cwOpen(i);renderMixer();return;}
+      partials[i].wave=e.target.value;refreshAudio();drawVisuals();$('preset').value='custom';
+    });
+    el.querySelector('.custom-edit').addEventListener('click',()=>cwOpen(i));
     el.querySelector('input').addEventListener('input',e=>{partials[i].level=Number(e.target.value);el.querySelector('output').textContent=partials[i].level+'%';refreshAudio();drawVisuals();$('preset').value='custom';});
     el.querySelector('.mute').addEventListener('click',()=>{partials[i].muted=!partials[i].muted;renderMixer();refreshAudio();drawVisuals();$('preset').value='custom';});
   }
   function renderMixer(){
     Array.from(mixer.children).forEach((el,i)=>{
       const p=partials[i];el.querySelector('select').value=p.wave;
+      el.querySelector('.custom-edit').hidden=p.wave!=='custom';
       el.querySelector('input').value=p.level;
       el.querySelector('output').textContent=p.level+'%';
       el.querySelector('.hfreq').textContent=fixedHz(baseHz*(i+1))+' Hz';
@@ -4047,6 +4378,11 @@ window.REIJI_DEFAULT_SONG = {
     refreshAudio();syncPower();animate();
     status(audition?'音色を試聴中です。':'音色の試聴を停止しました。');
   }
+  // This mixer-level button auditions the current sum of all configured partials.
+  // It shares the existing synthesis preview, not an individual-partial solo.
+  $('mixerSynthPreview').addEventListener('click',async()=>{
+    try{await toggleSynthAudition();}catch(e){status(e.message,'err');}
+  });
   $('wavePlayButton').addEventListener('click', () => $('playButton').click());
   $('playButton').addEventListener('click',async()=>{
     try{
@@ -4378,7 +4714,7 @@ window.REIJI_DEFAULT_SONG = {
   });
   function validTimbre(data){
     if(!Array.isArray(data)||data.length!==MAX_PARTIALS)throw Error('24倍音のデータが不正です。');
-    return data.map(p=>{if(!p||!Number.isFinite(p.level)||p.level<0||p.level>100||!waves.some(x=>x[0]===p.wave)||typeof p.muted!=='boolean')throw Error('倍音データに不正な値があります。');return {level:p.level,wave:p.wave,muted:p.muted};});
+    return data.map(p=>{if(!p||!Number.isFinite(p.level)||p.level<0||p.level>100||!waves.some(x=>x[0]===p.wave)||typeof p.muted!=='boolean')throw Error('倍音データに不正な値があります。');return {level:p.level,wave:p.wave,muted:p.muted,...((p.custom||p.wave==='custom')?{custom:normalizeCustomData(p.custom)}:{})};});
   }
   function exportFile(name,value){
     const blob=new Blob([JSON.stringify(value,null,2)],{type:'application/json;charset=utf-8'}),url=URL.createObjectURL(blob);
@@ -4710,11 +5046,14 @@ window.REIJI_DEFAULT_SONG = {
     const c=canvas.getContext('2d');c.setTransform(dpr,0,0,dpr,0,0);return {c,w,h};
   }
   function grid(c,w,h){c.clearRect(0,0,w,h);c.lineWidth=1;c.strokeStyle='#283c50';for(let i=1;i<4;i++){c.beginPath();c.moveTo(0,i*h/4);c.lineTo(w,i*h/4);c.stroke();}}
-  function rawWave(type,p){switch(type){case 'triangle':return (2/Math.PI)*Math.asin(Math.sin(p));case 'square':return Math.sin(p)>=0?1:-1;case 'sawtooth':return 2*(p/(2*Math.PI)-Math.floor(p/(2*Math.PI)+.5));default:return Math.sin(p);}}
+  function rawWave(type,p,custom){
+    if(type==='custom'&&custom){let v=0;for(let k=1;k<=CW_K;k++)v+=(custom.real[k]||0)*Math.cos(k*p)+(custom.imag[k]||0)*Math.sin(k*p);return v;}
+    switch(type){case 'triangle':return (2/Math.PI)*Math.asin(Math.sin(p));case 'square':return Math.sin(p)>=0?1:-1;case 'sawtooth':return 2*(p/(2*Math.PI)-Math.floor(p/(2*Math.PI)+.5));default:return Math.sin(p);}
+  }
   function drawWave(){const {c,w,h}=fitCanvas($('waveCanvas'));grid(c,w,h);const values=[],count=Math.max(150,Math.round(w*2));
     if((audition||playing)&&analyser&&timeArray){analyser.getByteTimeDomainData(timeArray);const span=Math.min(timeArray.length,Math.max(10,Math.round(ctx.sampleRate/baseHz*3)));for(let k=0;k<count;k++){const t=timeArray.length-span+Math.round(k/(count-1)*(span-1));values.push((timeArray[t]-128)/128);}}
     else if(soundSource==='sample'&&sampleBuffer){const data=sampleBuffer.getChannelData(0);for(let k=0;k<count;k++)values.push(data[Math.min(data.length-1,Math.floor(k/(count-1)*(data.length-1)))]);}
-    else{for(let k=0;k<count;k++){const p=k/(count-1)*Math.PI*6;let value=0;partials.forEach((t,i)=>{if(!t.muted)value+=t.level/100*rawWave(t.wave,p*(i+1));});values.push(value);}const peak=Math.max(1,...values.map(Math.abs));values.forEach((v,i)=>values[i]=v/peak*.9);}
+    else{for(let k=0;k<count;k++){const p=k/(count-1)*Math.PI*6;let value=0;partials.forEach((t,i)=>{if(!t.muted)value+=t.level/100*rawWave(t.wave,p*(i+1),t.custom);});values.push(value);}const peak=Math.max(1,...values.map(Math.abs));values.forEach((v,i)=>values[i]=v/peak*.9);}
     c.strokeStyle='#6cdad3';c.lineWidth=2;c.beginPath();values.forEach((v,i)=>{const x=i/(count-1)*w,y=h/2-v*h*.43;if(!i)c.moveTo(x,y);else c.lineTo(x,y);});c.stroke();}
   function drawSpectrum(){const {c,w,h}=fitCanvas($('spectrumCanvas'));grid(c,w,h);const gap=3,pad=10,bw=(w-2*pad-(MAX_PARTIALS-1)*gap)/MAX_PARTIALS;
     partials.forEach((p,i)=>{const a=p.muted?0:p.level/100,x=pad+i*(bw+gap),height=a*(h-31);c.fillStyle=i===22?'#a5a6ff':'#6cdad3';c.fillRect(x,h-24-height,Math.max(1,bw),height);if([0,5,11,17,22,23].includes(i)){c.fillStyle='#abbdd0';c.font='10px system-ui';c.textAlign='center';c.fillText(String(i+1),x+bw/2,h-7);}});}
@@ -4722,7 +5061,7 @@ window.REIJI_DEFAULT_SONG = {
   // This is the mathematical pre-compressor model, not measured audio.
   // Timbre and sampler reference values are snapshotted at sequence start.
   const compactMathNumber=(number,precision=3)=>Number(number.toFixed(precision)).toString();
-  const mathWaveName={sine:'sin',triangle:'tri',sawtooth:'saw',square:'sq'};
+  const mathWaveName={sine:'sin',triangle:'tri',sawtooth:'saw',square:'sq',custom:'Custom'};
   function updateLiveMath(){
     const pitchEl=$('mathPitch'),expanded=$('mathExpanded');
     if(!pitchEl||!expanded)return;
@@ -4734,13 +5073,20 @@ window.REIJI_DEFAULT_SONG = {
       ? sequenceMathEvents.filter(e=>e.start-1e-7<=nowBeat&&nowBeat<e.start+e.duration-1e-7):[];
     const sourcePlaying=playing?sequenceMathSource:(previewMathSource||soundSource);
     const snapshot=playing&&sequenceMathPartials?sequenceMathPartials:partials;
-    const active=snapshot.flatMap((p,i)=>p.muted||p.level<=0?[]:[{index:i+1,level:p.level/100,wave:p.wave}]);
+    // Define every Custom W_n term using its actual stored Fourier coefficients.
+    // Keep the (potentially long) definitions inside the existing collapsed math help.
+    const customTerms=snapshot.flatMap((p,i)=>p.wave==='custom'&&p.custom
+      ? [`W${i+1}(θ) ≈ ${customEquationFromCoeffs(p.custom)}`] : []);
+    const customDef=$('cwMathDefinitions');
+    customDef.hidden=customTerms.length===0;
+    customDef.textContent=customTerms.join('\n');
+    const active=snapshot.flatMap((p,i)=>p.muted||p.level<=0?[]:[{index:i+1,level:p.level/100,wave:p.wave,custom:p.custom}]);
     const sumSquares=active.reduce((total,p)=>total+p.level*p.level,0);
     const previewNorm=.55/Math.max(1,Math.sqrt(sumSquares));
     const detail=$('mathVoiceDetails'),detailList=$('mathVoiceList');
     const masterFactor=compactMathNumber(master/100,3);
     const waveSum=(frequency,origin='t',partialsForNote=active)=>{
-      const terms=partialsForNote.map(p=>`${compactMathNumber(p.level,2)}·${mathWaveName[p.wave]||'sin'}(2π·${compactMathNumber(p.index*frequency,4)}·${origin})`);
+      const terms=partialsForNote.map(p=>`${compactMathNumber(p.level,2)}·${p.wave==='custom'?'W'+p.index:(mathWaveName[p.wave]||'sin')}(2π·${compactMathNumber(p.index*frequency,4)}·${origin})`);
       return terms.length?terms.join(' + '):'0';
     };
     const voiceGain=(e)=>{
