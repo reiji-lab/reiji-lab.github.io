@@ -347,6 +347,8 @@ html[lang="ja"] .usage-terms [lang="en"],html[lang="en"] .usage-terms [lang="ja"
       <p>Harmonic Synth 24 は禮司（Reiji）が考案・設計したアプリです。</p>
       <p>法令で認められる場合を除き、プログラムや掲載コンテンツの複製・再配布、または改変版の公開には、事前の許可が必要です。ご希望の方は、お問い合わせください。</p>
       <p>本アプリや掲載コンテンツを自作と偽って発表・紹介することを禁止します。</p>
+      <p>本アプリの機能や仕組みを製品・サービスに取り入れたいとお考えの方は、事前にご相談ください。</p>
+      <p>お問い合わせ：<span data-contact-email></span></p>
       <p class="terms-copyright">© 2026 Reiji / reiji-lab. All rights reserved.</p>
     </div>
     <div lang="en">
@@ -355,6 +357,8 @@ html[lang="ja"] .usage-terms [lang="en"],html[lang="en"] .usage-terms [lang="ja"
       <p>Harmonic Synth 24 is an application conceived and designed by Reiji.</p>
       <p>Except where permitted by law, prior permission is required to reproduce or redistribute the program or published content, or to publish modified versions. Please contact us to request permission.</p>
       <p>Presenting or introducing this application or its published content as your own creation is prohibited.</p>
+      <p>If you are considering incorporating features or concepts from this application into a product or service, please contact us in advance.</p>
+      <p>Contact: <span data-contact-email></span></p>
       <p class="terms-copyright">© 2026 Reiji / reiji-lab. All rights reserved.</p>
     </div>
   </section>
@@ -5073,6 +5077,17 @@ window.REIJI_DEFAULT_SONG = {
   monitor.observe(document.body,{
     subtree:true,childList:true,characterData:true,attributes:true,
     attributeFilter:['aria-label','title','placeholder']
+  });
+})();
+</script>
+<script>
+/* Contact address: show as plain text after page load (no mailto link). */
+(function () {
+  'use strict';
+  var codes = [114, 101, 105, 106, 105, 46, 108, 97, 98, 64, 103, 109, 97, 105, 108, 46, 99, 111, 109];
+  var email = String.fromCharCode.apply(null, codes);
+  document.querySelectorAll('[data-contact-email]').forEach(function (node) {
+    node.textContent = email;
   });
 })();
 </script>
