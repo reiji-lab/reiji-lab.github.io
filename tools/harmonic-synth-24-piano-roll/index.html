@@ -73,6 +73,25 @@ button,input,select{font:inherit}button{cursor:pointer}button:disabled{cursor:no
 .wave-preview-tools .btn{min-height:40px;touch-action:manipulation}
 @media(max-width:440px){.wave-preview-tools .btn{width:100%}}
 
+
+/* Live mathematical model; no network, MathJax, or external fonts required. */
+.math-panel{margin-top:17px;padding:20px}
+.math-head{margin-bottom:10px}
+.math-head .hintchip{white-space:normal;text-align:right}
+.math-model{font-family:"Cambria Math","STIX Two Math","Segoe UI Symbol",Georgia,serif;font-size:clamp(16px,2vw,19px);line-height:1.9;letter-spacing:.005em;color:#effafa}
+.math-general{color:#a9dbd8;font-size:15px;overflow-wrap:anywhere}
+.math-expanded{margin-top:10px;background:#0b1726;border:1px solid #334f64;border-radius:10px;padding:13px 15px;white-space:normal;overflow-wrap:anywhere;max-height:220px;overflow-y:auto;font-variant-numeric:tabular-nums}
+.math-panel .formula-label{margin:0 0 5px;font-size:11px;font-weight:750;letter-spacing:.05em;color:var(--muted);font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+.math-panel .math-pitch{font-family:"Cambria Math",Georgia,serif;font-size:15px;line-height:1.75;color:#e3eaff;overflow-wrap:anywhere}
+.math-panel .math-gain{color:#a9b8cd;font-size:12px;line-height:1.7;margin-top:10px;overflow-wrap:anywhere}
+.math-panel .math-playing{margin-top:12px;padding:10px 12px;background:#17283a;border-radius:9px;border:1px solid #31465d;font-size:12px;color:#c6dcf0;line-height:1.7;overflow-wrap:anywhere}
+.math-panel .math-notes{font-size:11px;color:var(--muted);margin:10px 0 0;line-height:1.75}
+.math-help{margin-top:13px;border-top:1px solid var(--edge);padding-top:12px}
+.math-help summary{font-size:12px;font-weight:700;color:#add8d7;cursor:pointer}
+.math-help-body{font-size:12px;color:#c8d8ec;line-height:1.9;padding:12px 3px 3px;overflow-wrap:anywhere}
+.math-help-body code{color:#9ce4dc}
+.math-toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:10px 0 0}
+@media(max-width:710px){.math-panel{padding:15px}.math-general{font-size:13px}.math-expanded{font-size:16px;max-height:200px}.math-head{align-items:flex-start}}
 </style>
 </head>
 <body>
@@ -177,6 +196,34 @@ button,input,select{font:inherit}button{cursor:pointer}button:disabled{cursor:no
   <section class="visuals" aria-label="音色波形の可視化">
     <div class="panel vizpanel waveform-panel"><div class="panelhead"><h2>合成波形</h2><span id="waveLabel" class="minor">計算上の波形</span></div><canvas id="waveCanvas" role="img" aria-label="合成された波形"></canvas><div class="wave-preview-tools"><button id="wavePlayButton" class="btn secondary" type="button">♪ 音色を試聴</button></div></div>
     <div class="panel vizpanel"><div class="panelhead"><h2>倍音レベル</h2><span class="minor">第1〜24倍音の設定</span></div><canvas id="spectrumCanvas" role="img" aria-label="倍音レベルの棒グラフ"></canvas></div>
+  </section>
+
+
+  <section class="panel math-panel" id="liveMathPanel" aria-labelledby="liveMathTitle">
+    <div class="panel-title-row math-head">
+      <div><p class="eyebrow">LIVE HARMONIC EQUATION</p><h2 id="liveMathTitle">リアルタイム数式 <span class="minor">/ 音色・音程に連動</span></h2></div>
+      <span id="mathBadge" class="hintchip">24倍音の合成式</span>
+    </div>
+    <p class="formula-label">基本式（ミキサーで設定した成分の重ね合わせ）</p>
+    <div class="math-model math-general">u(t) = Σₙ₌₁²⁴ aₙ Wₙ(2π n f₀t)　<span class="minor">aₙ = 音量÷100（ミュート中は0）</span></div>
+    <p class="formula-label" style="margin-top:12px">現在の基準となる音程</p>
+    <div class="math-pitch" id="mathPitch" aria-live="off">f₀ = 261.625565 Hz</div>
+    <p class="formula-label" style="margin-top:14px">現在の設定を代入した数式（全有効成分）</p>
+    <div class="math-model math-expanded" id="mathExpanded" aria-live="off">u(t) = …</div>
+    <div class="math-gain" id="mathGain" aria-live="off"></div>
+    <div class="math-playing" id="mathPlaying" aria-live="off">音符を選ぶと、その音の周波数式も表示します。自動演奏中は発音している音を追跡します。</div>
+    <p class="math-notes" id="mathFootnote">数式は音色合成の数学モデルです。実際の出力には音量の補正・エンベロープ・コンプレッサーなどが加わります。</p>
+    <details class="math-help">
+      <summary>波形 W(θ) の定義と表示の読み方</summary>
+      <div class="math-help-body">
+        <div>正弦波：W(θ) = sin θ</div>
+        <div>矩形波：W(θ) = (4/π) Σ<sub>k=0…∞</sub> sin((2k+1)θ)/(2k+1)</div>
+        <div>三角波：W(θ) = (8/π²) Σ<sub>k=0…∞</sub> (−1)<sup>k</sup>sin((2k+1)θ)/(2k+1)²</div>
+        <div>ノコギリ波：W(θ) = (2/π) Σ<sub>k=1…∞</sub> (−1)<sup>k+1</sup>sin(kθ)/k</div>
+        <div>t は秒、f₀ は現在の音の基準周波数、n は倍音番号です。音量スライダーを動かすと aₙ、波形を変えると Wₙ、音程を変えると f₀ が更新されます。</div>
+        <div>※上記は理想波形の級数表示です。実際の音声合成ではサンプリング周波数による上限、音量補正、デバイスの特性が関わります。</div>
+      </div>
+    </details>
   </section>
 
   <details id="harmonicDetails" class="panel harmonics-panel" open>
@@ -3650,6 +3697,7 @@ window.REIJI_DEFAULT_SONG = {
   let ctx=null, masterGain=null, analyser=null, previewBus=null, audition=false;
   let oscBank=[],gainBank=[], sequenceBus=null, sequenceNodes=new Set(),playing=false;
   let sequenceStart=0, sequenceEnd=0, seqCount=0, raf=0, timeArray=null;
+  let sequenceMathEvents=[], sequenceMathSource='synth', lastMathTick=0;
   // A recorded sample is intentionally NOT embedded in song JSON. Export its WAV separately.
   let soundSource='synth', sampleBuffer=null, sampleReferenceHz=DEFAULT_SONG.baseHz;
   let sampleFilename='', micRecorder=null, micStream=null, micChunks=[], micTimer=null;
@@ -3667,6 +3715,8 @@ window.REIJI_DEFAULT_SONG = {
     $('sequencePlay').textContent=playing?'↻ 最初から再生':'▶ 自動演奏';
     $('sequenceStop').disabled=!playing;
     $('waveLabel').textContent=active?'実際の出力波形':'計算上の波形';
+    // Keep the sampler/mixer formula in sync with source and playback changes.
+    if($('mathExpanded'))updateLiveMath();
   }
   async function setupAudio() {
     if(!ctx){
@@ -3812,6 +3862,12 @@ window.REIJI_DEFAULT_SONG = {
     try{
       for(const event of events){scheduleActiveNote(bus,start+event.start*secs,event.duration*secs,event.freq,event.volume,snapShot,cache,headroom,sequenceNodes);}
     }catch(e){stopSequence(false);throw e;}
+    sequenceMathEvents=lanes.flatMap(l=>l.notes.map(note=>({
+      start:note.start,duration:note.duration,freq:laneFrequency(l),
+      label:rollMode==='tet'?noteName(l.midi):l.ratio,
+      formula:rollMode==='tet'?`${a4Hz} × 2^((${l.midi}−69)/12)`:`${baseHz} × ${l.ratio}`
+    })));
+    sequenceMathSource=soundSource;
     sequenceStart=start;sequenceEnd=start+totalBeats()*secs;seqCount=events.length;playing=true;
     syncPower();sequenceStatus(`再生中：${events.length}音 / ${lanes.length}音階行 / ${tempo} BPM / ${soundSource==='sample'?'サンプリング音源':'24倍音合成音'}。音源変更は次の再生から反映されます。`);
     animate();
@@ -3839,7 +3895,7 @@ window.REIJI_DEFAULT_SONG = {
   function setTimbrePreset(type){partials=makePartials(type);renderMixer();refreshAudio();drawVisuals();}
   $('preset').addEventListener('change',e=>{if(e.target.value!=='custom')setTimbrePreset(e.target.value);});
   $('resetTimbre').addEventListener('click',()=>{setTimbrePreset('organ');$('preset').value='organ';status('音色だけを初期化しました。');});
-  $('master').addEventListener('input',e=>{master=Number(e.target.value);$('masterValue').textContent=master+'%';refreshAudio();});
+  $('master').addEventListener('input',e=>{master=Number(e.target.value);$('masterValue').textContent=master+'%';refreshAudio();updateLiveMath();});
   $('baseHz').addEventListener('change',e=>{
     const value=Number(e.target.value);
     if(!Number.isFinite(value)||value<20||value>2000){e.target.value=String(baseHz);status('基準周波数は20〜2000 Hzで指定してください。','err');return;}
@@ -3875,10 +3931,11 @@ window.REIJI_DEFAULT_SONG = {
       $('noteStart').value=beatString(s.note.start);$('noteDuration').value=beatString(s.note.duration);$('noteVolume').value=s.note.volume;
       $('positionLabel').textContent=`第${Math.floor((s.note.start+1e-9)/beatsPerBar)+1}小節 / ${beatString(s.note.start%beatsPerBar+1)}拍目 → 長さ ${beatString(s.note.duration)}拍。1拍は4分音符です。`;
     }else{$('noteStart').value='';$('noteDuration').value='';$('noteVolume').value='';$('positionLabel').textContent=rollMode==='tet'?'空白をクリックすると、その行の12平均律の音符が追加されます。空白の区間が休符です。':'空白をクリックすると、その行の音程比で音符が追加されます。空白の区間が休符です。';}
+    updateLiveMath();
   }
   function selectNote(laneId,noteId){selected={laneId,noteId};
     document.querySelectorAll('.note-block').forEach(el=>el.classList.toggle('selected',el.dataset.noteId===noteId));
-    renderInspector();
+    renderInspector();updateLiveMath();
   }
   function deleteSelected(){const s=getSelected();if(!s)return;s.lane.notes=s.lane.notes.filter(n=>n.id!==s.note.id);selected=null;renderRoll();sequenceStatus('選択した音符を削除しました。');}
   $('deleteNote').addEventListener('click',deleteSelected);
@@ -4481,16 +4538,83 @@ window.REIJI_DEFAULT_SONG = {
     c.strokeStyle='#6cdad3';c.lineWidth=2;c.beginPath();values.forEach((v,i)=>{const x=i/(count-1)*w,y=h/2-v*h*.43;if(!i)c.moveTo(x,y);else c.lineTo(x,y);});c.stroke();}
   function drawSpectrum(){const {c,w,h}=fitCanvas($('spectrumCanvas'));grid(c,w,h);const gap=3,pad=10,bw=(w-2*pad-(MAX_PARTIALS-1)*gap)/MAX_PARTIALS;
     partials.forEach((p,i)=>{const a=p.muted?0:p.level/100,x=pad+i*(bw+gap),height=a*(h-31);c.fillStyle=i===22?'#a5a6ff':'#6cdad3';c.fillRect(x,h-24-height,Math.max(1,bw),height);if([0,5,11,17,22,23].includes(i)){c.fillStyle='#abbdd0';c.font='10px system-ui';c.textAlign='center';c.fillText(String(i+1),x+bw/2,h-7);}});}
-  const drawVisuals=()=>{drawWave();drawSpectrum();};
+  // Live mathematical readout: exact mixer coefficients and modeled waveforms.
+  // The equation is pre-envelope and pre-compressor. It is not an FFT measurement.
+  const compactMathNumber=(number,precision=3)=>Number(number.toFixed(precision)).toString();
+  function updateLiveMath(){
+    const pitchEl=$('mathPitch'), expanded=$('mathExpanded');
+    if(!pitchEl||!expanded)return;
+    const selectedNote=getSelected();
+    const nowBeat=playing&&ctx?(ctx.currentTime-sequenceStart)*tempo/60:-1;
+    const sounding=playing&&nowBeat>=0?sequenceMathEvents.filter(e=>e.start-1e-7<=nowBeat&&nowBeat<e.start+e.duration-1e-7):[];
+    let frequency=baseHz, pitchExpression=`f₀ = ${compactMathNumber(baseHz,6)} Hz （音色試聴の基準音）`;
+    if(sounding.length){
+      const e=sounding[0];frequency=e.freq;
+      pitchExpression=`f₀ = ${e.formula} = ${compactMathNumber(frequency,4)} Hz （演奏中の1音）`;
+    }else if(playing){
+      pitchExpression='現在は休符です。音色の数式は基準音を使って表示しています。';
+    }else if(selectedNote){
+      try{
+        frequency=laneFrequency(selectedNote.lane);
+        const lane=selectedNote.lane;
+        pitchExpression=rollMode==='tet'
+          ? `f₀ = ${compactMathNumber(a4Hz,4)} × 2^((${lane.midi}−69)/12) = ${compactMathNumber(frequency,4)} Hz （${noteName(lane.midi)}）`
+          : `f₀ = ${compactMathNumber(baseHz,6)} × ${lane.ratio} = ${compactMathNumber(frequency,4)} Hz （選択中の音符）`;
+      }catch(_e){frequency=baseHz;}
+    }
+    pitchEl.textContent=pitchExpression;
+    const active=partials.flatMap((p,i)=>p.muted||p.level<=0?[]:[{index:i+1,level:p.level/100,wave:p.wave}]);
+    const waveName={sine:'sin',triangle:'tri',sawtooth:'saw',square:'sq'};
+    const sumSquares=active.reduce((total,p)=>total+p.level*p.level,0);
+    const previewNorm=.55/Math.max(1,Math.sqrt(sumSquares));
+    const sourcePlaying=playing?sequenceMathSource:soundSource;
+    if(sourcePlaying==='sample'){
+      const ratio=frequency/sampleReferenceHz;
+      expanded.textContent=Number.isFinite(ratio)&&ratio>0
+        ? `x(t) ∝ s(${compactMathNumber(ratio,6)}t)　（再生速度 = ${compactMathNumber(frequency,4)} ÷ ${compactMathNumber(sampleReferenceHz,4)}）`
+        : 'サンプルの再生速度を算出できません。';
+      $('mathGain').textContent=`サンプル音源：s(t) は録音された元の波形です。ミキサーの24倍音式ではなく、録音波形の再生速度を変えます。マスター音量 ${master}% 。`;
+      $('mathBadge').textContent='サンプラーの移調式';
+    }else{
+      const terms=active.map(p=>{
+        const omega=compactMathNumber(p.index*frequency,4);
+        return `${compactMathNumber(p.level,2)}·${waveName[p.wave]||'sin'}(2π·${omega}·t)`;
+      });
+      expanded.textContent=terms.length?'u(t) = '+terms.join(' + '):'u(t) = 0　（すべての倍音が無音です）';
+      $('mathGain').textContent=`有効な設定：${active.length}/24成分 ｜試聴時の音量係数（コンプレッサー前）：${compactMathNumber(master/100,3)} × ${compactMathNumber(previewNorm,5)} = ${compactMathNumber(master/100*previewNorm,5)} 。曲の自動演奏時は、さらに音符ごとの音量・発音時間・同時発音数が関係します。`;
+      $('mathBadge').textContent=`24倍音：${active.length}成分が有効`;
+    }
+    if(playing){
+      if(nowBeat<0){$('mathPlaying').textContent='再生準備中：まもなく発音します。';}
+      else if(!sounding.length){$('mathPlaying').textContent=`演奏位置 ${compactMathNumber(nowBeat,2)}拍：休符（発音中の音符なし）。`;}
+      else{
+        const freqEntries=sounding.slice(0,8).map(e=>`${e.label}: ${compactMathNumber(e.freq,3)} Hz`);
+        $('mathPlaying').textContent=`演奏位置 ${compactMathNumber(nowBeat,2)}拍 ｜発音中 ${sounding.length}音：${freqEntries.join(' ／ ')}${sounding.length>8?` ほか${sounding.length-8}音`:''}。上の u(t) は表示した1音の音色モデルです。`;
+      }
+    }else if(selectedNote){
+      $('mathPlaying').textContent=`選択中：${rollMode==='tet'?noteName(selectedNote.lane.midi):selectedNote.lane.ratio} ｜開始 ${beatString(selectedNote.note.start)}拍 ｜長さ ${beatString(selectedNote.note.duration)}拍。自動演奏すると発音中の音程に切り替わります。`;
+    }else{
+      $('mathPlaying').textContent='音符をクリックすると、その周波数を式に代入します。自動演奏中は発音している音の周波数がリアルタイムで切り替わります。';
+    }
+    $('mathFootnote').textContent=playing
+      ? '数式は合成前の数学モデルです。自動演奏中に倍音設定や音源を変えても、再生中の音には反映されず、次の演奏から適用されます。実際の音にはエンベロープ・コンプレッサー等も加わります。'
+      : '数式は音色合成の数学モデルであり、実測波形ではありません。実際の音には音量の補正・エンベロープ・コンプレッサー等が加わります。';
+  }
+  const drawVisuals=()=>{drawWave();drawSpectrum();updateLiveMath();};
   function animate(){
     if(raf)return;
     const tick=()=>{
       raf=0;
       if(playing&&ctx){updatePlayhead();if(ctx.currentTime>=sequenceEnd+.06){stopSequence(false);sequenceStatus(`演奏完了：${seqCount}音。`);}}
-      if(playing||audition){drawWave();raf=requestAnimationFrame(tick);}else drawVisuals();
+      if(playing||audition){
+        drawWave();
+        if(playing&&performance.now()-lastMathTick>120){updateLiveMath();lastMathTick=performance.now();}
+        raf=requestAnimationFrame(tick);
+      }else drawVisuals();
     };
     raf=requestAnimationFrame(tick);
   }
+  $('sampleReferenceHz').addEventListener('change',updateLiveMath);
   window.addEventListener('resize',()=>{drawVisuals();updateNavigator();},{passive:true});
   document.addEventListener('visibilitychange',()=>{if(!document.hidden)drawVisuals();});
   syncSongSettings();$('a4Hz').value=String(a4Hz);syncRollModeUi();$('sampleReferenceHz').value=sampleReferenceHz;renderMixer();renderRoll();syncPower();drawVisuals();updateSamplerUi();
