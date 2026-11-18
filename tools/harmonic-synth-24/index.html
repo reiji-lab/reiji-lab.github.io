@@ -121,6 +121,65 @@ button,input,select{font:inherit}button{cursor:pointer}button:disabled{cursor:no
 .usage-terms .terms-copyright{font-size:11px;color:#a9b8cd;margin-top:11px}
 html[lang="ja"] .usage-terms [lang="en"],html[lang="en"] .usage-terms [lang="ja"]{display:none}
 @media(max-width:710px){.usage-terms{padding:14px 15px}}
+
+/* Phone-only piano-roll layout: keep all editing actions, give the score room. */
+@media (max-width: 600px) {
+  :root { --laneLabel: 170px; --rowHeight: 66px; }
+  .roll-panel { padding-inline: 9px; }
+  .scroll-timeline { max-height: 550px; }
+  .corner { padding: 0 6px; gap: 5px; font-size: 11px; }
+  .corner small { font-size: 9px; }
+  .lane-info {
+    display: grid;
+    grid-template-columns: 15px minmax(0, 1fr) 32px 25px;
+    grid-template-rows: 32px 22px;
+    align-content: center;
+    align-items: center;
+    column-gap: 3px;
+    row-gap: 1px;
+    padding: 4px 5px;
+  }
+  .lane-index { grid-column: 1; grid-row: 1; min-width: 0; font-size: 9px; }
+  .lane-info .lane-ratio {
+    grid-column: 2; grid-row: 1;
+    width: 100% !important; height: 31px !important;
+    font-size: 12px !important; padding: 4px 5px !important;
+  }
+  .lane-info .lane-hz {
+    grid-column: 2; grid-row: 2;
+    width: auto; min-width: 0; max-width: none;
+    justify-self: start; text-align: left; white-space: nowrap;
+    font-size: 9px; line-height: 1.1;
+  }
+  .lane-info .lane-vol {
+    grid-column: 3; grid-row: 1;
+    width: 100% !important; height: 30px !important;
+    font-size: 11px !important;
+    appearance: textfield; -moz-appearance: textfield;
+  }
+  .lane-info .lane-vol::-webkit-inner-spin-button,
+  .lane-info .lane-vol::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+  .lane-info .lane-play {
+    grid-column: 4; grid-row: 1;
+    min-width: 0; width: 25px; height: 30px; padding: 0;
+  }
+  .lane-info .lane-delete {
+    grid-column: 4; grid-row: 2;
+    min-width: 0; width: 25px; height: 21px; padding: 0;
+  }
+  .note-block { top: 15px; height: 36px; }
+  .tet-row .lane-info {
+    grid-template-columns: minmax(0, 1fr) 34px 25px;
+  }
+  .tet-row .piano-key {
+    grid-column: 1; grid-row: 1;
+    width: 100%; min-width: 0; height: 31px;
+    padding: 3px 7px; font-size: 11px;
+  }
+  .tet-row .lane-info .lane-hz { grid-column: 1; grid-row: 2; }
+  .tet-row .lane-info .lane-vol { grid-column: 2; grid-row: 1; margin-left: 0; }
+  .tet-row .lane-info .lane-play { grid-column: 3; grid-row: 1; }
+}
 </style>
 </head>
 <body>
@@ -3672,7 +3731,8 @@ window.REIJI_DEFAULT_SONG = {
 (() => {
   'use strict';
   const $ = id => document.getElementById(id);
-  const MAX_LANES = 40, MAX_PARTIALS = 24, MAX_NOTES = 512, LABEL_WIDTH = 282;
+  const MAX_LANES = 40, MAX_PARTIALS = 24, MAX_NOTES = 512;
+  const laneLabelWidth = () => Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--laneLabel')) || 282;
   const TET_MIN_MIDI = 36, TET_MAX_MIDI = 95; // C2 through B6 (5 octaves)
   const PITCH_NAMES = ['C','C♯','D','D♯','E','F','F♯','G','G♯','A','A♯','B'];
   const PITCH_FLATS = ['','D♭','','E♭','','','G♭','','A♭','','B♭',''];
@@ -4052,7 +4112,7 @@ window.REIJI_DEFAULT_SONG = {
   function renderRoll(){
     const container=$('rollContent'),scroll=$('scrollTimeline'),keepX=scroll.scrollLeft,keepY=scroll.scrollTop;
     const total=totalBeats(),width=total*beatPx,barWidth=beatsPerBar*beatPx;
-    container.innerHTML='';container.style.width=(LABEL_WIDTH+width)+'px';
+    container.innerHTML='';container.style.width=(laneLabelWidth()+width)+'px';
     const ruler=document.createElement('div');ruler.className='ruler-row';
     const corner=document.createElement('div');corner.className='corner';corner.innerHTML=rollMode==='tet'?'<span>鍵盤 / 12平均律</span><small>音量%</small>':'<span>音程比（自由入力）</span><small>音量%</small>';
     const rulerTrack=document.createElement('div');rulerTrack.className='ruler-track';rulerTrack.style.width=width+'px';
@@ -4457,9 +4517,9 @@ window.REIJI_DEFAULT_SONG = {
     const ph=$('playhead');if(!ph||!ctx)return;
     if(!playing){ph.style.display='none';return;}
     const beat=clamp((ctx.currentTime-sequenceStart)*tempo/60,0,totalBeats());
-    ph.style.display='block';ph.style.left=(LABEL_WIDTH+beat*beatPx)+'px';
-    const scroll=$('scrollTimeline'),x=LABEL_WIDTH+beat*beatPx;
-    if(x-scroll.scrollLeft>scroll.clientWidth-60 || x-scroll.scrollLeft<LABEL_WIDTH+20){scroll.scrollLeft=clamp(x-LABEL_WIDTH-80,0,scroll.scrollWidth-scroll.clientWidth);}
+    ph.style.display='block';ph.style.left=(laneLabelWidth()+beat*beatPx)+'px';
+    const scroll=$('scrollTimeline'),x=laneLabelWidth()+beat*beatPx;
+    if(x-scroll.scrollLeft>scroll.clientWidth-60 || x-scroll.scrollLeft<laneLabelWidth()+20){scroll.scrollLeft=clamp(x-laneLabelWidth()-80,0,scroll.scrollWidth-scroll.clientWidth);}
   }
   function samplerStatus(message,kind=''){
     $('samplerStatus').textContent=message;
@@ -4825,7 +4885,13 @@ window.REIJI_DEFAULT_SONG = {
     raf=requestAnimationFrame(tick);
   }
   $('sampleReferenceHz').addEventListener('change',updateLiveMath);
-  window.addEventListener('resize',()=>{drawVisuals();updateNavigator();},{passive:true});
+  window.addEventListener('resize',()=>{
+    // Keep the score width, playhead and scroll navigator aligned on rotation.
+    const roll = $('rollContent');
+    if (roll) roll.style.width = (laneLabelWidth() + totalBeats()*beatPx) + 'px';
+    if (playing) updatePlayhead();
+    drawVisuals(); updateNavigator();
+  },{passive:true});
   document.addEventListener('visibilitychange',()=>{if(!document.hidden)drawVisuals();});
   syncSongSettings();$('a4Hz').value=String(a4Hz);syncRollModeUi();$('sampleReferenceHz').value=sampleReferenceHz;renderMixer();renderRoll();syncPower();drawVisuals();updateSamplerUi();
 })();
