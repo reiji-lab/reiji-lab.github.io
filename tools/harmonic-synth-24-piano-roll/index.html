@@ -92,6 +92,14 @@ button,input,select{font:inherit}button{cursor:pointer}button:disabled{cursor:no
 .math-help-body code{color:#9ce4dc}
 .math-toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:10px 0 0}
 @media(max-width:710px){.math-panel{padding:15px}.math-general{font-size:13px}.math-expanded{font-size:16px;max-height:200px}.math-head{align-items:flex-start}}
+
+/* JA / EN controls (Japanese is the initial language on every load) */
+.head-actions{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.language-switch{display:flex;gap:4px;padding:4px;border:1px solid #36536c;border-radius:11px;background:#0d1a2b;white-space:nowrap}
+.language-choice{border:1px solid transparent;border-radius:7px;color:#aabbd1;background:transparent;min-height:34px;padding:6px 11px;font-size:12px;font-weight:750;touch-action:manipulation;cursor:pointer}
+.language-choice.active,.language-choice[aria-pressed="true"]{background:#2c5862;border-color:#76d5cb80;color:#e5fffc}
+.language-choice:focus-visible{outline:2px solid #80ded7;outline-offset:2px}
+@media(max-width:710px){.head{align-items:flex-start;flex-wrap:wrap}.head-actions{margin-left:auto}.language-choice{padding:6px 12px}}
 </style>
 </head>
 <body>
@@ -101,7 +109,13 @@ button,input,select{font:inherit}button{cursor:pointer}button:disabled{cursor:no
       <h1>Harmonic Synth <span>24</span></h1>
       <p class="intro">任意の周波数比と12平均律の2つのピアノロール。24倍音合成音、またはPCマイクで録音した音を使って演奏できます。</p>
     </div>
-    <div class="pill"><span id="powerDot" class="dot"></span><span id="powerLabel">停止中</span></div>
+    <div class="head-actions">
+      <div class="language-switch" role="group" aria-label="Language / 言語">
+        <button type="button" class="language-choice active" id="languageJa" data-language="ja" aria-pressed="true">日本語</button>
+        <button type="button" class="language-choice" id="languageEn" data-language="en" aria-pressed="false">English</button>
+      </div>
+      <div class="pill"><span id="powerDot" class="dot"></span><span id="powerLabel">停止中</span></div>
+    </div>
   </header>
 
   <section class="panel base-panel" aria-label="音の基本設定">
@@ -4170,7 +4184,7 @@ window.REIJI_DEFAULT_SONG = {
     const count=allNotes();
     if(!count)return;
     const modeName=rollMode==='tet'?'12平均律':'比率';
-    if(!confirm(`${modeName}ピアノロールの音符 ${count} 個をすべて削除します。\n\nもう一方のモードの音符・音程設定・音色は変更されません。\n初期曲は「初期データに戻す」で復元できますが、編集した内容は復元できません。\n\n削除しますか？`))return;
+    if(!window.reijiConfirm(`${modeName}ピアノロールの音符 ${count} 個をすべて削除します。\n\nもう一方のモードの音符・音程設定・音色は変更されません。\n初期曲は「初期データに戻す」で復元できますが、編集した内容は復元できません。\n\n削除しますか？`))return;
     if(playing)stopSequence(false);
     lanes.forEach(lane=>{lane.notes=[];});
     selected=null;
@@ -4191,7 +4205,7 @@ window.REIJI_DEFAULT_SONG = {
   }
   $('resetScore').addEventListener('click',()=>{
     if(rollMode==='tet'){
-      if(!confirm('12平均律ピアノロールを禮司の初期データに戻します。現在の12平均律側の編集内容は失われます。比率側は変更されません。よろしいですか？'))return;
+      if(!window.reijiConfirm('12平均律ピアノロールを禮司の初期データに戻します。現在の12平均律側の編集内容は失われます。比率側は変更されません。よろしいですか？'))return;
       if(playing)stopSequence(false);
       tetLanes=makeDefaultTetLanes();lanes=tetLanes;selected=null;
       a4Hz=DEFAULT_SONG.a4Hz;$('a4Hz').value=String(a4Hz);
@@ -4620,6 +4634,181 @@ window.REIJI_DEFAULT_SONG = {
   syncSongSettings();$('a4Hz').value=String(a4Hz);syncRollModeUi();$('sampleReferenceHz').value=sampleReferenceHz;renderMixer();renderRoll();syncPower();drawVisuals();updateSamplerUi();
 })();
 
+</script>
+
+<script>
+/* Interface-only localization. Musical ratios, pitches, MIDI data, JSON
+   serialization, and sound synthesis do not depend on the UI language. */
+(() => {
+  'use strict';
+  const dictionary = {"任意の周波数比と12平均律の2つのピアノロール。24倍音合成音、またはPCマイクで録音した音を使って演奏できます。":"Two piano rolls—arbitrary frequency ratios and 12-tone equal temperament. Play with 24-partial synthesis or audio recorded through a microphone.","停止中":"Stopped","自動演奏中":"Sequencer playing","音色試聴中":"Sound preview playing","音の基本設定":"Basic sound settings","基準周波数（比率モードの1/1）":"Reference frequency (1/1 in ratio mode)","マスター音量":"Master volume","音色プリセット":"Timbre preset","カスタム":"Custom","基音のみ":"Fundamental only","オルガン風":"Organ-like","弦楽器風":"String-like","奇数倍音":"Odd harmonics","第23倍音を確認":"Explore the 23rd harmonic","♪ 音色を試聴":"♪ Preview sound","♪ サンプルを試聴":"♪ Preview sample","■ 試聴を停止":"■ Stop preview","サンプリング音源":"Sampled instrument","/ PCマイク・音声ファイル":"/ Microphone · audio file","音源未登録":"No sample loaded","ピアノロールの音源":"Piano-roll sound source","24倍音ミキサー":"24-partial mixer","録音した音（サンプラー）":"Recorded audio (sampler)","録音した音の基準周波数":"Recorded sound reference frequency","● マイク録音":"● Record microphone","■ 録音終了":"■ Stop recording","▶ 録音音を試聴":"▶ Preview recording","音声ファイルを読み込む":"Load audio file","サンプルをWAV保存":"Save sample as WAV","録音または音声ファイルを読み込むと、ピアノロールの全音程をその音色で鳴らせます。":"Record or load audio to use that sound across the entire piano roll.","単音を録音してください（最大10秒）。録音した音の実際の高さを「基準周波数」に入力すると、各音の周波数比に応じて音程を変えます。音高変更は再生速度変更方式です。":"Record a single sustained note (up to 10 seconds). Set its actual pitch as the reference frequency to transpose the sample by the chosen frequency ratios. Pitch shifting changes the playback speed.","録音した音そのものは曲JSONには含まれません":"The recorded sample is not embedded in the song JSON","。共有する場合はWAVも保存してください。マイクはHTTPSまたはlocalhost等の対応環境で利用できます。":". Save the WAV separately when sharing your work. Microphone recording requires HTTPS, localhost, or another supported secure context.","VISUAL PIANO ROLL / RATIO & 12-TET · 修正版 2026-11-13":"VISUAL PIANO ROLL / RATIO & 12-TET · Revised 2026-11-13","比率ピアノロール":"Ratio piano roll","12平均律ピアノロール":"12-TET piano roll","/ 最大40音程行":"/ Up to 40 pitch lanes","/ C2〜B6・60鍵":"/ C2–B6 · 60 keys","音程比（純正調・任意比率）":"Frequency ratios (just intonation / custom)","12平均律（鍵盤）":"12-tone equal temperament (keyboard)","テンポ（BPM）":"Tempo (BPM)","拍子":"Time signature","小節数":"Measures","グリッド":"Grid","4分音符":"Quarter note","8分音符":"Eighth note","16分音符":"Sixteenth note","4分3連符（2/3拍）":"Quarter-note triplet (2/3 beat)","8分3連符（1/3拍）":"Eighth-note triplet (1/3 beat)","16分3連符（1/6拍）":"Sixteenth-note triplet (1/6 beat)","A4 基準周波数（12平均律）":"A4 reference frequency (12-TET)","横軸の拡大率":"Horizontal zoom","▶ 自動演奏":"▶ Play sequence","↻ 最初から再生":"↻ Restart sequence","■ 停止":"■ Stop","＋ 音を追加":"＋ Add pitch lane","曲の音符を一括削除":"Clear all notes","表示中のピアノロールの全音符を削除":"Delete all notes in the current piano roll","禮司の初期データに戻す":"Restore Reiji's original song","12平均律の初期データに戻す":"Restore original 12-TET song","空白をクリック：音符を追加 ／ 音符をドラッグ：発音位置を移動 ／ 音符の右端をドラッグ：長さを調整 ／ 空白の区間：休符。":"Click an empty space to add a note / Drag a note to move it / Drag its right edge to resize / Empty space is a rest.","3連符は「グリッド」で選択できます。":"Select triplets from the Grid menu.","比率モード：左側の音程比を自由に編集。禮司の英国国歌を初期表示します。":"Ratio mode: Edit the pitch ratios on the left. Reiji's “God Save the King” is preloaded.","12平均律モード：左の鍵盤をクリックすると試聴。C2〜B6の60半音で音符を配置できます。2つのモードは別々の演奏データとして保持します。":"12-TET mode: Click a key on the left to preview it. Place notes across 60 semitones from C2 to B6. Each mode retains its own score.","横スクロール":"Horizontal scroll","横スクロール可能なピアノロール":"Horizontally scrollable piano roll","最初":"Start","全体表示":"Full view","音符の詳細":"Note inspector","音符を選択してください":"Select a note","開始位置（拍）":"Start position (beats)","長さ（拍）":"Duration (beats)","音符の音量（%）":"Note volume (%)","選択音符を削除":"Delete selected note","開始と長さは4分音符を1拍として数えます。3連符は 1/3、2/3、1/6 のように分数で指定できます。各行の音程比は左側で編集できます。":"One beat equals a quarter note. Enter triplets as fractions such as 1/3, 2/3, or 1/6. Edit each lane's frequency ratio on the left.","例：1/3":"e.g. 1/3","曲を保存（JSON）":"Save song (JSON)","保存した曲を読み込む":"Load saved song","両方のピアノロールを1つのJSONに保存します。旧形式の曲も読み込めます。":"Save both piano rolls in one JSON file. Older song files are also supported.","ミキシング情報をダウンロード（JSON）":"Download mix settings (JSON)","ミキシング情報を読み込む":"Load mix settings","現在表示中のピアノロールの各音量と24倍音設定を別のJSONで保存します。":"Save the current piano roll's note volumes and 24-partial settings in a separate JSON file.","禮司の英国国歌（純正比率）：3/4拍子・14小節、28音程行・163音符。比率と音価は本人の保存データをそのまま使用しています。":"Reiji's “God Save the King” (just ratios): 3/4 time, 14 bars, 28 pitch lanes, 163 notes. Ratios and durations are preserved from his saved data.","音源を選び、自動演奏または音色試聴を押してください。":"Select a sound source, then play the sequence or preview the timbre.","合成波形":"Synthesized waveform","音色波形の可視化":"Sound visualization","計算上の波形":"Modeled waveform","実際の出力波形":"Audio output waveform","倍音レベル":"Harmonic levels","第1〜24倍音の設定":"Harmonics 1–24","合成された波形":"Synthesized waveform","倍音レベルの棒グラフ":"Harmonic-level bar chart","リアルタイム数式":"Live equations","/ 音色・音程に連動":"/ Follows timbre and pitch","24倍音の合成式":"24-partial synthesis equation","基本式（ミキサーで設定した成分の重ね合わせ）":"General form (sum of the mixer components)","aₙ = 音量÷100（ミュート中は0）":"aₙ = level ÷ 100 (zero when muted)","現在の基準となる音程":"Current reference pitch","現在の設定を代入した数式（全有効成分）":"Expanded equation with current settings (all active components)","音符を選ぶと、その音の周波数式も表示します。自動演奏中は発音している音を追跡します。":"Select a note to view its frequency equation. During playback, sounding notes are tracked.","数式は音色合成の数学モデルです。実際の出力には音量の補正・エンベロープ・コンプレッサーなどが加わります。":"These equations describe the mathematical synthesis model. The actual output also involves gain adjustment, envelopes, and compression.","波形 W(θ) の定義と表示の読み方":"Waveform W(θ): definitions and notation","正弦波：W(θ) = sin θ":"Sine: W(θ) = sin θ","矩形波：W(θ) = (4/π) Σ":"Square: W(θ) = (4/π) Σ","三角波：W(θ) = (8/π²) Σ":"Triangle: W(θ) = (8/π²) Σ","ノコギリ波：W(θ) = (2/π) Σ":"Sawtooth: W(θ) = (2/π) Σ","t は秒、f₀ は現在の音の基準周波数、n は倍音番号です。音量スライダーを動かすと aₙ、波形を変えると Wₙ、音程を変えると f₀ が更新されます。":"t is time in seconds, f₀ is the current reference frequency, and n is the partial index. Changing level updates aₙ; changing waveform updates Wₙ; changing pitch updates f₀.","※上記は理想波形の級数表示です。実際の音声合成ではサンプリング周波数による上限、音量補正、デバイスの特性が関わります。":"These are series expressions for ideal waveforms. Actual sound synthesis is limited by sample rate, gain adjustments, and device characteristics.","／各倍音の波形・音量・ミュートを調整":"/ Adjust waveform, level, and mute for each partial","音色のみ初期化":"Reset timbre only","音色だけをJSON保存":"Save timbre as JSON","音色を読み込み":"Load timbre","基準周波数 × 入力した比率。音程は12平均律に丸めません。":"Reference frequency × ratio. Pitches are not rounded to 12-TET.","12平均律の音高＝A4基準Hz × 2^((MIDI番号−69)/12)。ピアノ鍵盤をクリックして試聴できます。":"12-TET pitch = reference A4 × 2^((MIDI − 69)/12). Click piano keys to preview.","録音音源の場合は元の音の周波数と再生速度を基に移調します。比率は":"For sampled audio, transposition uses the original reference frequency and playback speed. Enter ratios such as","や":"or","のように入力できます。波形の選択（正弦波以外）によって追加の高次成分が生じます。第24倍音までの加算合成と「23-limit」の音程理論は別の概念です。再生時は音量にご注意ください。":". Non-sine waveforms produce further upper harmonics. Additive synthesis with 24 partials is distinct from 23-limit tuning theory. Mind your playback volume.","鍵盤 / 12平均律":"Keyboard / 12-TET","音程比（自由入力）":"Frequency ratio (editable)","音量%":"Level %","ミュート":"Mute","解除":"Unmute","正弦波":"Sine wave","三角波":"Triangle wave","ノコギリ波":"Sawtooth wave","矩形波":"Square wave","この音を試聴":"Preview this pitch","この音程行を削除":"Delete this pitch lane","この音の音量（%）":"Pitch volume (%)","周波数比。例：3/2、23/16":"Frequency ratio, e.g. 3/2 or 23/16","音符の長さを変更":"Resize note","無効":"Invalid","空白をクリックすると、その行の12平均律の音符が追加されます。空白の区間が休符です。":"Click an empty space to place a 12-TET note on this row. Blank sections are rests.","空白をクリックすると、その行の音程比で音符が追加されます。空白の区間が休符です。":"Click an empty space to place a note with this row's ratio. Blank sections are rests.","音符をクリックすると、その周波数を式に代入します。自動演奏中は発音している音の周波数がリアルタイムで切り替わります。":"Click a note to substitute its frequency into the equation. During playback, the frequency updates in real time to match sounding notes.","現在は休符です。音色の数式は基準音を使って表示しています。":"Currently a rest. The timbre equation uses the reference pitch.","サンプルの再生速度を算出できません。":"Could not calculate the sample's playback speed.","サンプラーの移調式":"Sampler transposition equation","u(t) = 0　（すべての倍音が無音です）":"u(t) = 0  (all partials are silent)","再生準備中：まもなく発音します。":"Preparing playback; sound begins shortly.","数式は合成前の数学モデルです。自動演奏中に倍音設定や音源を変えても、再生中の音には反映されず、次の演奏から適用されます。実際の音にはエンベロープ・コンプレッサー等も加わります。":"These equations represent the pre-synthesis model. Changes to harmonics or sound sources during sequence playback apply on the next run, not to notes already scheduled. Envelopes and compression also affect the actual output.","数式は音色合成の数学モデルであり、実測波形ではありません。実際の音には音量の補正・エンベロープ・コンプレッサー等が加わります。":"These equations describe synthesis, not a measured waveform. Gain adjustments, envelopes, and compression also affect the output.","音色だけを初期化しました。":"Reset the timbre only.","音色を試聴中です。":"Previewing the timbre.","音色の試聴を停止しました。":"Stopped timbre preview.","選択した音符を削除しました。":"Deleted the selected note.","最後の1音は削除できません。":"At least one pitch lane must remain.","この音程行にある音符も削除します。続けますか？":"The notes on this pitch lane will also be deleted. Continue?","音符は最大512個です。":"A maximum of 512 notes is supported.","対応していない拍子です。":"Unsupported time signature.","音符の位置と長さは維持されます。":"Note positions and durations have been preserved.","音符を減らすか小節を調整してください。":"Reduce the notes or adjust the measure count.","A4基準は400〜480 Hzで入力してください。":"Set A4 between 400 and 480 Hz.","拍数は 1/3、2/3、0.5、1 のように入力してください。":"Enter beats such as 1/3, 2/3, 0.5, or 1.","拍数は0以上で、分母は0以外にしてください。":"Beats must be nonnegative; the denominator cannot be zero.","比率は正の値にしてください（分母0不可）。":"The ratio must be positive; its denominator cannot be zero.","録音した音か音声ファイルを用意してください。":"Record or load an audio sample first.","音源を登録するには録音または音声ファイルが必要です。":"Record or load an audio file to register a sample.","再生時間が10分を超えます。テンポや小節数を調整してください。":"Playback exceeds 10 minutes. Adjust the tempo or bar count.","演奏を停止しました。":"Stopped sequence playback.","音符がありません。タイムラインの空白をクリックして配置してください。":"No notes. Click an empty spot on the timeline to add notes.","1曲の音符は512個以内にしてください。":"Limit each song to 512 notes.","録音音源を読み込んでから再生してください。":"Load a recorded sample before playing.","マスター音量が不正です。":"Invalid master volume.","24倍音のデータが不正です。":"Invalid 24-partial data.","このアプリの曲データではありません。":"This is not a song file for this app.","このアプリのミキシング設定JSONではありません。":"This is not a mix-settings JSON for this app.","ミキシング設定のピアノロール方式が異なります。対応する方式に切り替えてください。":"The mix settings use a different piano-roll mode. Switch to the corresponding mode.","音程行の数が異なります。曲を読み込んでからミキシング設定を適用してください。":"The pitch-lane count differs. Load the matching song first.","音程比または音符の数が異なります。同じ曲のミキシング情報を使ってください。":"The pitch ratios or note counts differ. Use mixing settings from the same song.","音程行の音量が不正です。":"Invalid pitch-lane volume.","音符の発音位置や音価が異なります。元の曲に適用してください。":"Note timing or duration differs. Apply the mix to its original score.","音符の音量が不正です。":"Invalid note volume.","ミキシング設定を読み込みました。音高と発音位置は変更していません。":"Loaded mix settings. Pitches and note positions are unchanged.","曲の基本設定が不正です。":"Invalid song settings.","比率ピアノロールの行数が不正です。":"Invalid number of ratio piano-roll lanes.","音程行の値が不正です。":"Invalid pitch-lane values.","周波数比が再生可能範囲外です。":"Frequency ratio is outside the playable range.","12平均律ピアノロールには60鍵が必要です。":"The 12-TET piano roll requires 60 keys.","12平均律ピアノロールの鍵盤データが不正です。":"Invalid 12-TET keyboard data.","音符の値が不正です。":"Invalid note data.","各ピアノロールの音符は512個以内です。":"Each piano roll supports up to 512 notes.","A4基準は400〜480 Hzで指定してください。":"A4 reference must be between 400 and 480 Hz.","音高と発音位置は変更していません。":"Pitches and note positions are unchanged.","ファイルが大きすぎます。":"File is too large.","24倍音の音色データではありません。":"Not a valid 24-partial timbre file.","24倍音の設定を読み込みました。":"Loaded the 24-partial settings.","音声データが空です。":"Audio file is empty.","音声をデコードできません。WAVなどブラウザが対応する形式をお試しください。":"Could not decode the audio. Try WAV or another browser-supported format.","録音された音が短すぎます。0.1秒以上の単音を録音してください。":"Recording is too short. Record a single note for at least 0.1 second.","録音音量が小さすぎます。マイクを近づけて再録音してください。":"Recording level is too low. Move the microphone closer and record again.","録音データが取得できませんでした。":"Could not capture the recording.","録音ボタンを押すか、既存の音声ファイルを読み込んでください。":"Press Record or load an existing audio file.","録音音源をWAVで保存しました。曲JSONとWAVをセットで保管してください。":"Saved the recorded audio as WAV. Keep it together with the song JSON.","音声ファイルは24MB以下にしてください。":"Audio files must be under 24 MB.","このブラウザまたは接続方法では録音できません。HTTPSで公開してChrome / Edgeをお試しください。":"Microphone recording is not supported in this browser or connection. Use HTTPS and try Chrome or Edge.","基準周波数は20〜2000 Hzで指定してください。":"Reference frequency must be 20–2000 Hz.","指定比率で発生する周波数が範囲外です。":"The pitch produced by that ratio is out of range.","音量は0〜100%で指定してください。":"Set volume between 0 and 100%.","テンポは20〜300 BPMで指定してください。":"Set tempo between 20 and 300 BPM.","開始位置は0以上、音符の長さは0より大きく、曲の終わりを超えないようにしてください。":"Start must be at least zero; duration must be positive; notes cannot extend beyond the end of the score.","この拍子では64小節を超えるため変更できません。音符を減らすか小節を調整してください。":"This time signature would exceed 64 bars. Reduce the notes or adjust the bar count.","小節数は1〜64。配置済みの音符を切り捨てる変更はできません。":"Bars must be 1–64. You cannot shorten the score past existing notes.","音が再生可能な周波数を超えています。":"Frequency exceeds the playable range.","Web Audio APIに対応していないブラウザです。":"This browser does not support the Web Audio API.","サンプリング音源が未登録です。マイクで録音するか、音声ファイルを読み込んでください。":"No sample is loaded. Record audio or load a file.","サンプリング音源と指定音高が離れすぎています。基準周波数を調整してください（移調は±4オクターブまで）。":"Target pitch is too far from the sample. Adjust the reference frequency (transposition is limited to ±4 octaves).","初期演奏データを読み込めませんでした。default-data.js を確認してください。":"Could not load the default song data. Check default-data.js."};
+  const patterns = [
+    [new RegExp("^第(\\d+)倍音$"),"Harmonic $1"],
+    [new RegExp("^第(\\d+)倍音の波形$"),"Waveform of harmonic $1"],
+    [new RegExp("^第(\\d+)倍音の音量$"),"Level of harmonic $1"],
+    [new RegExp("^第(\\d+)音の周波数比$"),"Frequency ratio of pitch lane $1"],
+    [new RegExp("^第(\\d+)音を削除$"),"Delete pitch lane $1"],
+    [new RegExp("^(\\S+)を試聴$"),"Preview $1"],
+    [new RegExp("^(\\S+) の音量$"),"Volume of $1"],
+    [new RegExp("^(\\S+) のタイムライン。空白をクリックして音符を配置$"),"Timeline for $1. Click an empty space to add notes"],
+    [new RegExp("^(\\d+) 小節$"),"Bar $1"],
+    [new RegExp("^(\\d+) / (\\d+) 音$"),"$1 / $2 lanes"],
+    [new RegExp("^12平均律 · (\\d+)鍵$"),"12-TET · $1 keys"],
+    [new RegExp("^(\\d+)小節 · (\\d+)拍 · (\\d+)音符$"),"$1 bars · $2 beats · $3 notes"],
+    [new RegExp("^(\\d+)小節 · (\\d+)拍$"),"$1 bars · $2 beats"],
+    [new RegExp("^(\\d+)px/拍$"),"$1 px/beat"],
+    [new RegExp("^第(\\d+)小節 / ([\\d/.]+)拍目 → 長さ ([\\d/.]+)拍。1拍は4分音符です。$"),"Bar $1 / Beat $2 → duration $3 beats. One beat equals a quarter note."],
+    [new RegExp("^(\\S+)（12平均律 / MIDI (\\d+)）$"),"$1 (12-TET / MIDI $2)"],
+    [new RegExp("^音符を追加：(.+)、開始 ([\\d/.]+)拍、長さ ([\\d/.]+)拍（(.+)）。$"),"Added note: $1, start $2 beats, duration $3 beats ($4)."],
+    [new RegExp("^3連符（([\\d/.]+)拍刻み）$"),"Triplets ($1-beat steps)"],
+    [new RegExp("^([\\d/.]+)拍刻み$"),"$1-beat grid"],
+    [new RegExp("^グリッド：(.+)。3連符のグリッドでは空白クリックで1個分の3連音符を追加します。$"),"Grid: $1. Click an empty space in triplet mode to add one triplet note."],
+    [new RegExp("^音程行を追加しました（(\\d+)/(\\d+)）。左側の1/1を編集してください。$"),"Added a pitch lane ($1/$2). Edit the 1/1 ratio on the left."],
+    [new RegExp("^拍子を(\\d+)/4に変更しました。(\\d+)小節・(\\d+)拍。(.*)$"),"Time signature changed to $1/4. $2 bars, $3 beats. $4"],
+    [new RegExp("^音符を残すため小節数を(\\d+)→(\\d+)に自動調整しました。$"),"Automatically expanded the score from $1 to $2 bars to preserve notes."],
+    [new RegExp("^(.+)ピアノロールの音符 (\\d+) 個を一括削除しました。音程行や他のモードの曲はそのままです。$"),"Cleared $2 notes from the $1 piano roll. Pitch lanes and the other score are unchanged."],
+    [new RegExp("^(.+)ピアノロールの音符 (\\d+) 個をすべて削除します。\\n\\nもう一方のモードの音符・音程設定・音色は変更されません。\\n初期曲は「初期データに戻す」で復元できますが、編集した内容は復元できません。\\n\\n削除しますか？$"),"Delete all $2 notes in the $1 piano roll?\n\nThe other mode's notes, pitch settings, and timbre will not change.\nThe original song can be restored with the Restore button, but your edits cannot be recovered.\n\nDelete all notes?"],
+    [new RegExp("^12平均律ピアノロールを禮司の初期データに戻します。現在の12平均律側の編集内容は失われます。比率側は変更されません。よろしいですか？$"),"Restore Reiji's original 12-TET song? Edits to the 12-TET score will be lost. The ratio score will remain unchanged. Continue?"],
+    [new RegExp("^禮司の英国国歌（12平均律・163音）を復元しました。比率ピアノロールはそのままです。$"),"Restored Reiji's “God Save the King” (12-TET, 163 notes). The ratio score is unchanged."],
+    [new RegExp("^禮司の英国国歌・音色を復元しました。12平均律の音符を保護するため、共有のテンポ・拍子・小節数・グリッドは維持しています。$"),"Restored Reiji's original song and timbre. Shared tempo, meter, bar count, and grid settings were retained to protect notes in the 12-TET score."],
+    [new RegExp("^禮司の初期データを復元しました：英国国歌（純正比率）、3/4拍子・14小節。音符とミキシング設定も復元しています。$"),"Restored Reiji's original song: “God Save the King” (just ratios), 3/4 time, 14 bars. Notes and mixing settings were restored."],
+    [new RegExp("^12平均律ピアノロールに切り替えました。C2〜B6の60鍵。比率ピアノロールの音符は保存されたままです。$"),"Switched to the 12-TET piano roll (60 keys, C2–B6). Notes in the ratio score are preserved."],
+    [new RegExp("^比率ピアノロールに戻りました。純正比率の音符・位置・長さは変更していません。$"),"Returned to the ratio piano roll. Ratios, note positions, and durations are unchanged."],
+    [new RegExp("^12平均律の基準を A4 = ([\\d.]+) Hz に設定しました。$"),"12-TET reference set to A4 = $1 Hz."],
+    [new RegExp("^再生中：(\\d+)音 / (\\d+)音階行 / (\\d+) BPM / (.+)。音源変更は次の再生から反映されます。$"),"Playing: $1 notes / $2 pitch lanes / $3 BPM / $4. Sound-source changes apply on the next play."],
+    [new RegExp("^演奏完了：(\\d+)音。$"),"Playback complete: $1 notes."],
+    [new RegExp("^([\\d.,]+) Hzは再生可能な範囲外です。比率または基準周波数を調整してください。$"),"$1 Hz is outside the playable range. Adjust the ratio or reference frequency."],
+    [new RegExp("^(.+)：([\\d.,]+) Hz を試聴しました。$"),"Previewed $1: $2 Hz."],
+    [new RegExp("^「(.+)」は比率の形式ではありません。例：3/2、23/16$"),"“$1” is not a valid ratio. Try 3/2 or 23/16."],
+    [new RegExp("^再生位置 ([\\d.]+)拍：休符（発音中の音符なし）。$"),"Playback position: $1 beats — rest (no sounding notes)."],
+    [new RegExp("^演奏位置 ([\\d.]+)拍：休符（発音中の音符なし）。$"),"Playback position: $1 beats — rest (no sounding notes)."],
+    [new RegExp("^演奏位置 ([\\d.]+)拍 ｜発音中 (\\d+)音：(.+)。上の u\\(t\\) は表示した1音の音色モデルです。$"),"Playback position: $1 beats | $2 sounding notes: $3. The u(t) above represents the timbre of one displayed note."],
+    [new RegExp("^ ほか(\\d+)音$"),", plus $1 more notes"],
+    [new RegExp("^選択中：(.+) ｜開始 ([\\d/.]+)拍 ｜長さ ([\\d/.]+)拍。自動演奏すると発音中の音程に切り替わります。$"),"Selected: $1 | Start $2 beats | Duration $3 beats. During playback, the display follows sounding notes."],
+    [new RegExp("^f₀ = (.+) Hz （音色試聴の基準音）$"),"f₀ = $1 Hz (timbre preview reference pitch)"],
+    [new RegExp("^f₀ = (.+) Hz （演奏中の1音）$"),"f₀ = $1 Hz (one sounding note)"],
+    [new RegExp("^f₀ = (.+) Hz （選択中の音符）$"),"f₀ = $1 Hz (selected note)"],
+    [new RegExp("^x\\(t\\) ∝ s\\((.+)t\\)　（再生速度 = (.+) ÷ (.+)）$"),"x(t) ∝ s($1t)  (playback rate = $2 ÷ $3)"],
+    [new RegExp("^有効な設定：(\\d+)/24成分 ｜試聴時の音量係数（コンプレッサー前）：(.+) 。曲の自動演奏時は、さらに音符ごとの音量・発音時間・同時発音数が関係します。$"),"Active components: $1/24 | Preview gain (before compression): $2. Sequence playback also depends on per-note volume, duration, and polyphony."],
+    [new RegExp("^24倍音：(\\d+)成分が有効$"),"24-partial synthesis: $1 active components"],
+    [new RegExp("^サンプル音源：s\\(t\\) は録音された元の波形です。ミキサーの24倍音式ではなく、録音波形の再生速度を変えます。マスター音量 (\\d+)% 。$"),"Sampled audio: s(t) is the recorded waveform. Playback speed is adjusted instead of using the 24-partial mixer equation. Master volume: $1%."],
+    [new RegExp("^音源を登録しました：(.+) / ([\\d.]+)秒。基準周波数を合わせてピアノロールを再生してください。$"),"Sample loaded: $1 / $2 seconds. Set the reference frequency before playing."],
+    [new RegExp("^試聴中：サンプル基準 ([\\d.]+) Hz → 出力 ([\\d.]+) Hz。$"),"Previewing sample: reference $1 Hz → output $2 Hz."],
+    [new RegExp("^● 録音中です。できるだけ単音を鳴らし、録音終了を押してください（最大10秒）。$"),"● Recording. Play one sustained note, then press Stop recording (max. 10 seconds)."],
+    [new RegExp("^サンプリング音源を使用します（(.+)）。$"),"Using sampled audio ($1)."],
+    [new RegExp("^24倍音ミキサーの合成音を使用します。$"),"Using the 24-partial synthesis sound."],
+    [new RegExp("^サンプル基準周波数を([\\d.]+) Hzに変更しました。録音音の実際の音高に合わせてください。$"),"Sample reference frequency changed to $1 Hz. Match it to the actual recorded pitch."],
+    [new RegExp("^([\\d.]+)秒 / (.+)$"),"$1 s / $2"],
+    [new RegExp("^マイク録音$"),"Microphone recording"],
+    [new RegExp("^読み込み完了：(比率|12平均律) (\\d+)音程行、合計(\\d+)音符。(.*)$"),"Loaded: $1, $2 pitch lanes, $3 notes. $4"],
+    [new RegExp("^ 音声はJSONに含まれません。WAVファイルを別途読み込んでください。$")," The audio is not included in JSON. Load the WAV separately."],
+    [new RegExp("^曲全体のミキシング設定をダウンロードしました（音程比・音符のタイミングは変更されません）。$"),"Downloaded mix settings for this score (ratios and timing are unchanged)."],
+    [new RegExp("^([^（）]+)（([^（）]+)）$"),"$1 ($2)"],
+  ];
+  const japanesePresent = /[\u3040-\u30ff\u3400-\u9fff]/;
+  let language = 'ja';
+  const sourceTexts = new WeakMap();
+  const sourceAttrs = new WeakMap();
+  function translate(s) {
+    if (!japanesePresent.test(s) && !s.includes('（')) return s;
+    const match = s.match(/^(\s*)([\s\S]*?)(\s*)$/);
+    const lead = match[1], body = match[2], trail = match[3];
+    if (Object.prototype.hasOwnProperty.call(dictionary, body)) return lead + dictionary[body] + trail;
+    for (const [re, template] of patterns) {
+      if (re.test(body)) {
+        let formatted=body.replace(re, (...args) =>
+          template.replace(/\$(\d+)/g, (_, index) => args[Number(index)] ?? '')
+        );
+        formatted=formatted.replaceAll('12平均律','12-TET')
+          .replaceAll('24倍音合成音','24-partial synthesis')
+          .replaceAll('サンプリング音源','sampled audio')
+          .replaceAll('比率 piano roll','ratio piano roll')
+          .replace(/ ほか(\d+)音/g, ', plus $1 more notes');
+        return lead + formatted + trail;
+      }
+    }
+    // A limited fallback for compound, otherwise-unmatched labels. Keep
+    // untouched scientific notation and any unrecognized text as authored.
+    let result = body;
+    for (const [jp,en] of Object.entries(dictionary).sort((a,b)=>b[0].length-a[0].length)) {
+      if (jp.length>=5 && result.includes(jp)) result=result.split(jp).join(en);
+    }
+    return lead + result + trail;
+  }
+  function translateTextNode(node) {
+    if (!node || node.nodeType !== Node.TEXT_NODE) return;
+    const element=node.parentElement;
+    if (!element || element.closest('script,style,textarea,[data-i18n-skip]')) return;
+    const value=node.nodeValue;
+    if (language === 'en') {
+      if (!japanesePresent.test(value) && !value.includes('（')) return;
+      sourceTexts.set(node, value);
+      const target=translate(value);
+      if (target !== value) node.nodeValue=target;
+    } else if (sourceTexts.has(node)) {
+      const original=sourceTexts.get(node);
+      if (value !== original) node.nodeValue=original;
+    }
+  }
+  function translateAttributes(el) {
+    if (!el || el.nodeType!==Node.ELEMENT_NODE) return;
+    const attrs=['aria-label','title','placeholder'];
+    for (const attr of attrs) {
+      if (!el.hasAttribute(attr)) continue;
+      const value=el.getAttribute(attr);
+      if (language==='en') {
+        if (!japanesePresent.test(value)) continue;
+        let record=sourceAttrs.get(el);
+        if (!record) {record=new Map();sourceAttrs.set(el,record);}
+        record.set(attr,value);
+        const target=translate(value);
+        if (target!==value)el.setAttribute(attr,target);
+      } else {
+        const original=sourceAttrs.get(el)?.get(attr);
+        if (original!==undefined && value!==original)el.setAttribute(attr,original);
+      }
+    }
+  }
+  function walk(root) {
+    if (!root) return;
+    if (root.nodeType===Node.TEXT_NODE) {translateTextNode(root);return;}
+    if (root.nodeType!==Node.ELEMENT_NODE) return;
+    if (root.matches('script,style,textarea,[data-i18n-skip]'))return;
+    translateAttributes(root);
+    const walker=document.createTreeWalker(root,NodeFilter.SHOW_ELEMENT|NodeFilter.SHOW_TEXT);
+    let node;
+    while ((node=walker.nextNode())) {
+      if (node.nodeType===Node.TEXT_NODE)translateTextNode(node);
+      else translateAttributes(node);
+    }
+  }
+  const monitor=new MutationObserver(records=>{
+    for (const record of records) {
+      if (record.type==='characterData') translateTextNode(record.target);
+      else if (record.type==='attributes')translateAttributes(record.target);
+      else for (const node of record.addedNodes)walk(node);
+    }
+  });
+  function choose(next) {
+    if(next===language)return;
+    language=next;
+    document.documentElement.lang=next;
+    for(const key of ['ja','en']) {
+      const button=document.getElementById('language'+(key==='ja'?'Ja':'En'));
+      button.classList.toggle('active',key===next);
+      button.setAttribute('aria-pressed',String(key===next));
+    }
+    walk(document.body);
+  }
+  window.reijiTranslate = msg => language==='en'?translate(String(msg)):String(msg);
+  window.reijiConfirm = msg => window.confirm(window.reijiTranslate(msg));
+  document.getElementById('languageJa').addEventListener('click',()=>choose('ja'));
+  document.getElementById('languageEn').addEventListener('click',()=>choose('en'));
+  monitor.observe(document.body,{
+    subtree:true,childList:true,characterData:true,attributes:true,
+    attributeFilter:['aria-label','title','placeholder']
+  });
+})();
 </script>
 </body>
 </html>
