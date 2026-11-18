@@ -143,6 +143,7 @@ button,input,select{font:inherit}button{cursor:pointer}button:disabled{cursor:no
       <button type="button" id="sequencePlay" class="btn primary">▶ 自動演奏</button>
       <button type="button" id="sequenceStop" class="btn secondary" disabled>■ 停止</button>
       <button type="button" id="addLane" class="btn secondary">＋ 音を追加</button>
+      <button type="button" id="clearScore" class="btn danger" aria-label="表示中のピアノロールの全音符を削除">曲の音符を一括削除</button>
       <button type="button" id="resetScore" class="btn ghost">禮司の初期データに戻す</button>
       <span id="measureText" class="small-metric">14小節 · 42拍</span>
     </div>
@@ -4013,6 +4014,7 @@ window.REIJI_DEFAULT_SONG = {
     const head=document.createElement('div');head.id='playhead';head.className='playhead';container.append(head);
     $('trackCount').textContent=rollMode==='tet'?`12平均律 · ${lanes.length}鍵`:`${lanes.length} / ${MAX_LANES} 音`;
     $('measureText').textContent=`${bars}小節 · ${total}拍 · ${allNotes()}音符`;
+    $('clearScore').disabled=allNotes()===0;
     $('addLane').disabled=rollMode==='tet'||lanes.length>=MAX_LANES;
     $('addLane').hidden=rollMode==='tet';
     scroll.scrollLeft=keepX;scroll.scrollTop=keepY;
@@ -4107,6 +4109,17 @@ window.REIJI_DEFAULT_SONG = {
   $('zoom').addEventListener('input',e=>{beatPx=Number(e.target.value);$('zoomLabel').textContent=beatPx+'px/拍';renderRoll();});
   $('sequencePlay').addEventListener('click',async()=>{const b=$('sequencePlay');b.disabled=true;try{await startSequence();}catch(e){announceError(e);}finally{b.disabled=false;}});
   $('sequenceStop').addEventListener('click',()=>stopSequence());
+  $('clearScore').addEventListener('click',()=>{
+    const count=allNotes();
+    if(!count)return;
+    const modeName=rollMode==='tet'?'12平均律':'比率';
+    if(!confirm(`${modeName}ピアノロールの音符 ${count} 個をすべて削除します。\n\nもう一方のモードの音符・音程設定・音色は変更されません。\n初期曲は「初期データに戻す」で復元できますが、編集した内容は復元できません。\n\n削除しますか？`))return;
+    if(playing)stopSequence(false);
+    lanes.forEach(lane=>{lane.notes=[];});
+    selected=null;
+    renderRoll();
+    sequenceStatus(`${modeName}ピアノロールの音符 ${count} 個を一括削除しました。音程行や他のモードの曲はそのままです。`);
+  });
   function syncSongSettings() {
     $('tempo').value=tempo;
     $('meter').value=beatsPerBar;
